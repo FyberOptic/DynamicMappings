@@ -541,6 +541,7 @@ public class DynamicMappings
 		DynamicMappings.registerMappingsClass(DynamicMappings.class);
 		if (MeddleUtil.isClientJar()) DynamicClientMappings.generateClassMappings();
 
+		System.out.println("Minecraft version: " + MeddleUtil.findMinecraftVersion());
 		System.out.println("Minecraft jar type: " + (MeddleUtil.isClientJar() ? "client" : "server"));
 
 		System.out.println("\nCLASSES:");
