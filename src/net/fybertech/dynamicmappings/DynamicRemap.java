@@ -75,6 +75,12 @@ public class DynamicRemap
 	private class MyRemapper extends Remapper
 	{
 		
+		boolean showMapMethod = false;
+		
+		public MyRemapper(boolean debug) {
+			showMapMethod = debug;
+		}
+		
 		
 		@Override
 		public String map(String typeName) 
@@ -134,7 +140,9 @@ public class DynamicRemap
 		@Override
 		public String mapMethodName(String owner, String name, String desc) 
 		{		
-			if (owner.startsWith("[") || name.startsWith("<")) return super.mapMethodName(owner, name, desc);			
+			if (owner.startsWith("[") || name.startsWith("<")) return super.mapMethodName(owner, name, desc);		
+			
+			if (showMapMethod) System.out.println("mapMethod: " + owner + " " + name + " " + desc);
 			
 			ClassNode cn = getClassNode(owner);			
 			if (cn == null) return super.mapMethodName(owner, name, desc);
@@ -225,8 +233,10 @@ public class DynamicRemap
 	
 	public ClassNode remapClass(ClassReader reader)
 	{
+		boolean showDebug = false;
+		
 		ClassNode cn = new ClassNode();
-		reader.accept(new CustomRemappingClassAdapter(cn, new MyRemapper()), ClassReader.EXPAND_FRAMES);
+		reader.accept(new CustomRemappingClassAdapter(cn, new MyRemapper(showDebug)), ClassReader.EXPAND_FRAMES);
 		
 		// Fix obfuscation of local variable names
 		for (MethodNode method : cn.methods)
@@ -279,7 +289,7 @@ public class DynamicRemap
 				
 		DynamicMappings.generateClassMappings();
 		DynamicClientMappings.generateClassMappings();
-		DynamicMappings.generateMethodMappings();
+
 		
 		DynamicRemap remapper = new DynamicRemap(
 				DynamicMappings.reverseClassMappings, 
