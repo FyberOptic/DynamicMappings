@@ -13,15 +13,16 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 
 public class InheritanceMap
 {
-	public static List<String> libraries = new ArrayList<String>();
-	public static Map<String, InheritanceMap> mapCache = new HashMap<String, InheritanceMap>();
-	public static Map<String, ClassNode> classCache = new HashMap<String, ClassNode>();
+	//public static List<String> libraries = new ArrayList<String>();
+	public Map<String, InheritanceMap> mapCache = new HashMap<String, InheritanceMap>();
+	//public static Map<String, ClassNode> classCache = new HashMap<String, ClassNode>();
 	
 	public List<String> privatefields = new ArrayList<String>();
 	public List<String> privatemethods = new ArrayList<String>();
@@ -69,7 +70,7 @@ public class InheritanceMap
 		{
 			String fielddesc = jf.name + " " + jf.desc;
 			
-			if ((jf.access & 0x0002) > 0) privatefields.add(fielddesc);
+			if ((jf.access & Opcodes.ACC_PRIVATE) > 0) privatefields.add(fielddesc);
 			
 			HashSet<FieldHolder> fieldslist = this.fields.get(fielddesc);				
 			if (fieldslist == null)	
@@ -84,7 +85,7 @@ public class InheritanceMap
 		{
 			String methoddesc = jm.name + " " + jm.desc;
 			
-			if ((jm.access & 0x0002) > 0) privatemethods.add(methoddesc);
+			if ((jm.access & Opcodes.ACC_PRIVATE) > 0) privatemethods.add(methoddesc);
 			
 			HashSet<MethodHolder> methodslist = this.methods.get(methoddesc);				
 			if (methodslist == null) 
@@ -136,7 +137,7 @@ public class InheritanceMap
 	
 	public InheritanceMap buildMap(ClassNode paramClass) throws IOException
 	{
-		InheritanceMap classmap = InheritanceMap.mapCache.get(paramClass.name); 
+		InheritanceMap classmap = mapCache.get(paramClass.name); 
 		if (classmap != null) return classmap;				
 				
 		//System.out.println("Begin buildMap: " + paramClass.getClassName());
@@ -159,7 +160,7 @@ public class InheritanceMap
 		}
 		//System.out.println("Finish buildMap: " + paramClass.getClassName());
 		
-		InheritanceMap.mapCache.put(paramClass.name, classmap);
+		mapCache.put(paramClass.name, classmap);
 		
 		return classmap;
 	}
@@ -210,7 +211,7 @@ public class InheritanceMap
 	}
 	
 	
-	public static void addSystemLibrary()
+	/*public static void addSystemLibrary()
 	{
 		String systemJAR = System.getProperty("java.home") + File.separator + "lib" + File.separator + "rt.jar";
 		InheritanceMap.libraries.add(systemJAR);
@@ -219,7 +220,7 @@ public class InheritanceMap
 	public static void addLibrary(String paramLib)
 	{
 		InheritanceMap.libraries.add(paramLib);
-	}
+	}*/
 	
 	/*public static void addLibraryDir(String libDir)
 	{
@@ -232,15 +233,15 @@ public class InheritanceMap
 		InheritanceMap.classCache.putAll(classPool.getPool());
 	}*/
 	
-	public static void reset()
-	{
-		InheritanceMap.libraries.clear();
-		InheritanceMap.classCache.clear();
-		InheritanceMap.mapCache.clear();
-	}
+	//public static void reset()
+	//{
+		//InheritanceMap.libraries.clear();
+		//InheritanceMap.classCache.clear();
+		//InheritanceMap.mapCache.clear();
+	//}
 	
 
-	
+	// For debugging
 	public static void main(String[] args) throws IOException 
 	{
 		InheritanceMap base = new InheritanceMap();
