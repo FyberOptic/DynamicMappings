@@ -3003,5 +3003,255 @@ public class DynamicMappings
 	}
 	
 	
+	@Mapping(provides={
+			"net/minecraft/command/ServerCommandManager",
+			"net/minecraft/util/DataVersionManager",
+			"net/minecraft/network/NetworkSystem",
+			"net/minecraft/server/management/PlayerProfileCache"
+			},
+			providesFields={
+			"net/minecraft/server/MinecraftServer mcServer Lnet/minecraft/server/MinecraftServer;"
+			},
+			depends={
+			"net/minecraft/server/MinecraftServer"
+			})
+	public static boolean findServerCommandManagerClass()
+	{
+		ClassNode minecraftServer = getClassNode("net/minecraft/server/MinecraftServer");
+		if (minecraftServer == null) return false;
+		
+		// public MinecraftServer(File, Proxy, File, DataVersionManager)		
+		for (MethodNode method : minecraftServer.methods) {
+			if (!method.name.equals("<init>")) continue;
+			if (!method.desc.startsWith("(Ljava/io/File;Ljava/net/Proxy;Ljava/io/File;")) continue;			
+			
+			Type t = Type.getMethodType(method.desc);
+			Type[] args = t.getArgumentTypes();
+			if (args.length != 4) continue;
+			
+			String className = args[3].getClassName();
+			if (searchConstantPoolForStrings(className, "DataVersion")) {
+				addClassMapping("net/minecraft/util/DataVersionManager", className);
+			}
+			
+			for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				
+				if (insn instanceof MethodInsnNode) {
+					MethodInsnNode mn = (MethodInsnNode)insn;
+					if (mn.name.equals("<init>")) continue;
+					Type mt = Type.getMethodType(mn.desc);
+					Type returnType = mt.getReturnType();
+					if (returnType.getSort() != Type.OBJECT || returnType.getClassName().contains(".")) continue;
+					
+					if (searchConstantPoolForStrings(returnType.getClassName(), "chat.type.admin", "logAdminCommands")) {
+						addClassMapping("net/minecraft/command/ServerCommandManager",  returnType.getClassName());
+						continue;
+					}					
+				}
+				
+				if (!(insn instanceof FieldInsnNode)) continue;
+				FieldInsnNode fn = (FieldInsnNode)insn;
+				
+				if (fn.getOpcode() == Opcodes.PUTSTATIC && fn.desc.equals("Lnet/minecraft/server/MinecraftServer;")) {
+					addFieldMapping("net/minecraft/server/MinecraftServer mcServer Lnet/minecraft/server/MinecraftServer;",
+							"net/minecraft/server/MinecraftServer " + fn.name + " " + fn.desc);
+					continue;
+				}
+				
+				Type ft = Type.getType(fn.desc);
+				if (ft.getSort() != Type.OBJECT) continue;
+				
+				className = ft.getClassName();
+				if (className.contains(".")) continue;
+				
+				if (searchConstantPoolForStrings(className, "Ticking memory connection", "Failed to handle packet for")) {
+					addClassMapping("net/minecraft/network/NetworkSystem", className);
+					continue;
+				}
+				
+				if (searchConstantPoolForStrings(className, "yyyy-MM-dd HH:mm:ss Z")) {
+					addClassMapping("net/minecraft/server/management/PlayerProfileCache", className);
+					continue;
+				}
+				
+				// TODO - Do other fields				
+							
+				//System.out.println(ft.getClassName());
+			}
+			
+		}
+		
+		return true;
+	}
+	
+	
+	
+	@Mapping(provides={
+			"net/minecraft/command/CommandHandler",
+			"net/minecraft/command/ICommandManager"
+			},
+			depends={
+			"net/minecraft/command/ServerCommandManager"
+			})
+	public static boolean processServerCommandManagerClass()
+	{
+		ClassNode serverCommandManager = getClassNodeFromMapping("net/minecraft/command/ServerCommandManager");
+		if (serverCommandManager == null) return false;
+		if (serverCommandManager.superName == null) return false;
+		
+		if (searchConstantPoolForStrings(serverCommandManager.superName, "commands.generic.notFound", "commands.generic.usage")) {
+			addClassMapping("net/minecraft/command/CommandHandler", serverCommandManager.superName);
+		}
+		else return false;
+		
+		ClassNode commandHandler = getClassNode(serverCommandManager.superName);
+		if (commandHandler.interfaces.size() != 1) return false;
+		addClassMapping("net/minecraft/command/ICommandManager", commandHandler.interfaces.get(0));		
+		
+		return true;
+	}
+	
+	
+	@Mapping(provides={
+			"net/minecraft/command/ICommand"
+			},
+			providesMethods={
+			"net/minecraft/command/CommandHandler registerCommand (Lnet/minecraft/command/ICommand;)Lnet/minecraft/command/ICommand;"
+			},
+			depends={
+			"net/minecraft/command/CommandHandler"			
+			})
+	public static boolean processCommandHandlerClass()
+	{
+		ClassNode commandHandler = getClassNodeFromMapping("net/minecraft/command/CommandHandler");
+		if (commandHandler == null) return false;
+		
+		List<MethodNode> methods = new ArrayList<MethodNode>();
+		String className = null;
+		
+		// Find: public ICommand registerCommand(ICommand)
+		for (MethodNode method : commandHandler.methods) {
+			Type t = Type.getMethodType(method.desc);
+			Type[] args = t.getArgumentTypes();
+			Type returnType = t.getReturnType();
+			if (args.length != 1) continue;
+			if (args[0].getSort() != Type.OBJECT || returnType.getSort() != Type.OBJECT) continue;
+			if (!args[0].getClassName().equals(returnType.getClassName())) continue;			
+			methods.add(method);
+			className = returnType.getClassName();
+		}
+		if (methods.size() != 1 || className == null) return false;
+		
+		ClassNode iCommand = getClassNode(className);
+		if (iCommand == null) return false;		
+		if ((iCommand.access & Opcodes.ACC_INTERFACE) == 0) return false;
+		
+		addMethodMapping("net/minecraft/command/CommandHandler registerCommand (Lnet/minecraft/command/ICommand;)Lnet/minecraft/command/ICommand;",
+				commandHandler.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		addClassMapping("net/minecraft/command/ICommand", iCommand.name);
+		
+		
+		return true;
+	}
+	
+	
+	
+	@Mapping(provides={
+			"net/minecraft/command/ICommandSender",
+			"net/minecraft/command/CommandException"
+			},
+			providesMethods={
+			"net/minecraft/command/ICommand getCommandName ()Ljava/lang/String;",
+			"net/minecraft/command/ICommand getCommandUsage (Lnet/minecraft/command/ICommandSender;)Ljava/lang/String;",
+			"net/minecraft/command/ICommand getCommandAliases ()Ljava/util/List;",
+			"net/minecraft/command/ICommand processCommand (Lnet/minecraft/command/ICommandSender;[Ljava/lang/String;)V",
+			"net/minecraft/command/ICommand canCommandSenderUseCommand (Lnet/minecraft/command/ICommandSender;)Z",
+			"net/minecraft/command/ICommand addTabCompletionOptions (Lnet/minecraft/command/ICommandSender;[Ljava/lang/String;Lnet/minecraft/util/BlockPos;)Ljava/util/List;"
+			},
+			depends={
+			"net/minecraft/command/ICommand",
+			"net/minecraft/util/BlockPos"
+			})
+	public static boolean processICommandClass()
+	{
+		ClassNode iCommand = getClassNodeFromMapping("net/minecraft/command/ICommand");
+		ClassNode blockPos = getClassNodeFromMapping("net/minecraft/util/BlockPos");
+		if (iCommand == null || blockPos == null) return false;
+	
+		// String getCommandName();
+		List<MethodNode> methods = getMatchingMethods(iCommand, null, "()Ljava/lang/String;");	
+		if (methods.size() != 1) return false;
+		addMethodMapping("net/minecraft/command/ICommand getCommandName ()Ljava/lang/String;",
+				iCommand.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		
+		// String getCommandUsage(ICommandSender sender);
+		methods.clear();
+		String iCommandSender_name = null;
+		for (MethodNode method : iCommand.methods) {
+			if (!method.desc.endsWith(";)Ljava/lang/String;")) continue;			
+			Type t = Type.getMethodType(method.desc);
+			Type[] args = t.getArgumentTypes();
+			if (args.length != 1) continue;
+			if (args[0].getSort() != Type.OBJECT) continue;
+			methods.add(method);
+			iCommandSender_name = args[0].getClassName();
+		}
+		if (methods.size() != 1 || iCommandSender_name == null) return false;
+		
+		ClassNode iCommandSender = getClassNode(iCommandSender_name);
+		if (iCommandSender == null) return false;
+		if ((iCommandSender.access & Opcodes.ACC_INTERFACE) == 0) return false;
+		addClassMapping("net/minecraft/command/ICommandSender", iCommandSender_name);
+		addMethodMapping("net/minecraft/command/ICommand getCommandUsage (Lnet/minecraft/command/ICommandSender;)Ljava/lang/String;",
+				iCommand.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		
+		
+		// List getCommandAliases();
+		methods = getMatchingMethods(iCommand,  null,  "()Ljava/util/List;");
+		if (methods.size() != 1) return false;
+		addMethodMapping("net/minecraft/command/ICommand getCommandAliases ()Ljava/util/List;",
+				iCommand.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		
+		
+		// void processCommand(ICommandSender sender, String[] args) throws CommandException;
+		methods = getMatchingMethods(iCommand, null, "(L" + iCommandSender.name + ";[Ljava/lang/String;)V");
+		if (methods.size() != 1) return false;
+		addMethodMapping("net/minecraft/command/ICommand processCommand (Lnet/minecraft/command/ICommandSender;[Ljava/lang/String;)V",
+				iCommand.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		
+		if (methods.get(0).exceptions.size() != 1) return false;
+		addClassMapping("net/minecraft/command/CommandException", methods.get(0).exceptions.get(0));		
+		
+		
+		// boolean canCommandSenderUseCommand(ICommandSender sender);
+		methods = getMatchingMethods(iCommand, null, "(L" + iCommandSender.name + ";)Z");
+		if (methods.size() != 1) return false;
+		addMethodMapping("net/minecraft/command/ICommand canCommandSenderUseCommand (Lnet/minecraft/command/ICommandSender;)Z",
+				iCommand.name + " " + methods.get(0).name + " " + methods.get(0).desc);		
+		
+		
+	    // List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos);		
+		methods = getMatchingMethods(iCommand, null, "(L" + iCommandSender.name + ";[Ljava/lang/String;L" + blockPos.name + ";)Ljava/util/List;");		
+		if (methods.size() != 1) return false;
+		addMethodMapping("net/minecraft/command/ICommand addTabCompletionOptions (Lnet/minecraft/command/ICommandSender;[Ljava/lang/String;Lnet/minecraft/util/BlockPos;)Ljava/util/List;",
+				iCommand.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		
+	    //boolean isUsernameIndex(String[] args, int index);
+		methods = getMatchingMethods(iCommand, null, "([Ljava/lang/String;I)Z");
+		if (methods.size() != 1) return false;
+		addMethodMapping("net/minecraft/command/ICommand isUsernameIndex ([Ljava/lang/String;I)Z",
+				iCommand.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		
+		
+		return true;
+	}
+	
+	
+    
+    
+    
+
+	
+	
 }
 

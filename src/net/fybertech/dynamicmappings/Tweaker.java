@@ -18,7 +18,7 @@ import net.minecraft.launchwrapper.LaunchClassLoader;
 
 
 
-@MeddleMod(id="dynamicmappings", name="Dynamic Mappings", author="FyberOptic", version="005")
+@MeddleMod(id="dynamicmappings", name="Dynamic Mappings", author="FyberOptic", version="006-alpha")
 public class Tweaker implements ITweaker
 {
 
