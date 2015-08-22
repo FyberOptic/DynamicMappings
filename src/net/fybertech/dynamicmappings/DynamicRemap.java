@@ -76,8 +76,10 @@ public class DynamicRemap
 	{
 		
 		boolean showMapMethod = false;
+		final ClassNode classNode;
 		
-		public MyRemapper(boolean debug) {
+		public MyRemapper(ClassNode cn, boolean debug) {
+			classNode = cn;
 			showMapMethod = debug;
 		}
 		
@@ -139,27 +141,29 @@ public class DynamicRemap
 		
 		@Override
 		public String mapMethodName(String owner, String name, String desc) 
-		{		
+		{			
 			if (owner.startsWith("[") || name.startsWith("<")) return super.mapMethodName(owner, name, desc);		
 			
 			if (showMapMethod) System.out.println("mapMethod: " + owner + " " + name + " " + desc);
 			
 			ClassNode cn = getClassNode(owner);			
 			if (cn == null) return super.mapMethodName(owner, name, desc);
-				
+						
 			InheritanceMap map = null;
 			try {
 				map = inheritanceMapper.buildMap(cn);
 			} catch (IOException e) {
 				e.printStackTrace();
-			}			
+			}
+					
 			Set<MethodHolder> methods = map.methods.get(name + " " + desc);			
-			if (methods == null) return super.mapMethodName(owner, name, desc);			
+			if (methods == null) return super.mapMethodName(owner, name, desc);		
+			
 			
 			for (MethodHolder holder : methods) {			
-				String key = holder.cn.name + " " + holder.mn.name + " " + holder.mn.desc; 
+				String key = holder.cn.name + " " + holder.mn.name + " " + holder.mn.desc;
 				if (methodMappings.containsKey(key)) {
-					String mapping = methodMappings.get(key);
+					String mapping = methodMappings.get(key);	
 					//System.out.println(mapping);
 					String[] split = mapping.split(" ");
 					return super.mapMethodName(owner, split[1], desc);
@@ -235,8 +239,8 @@ public class DynamicRemap
 	{
 		boolean showDebug = false;
 		
-		ClassNode cn = new ClassNode();
-		reader.accept(new CustomRemappingClassAdapter(cn, new MyRemapper(showDebug)), ClassReader.EXPAND_FRAMES);
+		ClassNode cn = new ClassNode();		
+		reader.accept(new CustomRemappingClassAdapter(cn, new MyRemapper(cn, showDebug)), ClassReader.EXPAND_FRAMES);		
 		
 		// Fix obfuscation of local variable names
 		for (MethodNode method : cn.methods)

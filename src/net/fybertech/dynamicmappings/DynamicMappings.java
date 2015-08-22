@@ -123,7 +123,7 @@ public class DynamicMappings
 	// Get the description of the specified field from the class
 	public static String getFieldDesc(ClassNode cn, String fieldName)
 	{
-		for (FieldNode field : (List<FieldNode>)cn.fields)
+		for (FieldNode field : cn.fields)
 		{
 			if (field.name.equals(fieldName)) return field.desc;
 		}
@@ -134,7 +134,7 @@ public class DynamicMappings
 	// Get the specified field node from the class
 	public static FieldNode getFieldByName(ClassNode cn, String fieldName)
 	{
-		for (FieldNode field : (List<FieldNode>)cn.fields)
+		for (FieldNode field : cn.fields)
 		{
 			if (field.name.equals(fieldName)) return field;
 		}
@@ -269,7 +269,7 @@ public class DynamicMappings
 	{
 		List<MethodNode> output = new ArrayList<MethodNode>();
 
-		for (MethodNode method : (List<MethodNode>)cn.methods) {
+		for (MethodNode method : cn.methods) {
 			if ((name == null || (name != null && method.name.equals(name))) &&
 					(desc == null || (desc != null && method.desc.equals(desc)))) output.add(method);
 		}
@@ -284,7 +284,7 @@ public class DynamicMappings
 	{
 		List<FieldNode> output = new ArrayList<FieldNode>();
 
-		for (FieldNode field : (List<FieldNode>)cn.fields) {
+		for (FieldNode field : cn.fields) {
 			if ((name == null || (name != null && field.name.equals(name))) &&
 					(desc == null || (desc != null && field.desc.equals(desc)))) output.add(field);
 		}
@@ -354,7 +354,7 @@ public class DynamicMappings
 	}
 
 	
-	// Both in the format of "classname method_name method_desc"
+	// Both inputs in the format of "class_name method_name method_desc"
 	public static void addMethodMapping(String deobfMethodDesc, String obfMethodDesc)
 	{
 		methodMappings.put(deobfMethodDesc, obfMethodDesc);
@@ -362,7 +362,7 @@ public class DynamicMappings
 	}
 	
 
-	// Both in the format of "classname field_name field_desc"
+	// Both inputs in the format of "class_name field_name field_desc"
 	public static void addFieldMapping(String deobfFieldDesc, String obfFieldDesc)
 	{
 		fieldMappings.put(deobfFieldDesc, obfFieldDesc);
@@ -604,7 +604,7 @@ public class DynamicMappings
 		List<String> potentialClasses = new ArrayList<String>();
 
 		// Fetch all obfuscated classes used inside MinecraftServer's interfaces
-		for (String interfaceClass : (List<String>)server.interfaces) {
+		for (String interfaceClass : server.interfaces) {
 			if (interfaceClass.contains("/")) continue;
 
 			ClassNode node = getClassNode(interfaceClass);
@@ -645,7 +645,7 @@ public class DynamicMappings
 		Set<String> potentialClasses = new HashSet<String>();
 
 		// Discover and filter all static fields accessed in World's methods
-		for (MethodNode method : (List<MethodNode>)worldClass.methods) {
+		for (MethodNode method : worldClass.methods) {
 			for (AbstractInsnNode node = method.instructions.getFirst(); node != null; node = node.getNext()) {
 				if (node.getOpcode() != Opcodes.GETSTATIC) continue;
 				FieldInsnNode fieldNode = (FieldInsnNode)node;
@@ -682,7 +682,7 @@ public class DynamicMappings
 		Map<String, Integer> classes = new HashMap<String, Integer>();
 
 		// Make a tally of how many times a class was used in the field descriptors
-		for (FieldNode field : (List<FieldNode>)blocksClass.fields) {
+		for (FieldNode field : blocksClass.fields) {
 			String descClass = Type.getType(field.desc).getClassName();
 			int val = (classes.containsKey(descClass) ? classes.get(descClass) : 0);
 			val++;
@@ -718,7 +718,7 @@ public class DynamicMappings
 		Map<String, Integer> counts = new HashMap<String, Integer>();
 
 		// Count the times a class is used as the third parameter of a method
-		for (MethodNode method : (List<MethodNode>)block.methods) {
+		for (MethodNode method : block.methods) {
 			Type t = Type.getMethodType(method.desc);
 			Type[] args = t.getArgumentTypes();
 			if (args.length < 3) continue;
@@ -772,7 +772,7 @@ public class DynamicMappings
 		Map<String, Integer> counts = new HashMap<String, Integer>();
 
 		// Count the times a class is used as the second parameter of a method
-		for (MethodNode method : (List<MethodNode>)block.methods) {
+		for (MethodNode method : block.methods) {
 			Type t = Type.getMethodType(method.desc);
 			Type[] args = t.getArgumentTypes();
 			if (args.length < 2) continue;
@@ -820,7 +820,7 @@ public class DynamicMappings
 		if (!MeddleUtil.notNull(worldClass, blockPosClass, blockClass)) return false;
 
 		// search for Block.spawnAsEntity(World worldIn, BlockPos pos, ItemStack stack)
-		for (MethodNode method : (List<MethodNode>)blockClass.methods)
+		for (MethodNode method : blockClass.methods)
 		{
 			// We're looking for a static method
 			if ((method.access & Opcodes.ACC_STATIC) != Opcodes.ACC_STATIC) continue;
@@ -881,7 +881,7 @@ public class DynamicMappings
 		if (blockClass == null || blocksClass == null) return false;
 
 		// Generate list
-		for (MethodNode method : (List<MethodNode>)blocksClass.methods)
+		for (MethodNode method : blocksClass.methods)
 		{
 			if (!method.name.equals("<clinit>")) continue;
 
@@ -975,7 +975,7 @@ public class DynamicMappings
 
 		List<String> possibleClasses = new ArrayList<String>();
 
-		for (MethodNode method : (List<MethodNode>)itemStackClass.methods)
+		for (MethodNode method : itemStackClass.methods)
 		{
 			if (!method.name.equals("<init>")) continue;
 			Type t = Type.getMethodType(method.desc);
@@ -1060,7 +1060,7 @@ public class DynamicMappings
 		List<String> potentialClasses = new ArrayList<String>();
 
 		// Find isBlockProtected(World, BlockPos, EntityPlayer)Z
-		for (MethodNode method : (List<MethodNode>)serverClass.methods)
+		for (MethodNode method : serverClass.methods)
 		{
 			Type t = Type.getMethodType(method.desc);
 			if (t.getReturnType().getSort() != Type.BOOLEAN) continue;
@@ -1118,7 +1118,7 @@ public class DynamicMappings
 
 		// Try to find: public void travelToDimension(int)
 		// NOTE: Mojang changed to public Entity travelToDimension(int, BlockPos)
-		for (MethodNode method : (List<MethodNode>)entity.methods)
+		for (MethodNode method : entity.methods)
 		{
 			if (!method.desc.startsWith("(I")) continue;
 
@@ -2129,27 +2129,29 @@ public class DynamicMappings
 		}
 
 		// public int hashCode()
+		String hashCode_name = null;
 		methods = getMatchingMethods(tagBase, null, "()I");
-		if (methods.size() != 1) return false;
-		String getHashName = methods.get(0).name;
-		addMethodMapping("net/minecraft/nbt/NBTBase hashCode ()I", tagBase.name + " " + getHashName + " ()I");
+		if (methods.size() == 1) {
+			hashCode_name = methods.get(0).name;
+			addMethodMapping("net/minecraft/nbt/NBTBase hashCode ()I", tagBase.name + " " + hashCode_name + " ()I");
+		}
 
 
 		// public NBTTagCompound.tagCount()I
 		methods = getMatchingMethods(tagCompound, null, "()I");
 		for (Iterator<MethodNode> iterator = methods.iterator(); iterator.hasNext();) {
-			if (iterator.next().name.equals(getHashName)) iterator.remove();
+			if (iterator.next().name.equals(hashCode_name)) iterator.remove();
 		}
-		if (methods.size() != 1) return false;
-		String tagCountName_compound = methods.get(0).name;
-		addMethodMapping("net/minecraft/nbt/NBTTagCompound tagCount ()I", tagCompound.name + " " + tagCountName_compound + " ()I");
+		if (methods.size() == 1) {		
+			addMethodMapping("net/minecraft/nbt/NBTTagCompound tagCount ()I", tagCompound.name + " " +  methods.get(0).name + " ()I");
+		}
 
 
 		// public NBTTagList.getTagType()I
 		methods = getMatchingMethods(tagList, null, "()I");
 		for (Iterator<MethodNode> iterator = methods.iterator(); iterator.hasNext();) {
 			MethodNode method = iterator.next();
-			if (method.name.equals(getHashName)) { iterator.remove(); continue; }
+			if (method.name.equals(hashCode_name)) { iterator.remove(); continue; }
 
 			for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
 				if (insn.getOpcode() != Opcodes.GETFIELD) continue;
@@ -2164,76 +2166,81 @@ public class DynamicMappings
 		}
 
 		// public NBTTagList.tagCount()I
-		if (methods.size() != 1) return false;
-		String tagCountName_list = methods.get(0).name;
-		addMethodMapping("net/minecraft/nbt/NBTTagList tagCount ()I", tagList.name + " " + tagCountName_list + " ()I");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/nbt/NBTTagList tagCount ()I", tagList.name + " " + methods.get(0).name + " ()I");
+		}
 
 
 		// public NBTTagList.getCompoundTagAt(I)Lnet/minecraft/nbt/NBTTagCompound;
 		methods = getMatchingMethods(tagList,  null,  "(I)L" + tagCompound.name + ";");
-		if (methods.size() != 1) return false;
-		addMethodMapping("net/minecraft/nbt/NBTTagList getCompoundTagAt (I)Lnet/minecraft/nbt/NBTTagCompound;",
-				tagList.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/nbt/NBTTagList getCompoundTagAt (I)Lnet/minecraft/nbt/NBTTagCompound;",
+					tagList.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
 
 
 		// public boolean hasKey(String key, int type)
 		methods = getMatchingMethods(tagCompound, null, "(Ljava/lang/String;I)Z");
-		if (methods.size() != 1) return false;
-		String hasKeyName = methods.get(0).name;
-		addMethodMapping("net/minecraft/nbt/NBTTagCompound hasKey (Ljava/lang/String;I)Z",
-				tagCompound.name + " " + hasKeyName + " (Ljava/lang/String;I)Z");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/nbt/NBTTagCompound hasKey (Ljava/lang/String;I)Z",
+					tagCompound.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
 
 
 
-
+		// Find getByte and getTagType
 		methods = getMatchingMethods(tagCompound, null, "(Ljava/lang/String;)B");
-		if (methods.size() != 2) return false;
-		for (MethodNode method : methods) {
-			boolean hasBase = false;
-			boolean hasPrimitive = false;
-			for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
-				if (insn.getOpcode() != Opcodes.CHECKCAST) continue;
-				TypeInsnNode tn = (TypeInsnNode)insn;
-				if (tn.desc.equals(tagBase.name)) hasBase = true;
-				else if (tn.desc.startsWith(tagBase.name + "$")) {
-					hasPrimitive = true;
-					addClassMapping("net/minecraft/nbt/NBTBase$NBTPrimitive", tn.desc);
+		if (methods.size() == 2) 
+		{
+			for (MethodNode method : methods) {
+				boolean hasBase = false;
+				boolean hasPrimitive = false;
+				for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+					if (insn.getOpcode() != Opcodes.CHECKCAST) continue;
+					TypeInsnNode tn = (TypeInsnNode)insn;
+					if (tn.desc.equals(tagBase.name)) hasBase = true;
+					else if (tn.desc.startsWith(tagBase.name + "$")) {
+						hasPrimitive = true;
+						addClassMapping("net/minecraft/nbt/NBTBase$NBTPrimitive", tn.desc);
+					}
 				}
-			}
-
-			// public byte getByte(String key)
-			if (hasPrimitive && !hasBase) {
-				addMethodMapping("net/minecraft/nbt/NBTTagCompound getByte (Ljava/lang/String;)B",
-						tagCompound.name + " " + method.name + " " + method.desc);
-			}
-			// public byte getTagType(String key)
-			else if (!hasPrimitive && hasBase) {
-				addMethodMapping("net/minecraft/nbt/NBTTagCompound getTagType (Ljava/lang/String;)B",
-						tagCompound.name + " " + method.name + " " + method.desc);
+	
+				// public byte getByte(String key)
+				if (hasPrimitive && !hasBase) {
+					addMethodMapping("net/minecraft/nbt/NBTTagCompound getByte (Ljava/lang/String;)B",
+							tagCompound.name + " " + method.name + " " + method.desc);
+				}
+				// public byte getTagType(String key)
+				else if (!hasPrimitive && hasBase) {
+					addMethodMapping("net/minecraft/nbt/NBTTagCompound getTagType (Ljava/lang/String;)B",
+							tagCompound.name + " " + method.name + " " + method.desc);
+				}
 			}
 		}
 
 
 		// public void setByte(String key, byte value)
 		methods = getMatchingMethods(tagCompound, null, "(Ljava/lang/String;B)V");
-		if (methods.size() != 1) return false;
-		addMethodMapping("net/minecraft/nbt/NBTTagCompound setByte (Ljava/lang/String;B)V",
-				tagCompound.name + " " + methods.get(0).name + " (Ljava/lang/String;B)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/nbt/NBTTagCompound setByte (Ljava/lang/String;B)V",
+					tagCompound.name + " " + methods.get(0).name + " (Ljava/lang/String;B)V");
+		}
 
 
 		// public void appendTag(NBTBase nbt)
 		methods = getMatchingMethods(tagList, null, "(L" + tagBase.name + ";)V");
-		if (methods.size() != 1) return false;
-		addMethodMapping("net/minecraft/nbt/NBTTagList appendTag (Lnet/minecraft/nbt/NBTBase;)V",
-				tagList.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/nbt/NBTTagList appendTag (Lnet/minecraft/nbt/NBTBase;)V",
+					tagList.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
 
 
 		// public void setTag(String key, NBTBase value)
 		methods = getMatchingMethods(tagCompound, null, "(Ljava/lang/String;L" + tagBase.name + ";)V");
-		if (methods.size() != 1) return false;
-		addMethodMapping("net/minecraft/nbt/NBTTagCompound setTag (Ljava/lang/String;Lnet/minecraft/nbt/NBTBase;)V",
-				tagCompound.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/nbt/NBTTagCompound setTag (Ljava/lang/String;Lnet/minecraft/nbt/NBTBase;)V",
+					tagCompound.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
 
 		return true;
 	}
@@ -2346,9 +2353,10 @@ public class DynamicMappings
 
 		// public void setInventorySlotContents(int index, ItemStack stack)
 		methods = getMatchingMethods(inventoryBasic, null, "(IL" + itemStack.name + ";)V");
-		if (methods.size() != 1) return false;
-		addMethodMapping("net/minecraft/inventory/IInventory setInventorySlotContents (ILnet/minecraft/item/ItemStack;)V",
-				iInventory.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/IInventory setInventorySlotContents (ILnet/minecraft/item/ItemStack;)V",
+					iInventory.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
 
 
 		// Get the two methods with decriptor (I)Lnet/minecraft/item/ItemStack;
@@ -2484,6 +2492,7 @@ public class DynamicMappings
 
 		List<MethodNode> methods;
 
+		
 		//public static int getIdFromItem(Item itemIn)
 		methods = getMethodsWithDescriptor(itemMethods, "(L" + item.name + ";)I");
 		methods = removeMethodsWithoutFlags(methods, Opcodes.ACC_STATIC);
@@ -2493,6 +2502,26 @@ public class DynamicMappings
 			itemMethods.remove(mn);
 			addMethodMapping("net/minecraft/item/Item getIdFromItem (Lnet/minecraft/item/Item;)I",
 					item.name + " " + mn.name + " " + mn.desc);
+		}
+		// A hack since 15w34c duplicated the method for seemingly no reason
+		else if (methods.size() == 2) {
+			MethodNode mn1 = methods.get(0);
+			MethodNode mn2 = methods.get(1);
+			if (mn1.instructions.size() == mn2.instructions.size()) {
+				int size = mn1.instructions.size();
+				boolean nomatch = false;
+				for (int n = 0; n < size; n++) {
+					if (mn1.instructions.get(n).getOpcode() != mn2.instructions.get(n).getOpcode()) { nomatch = true; break; }
+				}
+				if (!nomatch) {
+					// Use the second one, since it seems to be the original
+					addMethodMapping("net/minecraft/item/Item getIdFromItem (Lnet/minecraft/item/Item;)I",
+							item.name + " " + mn2.name + " " + mn2.desc);
+					// Not going to put this in the 'provides' list in case it's removed, but we'll map it
+					addMethodMapping("net/minecraft/item/Item getIdFromItem2 (Lnet/minecraft/item/Item;)I",
+							item.name + " " + mn1.name + " " + mn1.desc);
+				}
+			}
 		}
 
 
@@ -2697,6 +2726,7 @@ public class DynamicMappings
 
 
 
+		// Find isItemEnchanted()Z and hasTagCompound()Z
 		methods = getMatchingMethods(itemStack, null, "()Z");
 		for (Iterator<MethodNode> iterator = methods.iterator(); iterator.hasNext();)
 		{
@@ -2717,38 +2747,40 @@ public class DynamicMappings
 			if (!correctField) { iterator.remove(); continue; }
 		}
 
-		if (methods.size() != 2) return false;
-
-		for (MethodNode method : methods) {
-			boolean isEnchant = false;
-			for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
-				if (isLdcWithString(insn, "ench")) { isEnchant = true; break; }
-			}
-
-			// public boolean isItemEnchanted()
-			if (isEnchant) {
-				addMethodMapping("net/minecraft/item/ItemStack isItemEnchanted ()Z", itemStack.name + " " + method.name + " ()Z");
-			}
-			// public boolean hasTagCompound()
-			else {
-				addMethodMapping("net/minecraft/item/ItemStack hasTagCompound ()Z", itemStack.name + " " + method.name + " ()Z");
+		if (methods.size() == 2) 
+		{
+			for (MethodNode method : methods) {
+				boolean isEnchant = false;
+				for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+					if (isLdcWithString(insn, "ench")) { isEnchant = true; break; }
+				}
+				
+				// public boolean isItemEnchanted()
+				if (isEnchant) {
+					addMethodMapping("net/minecraft/item/ItemStack isItemEnchanted ()Z", itemStack.name + " " + method.name + " ()Z");
+				}
+				// public boolean hasTagCompound()
+				else {
+					addMethodMapping("net/minecraft/item/ItemStack hasTagCompound ()Z", itemStack.name + " " + method.name + " ()Z");
+				}
 			}
 		}
 
 
 		// public Item getItem()
 		methods = getMatchingMethods(itemStack, null, "()L" + item.name + ";");
-		if (methods.size() != 1) return false;
-		addMethodMapping("net/minecraft/item/ItemStack getItem ()Lnet/minecraft/item/Item;",
-				itemStack.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/item/ItemStack getItem ()Lnet/minecraft/item/Item;",
+					itemStack.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
 
 
 		// public NBTTagCompound getTagCompound()
 		methods = getMatchingMethods(itemStack, null, "()L" + tagCompound.name + ";");
-		if (methods.size() != 1) return false;
-		addMethodMapping("net/minecraft/item/ItemStack getTagCompound ()Lnet/minecraft/nbt/NBTTagCompound;",
-				itemStack.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/item/ItemStack getTagCompound ()Lnet/minecraft/nbt/NBTTagCompound;",
+					itemStack.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
 
 
 
@@ -2965,7 +2997,7 @@ public class DynamicMappings
 		if (itemsClass == null || itemClass == null) return false;
 
 		// Generate list
-		for (MethodNode method : (List<MethodNode>)itemsClass.methods)
+		for (MethodNode method : itemsClass.methods)
 		{
 			if (!method.name.equals("<clinit>")) continue;
 
@@ -2997,7 +3029,7 @@ public class DynamicMappings
 		if (fieldName != null) addFieldMapping("net/minecraft/init/Items leather Lnet/minecraft/item/Item;", 
 				itemsClass.name + " " + fieldName + " L" + itemClass.name + ";");
 
-		
+		// TODO - Other items
 
 		return true;
 	}
@@ -3012,6 +3044,9 @@ public class DynamicMappings
 			providesFields={
 			"net/minecraft/server/MinecraftServer mcServer Lnet/minecraft/server/MinecraftServer;"
 			},
+			providesMethods={
+			"net/minecraft/server/MinecraftServer createNewCommandManager ()Lnet/minecraft/command/ServerCommandManager;"
+			},
 			depends={
 			"net/minecraft/server/MinecraftServer"
 			})
@@ -3020,8 +3055,16 @@ public class DynamicMappings
 		ClassNode minecraftServer = getClassNode("net/minecraft/server/MinecraftServer");
 		if (minecraftServer == null) return false;
 		
+		String serverCommandManager_name = null;
+		
 		// public MinecraftServer(File, Proxy, File, DataVersionManager)		
 		for (MethodNode method : minecraftServer.methods) {
+			
+			if (serverCommandManager_name != null && method.desc.equals("()L" + serverCommandManager_name + ";")) {
+				
+				continue;
+			}
+			
 			if (!method.name.equals("<init>")) continue;
 			if (!method.desc.startsWith("(Ljava/io/File;Ljava/net/Proxy;Ljava/io/File;")) continue;			
 			
@@ -3044,7 +3087,10 @@ public class DynamicMappings
 					if (returnType.getSort() != Type.OBJECT || returnType.getClassName().contains(".")) continue;
 					
 					if (searchConstantPoolForStrings(returnType.getClassName(), "chat.type.admin", "logAdminCommands")) {
+						serverCommandManager_name = returnType.getClassName();
 						addClassMapping("net/minecraft/command/ServerCommandManager",  returnType.getClassName());
+						addMethodMapping("net/minecraft/server/MinecraftServer createNewCommandManager ()Lnet/minecraft/command/ServerCommandManager;",
+								minecraftServer.name + " " + mn.name + " " + mn.desc);
 						continue;
 					}					
 				}
@@ -3074,7 +3120,7 @@ public class DynamicMappings
 					continue;
 				}
 				
-				// TODO - Do other fields				
+				// TODO - Do other fields from constructor			
 							
 				//System.out.println(ft.getClassName());
 			}
@@ -3090,13 +3136,18 @@ public class DynamicMappings
 			"net/minecraft/command/CommandHandler",
 			"net/minecraft/command/ICommandManager"
 			},
+			providesMethods={
+			"net/minecraft/server/MinecraftServer getCommandManager ()Lnet/minecraft/command/ICommandManager;"
+			},
 			depends={
-			"net/minecraft/command/ServerCommandManager"
+			"net/minecraft/command/ServerCommandManager",
+			"net/minecraft/server/MinecraftServer"
 			})
 	public static boolean processServerCommandManagerClass()
 	{
 		ClassNode serverCommandManager = getClassNodeFromMapping("net/minecraft/command/ServerCommandManager");
-		if (serverCommandManager == null) return false;
+		ClassNode minecraftServer = getClassNodeFromMapping("net/minecraft/server/MinecraftServer");
+		if (serverCommandManager == null || minecraftServer == null) return false;
 		if (serverCommandManager.superName == null) return false;
 		
 		if (searchConstantPoolForStrings(serverCommandManager.superName, "commands.generic.notFound", "commands.generic.usage")) {
@@ -3106,7 +3157,16 @@ public class DynamicMappings
 		
 		ClassNode commandHandler = getClassNode(serverCommandManager.superName);
 		if (commandHandler.interfaces.size() != 1) return false;
-		addClassMapping("net/minecraft/command/ICommandManager", commandHandler.interfaces.get(0));		
+		String iCommandManager_name = commandHandler.interfaces.get(0);
+		addClassMapping("net/minecraft/command/ICommandManager", iCommandManager_name);		
+		
+		
+		List<MethodNode> methods = getMatchingMethods(minecraftServer,  null, "()L" + iCommandManager_name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/server/MinecraftServer getCommandManager ()Lnet/minecraft/command/ICommandManager;",
+					minecraftServer.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
 		
 		return true;
 	}
@@ -3208,39 +3268,45 @@ public class DynamicMappings
 		
 		// List getCommandAliases();
 		methods = getMatchingMethods(iCommand,  null,  "()Ljava/util/List;");
-		if (methods.size() != 1) return false;
-		addMethodMapping("net/minecraft/command/ICommand getCommandAliases ()Ljava/util/List;",
-				iCommand.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/command/ICommand getCommandAliases ()Ljava/util/List;",
+					iCommand.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
 		
 		
 		// void processCommand(ICommandSender sender, String[] args) throws CommandException;
 		methods = getMatchingMethods(iCommand, null, "(L" + iCommandSender.name + ";[Ljava/lang/String;)V");
-		if (methods.size() != 1) return false;
-		addMethodMapping("net/minecraft/command/ICommand processCommand (Lnet/minecraft/command/ICommandSender;[Ljava/lang/String;)V",
-				iCommand.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/command/ICommand processCommand (Lnet/minecraft/command/ICommandSender;[Ljava/lang/String;)V",
+					iCommand.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		
-		if (methods.get(0).exceptions.size() != 1) return false;
-		addClassMapping("net/minecraft/command/CommandException", methods.get(0).exceptions.get(0));		
+			if (methods.get(0).exceptions.size() == 1) {
+				addClassMapping("net/minecraft/command/CommandException", methods.get(0).exceptions.get(0));
+			}
+		}
 		
 		
 		// boolean canCommandSenderUseCommand(ICommandSender sender);
 		methods = getMatchingMethods(iCommand, null, "(L" + iCommandSender.name + ";)Z");
-		if (methods.size() != 1) return false;
-		addMethodMapping("net/minecraft/command/ICommand canCommandSenderUseCommand (Lnet/minecraft/command/ICommandSender;)Z",
-				iCommand.name + " " + methods.get(0).name + " " + methods.get(0).desc);		
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/command/ICommand canCommandSenderUseCommand (Lnet/minecraft/command/ICommandSender;)Z",
+					iCommand.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
 		
 		
 	    // List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos);		
 		methods = getMatchingMethods(iCommand, null, "(L" + iCommandSender.name + ";[Ljava/lang/String;L" + blockPos.name + ";)Ljava/util/List;");		
-		if (methods.size() != 1) return false;
-		addMethodMapping("net/minecraft/command/ICommand addTabCompletionOptions (Lnet/minecraft/command/ICommandSender;[Ljava/lang/String;Lnet/minecraft/util/BlockPos;)Ljava/util/List;",
-				iCommand.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/command/ICommand addTabCompletionOptions (Lnet/minecraft/command/ICommandSender;[Ljava/lang/String;Lnet/minecraft/util/BlockPos;)Ljava/util/List;",
+					iCommand.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
 		
 	    //boolean isUsernameIndex(String[] args, int index);
 		methods = getMatchingMethods(iCommand, null, "([Ljava/lang/String;I)Z");
-		if (methods.size() != 1) return false;
-		addMethodMapping("net/minecraft/command/ICommand isUsernameIndex ([Ljava/lang/String;I)Z",
-				iCommand.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/command/ICommand isUsernameIndex ([Ljava/lang/String;I)Z",
+					iCommand.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
 		
 		
 		return true;
@@ -3248,10 +3314,5 @@ public class DynamicMappings
 	
 	
     
-    
-    
-
-	
-	
 }
 

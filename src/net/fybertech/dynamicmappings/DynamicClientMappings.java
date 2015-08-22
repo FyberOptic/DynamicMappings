@@ -123,13 +123,15 @@ public class DynamicClientMappings
 	
 	
 	@Mapping(provides={
-			"net/minecraft/world/WorldSettings"
+			"net/minecraft/world/WorldSettings",
+			"net/minecraft/server/integrated/IntegratedServer"
 			},
 			providesMethods={
 			"net/minecraft/client/Minecraft getMinecraft ()Lnet/minecraft/client/Minecraft;",
 			"net/minecraft/client/Minecraft getRenderItem ()Lnet/minecraft/client/renderer/entity/RenderItem;",
 			"net/minecraft/client/Minecraft refreshResources ()V",
-			"net/minecraft/client/Minecraft launchIntegratedServer (Ljava/lang/String;Ljava/lang/String;Lnet/minecraft/world/WorldSettings;)V"
+			"net/minecraft/client/Minecraft launchIntegratedServer (Ljava/lang/String;Ljava/lang/String;Lnet/minecraft/world/WorldSettings;)V",
+			"net/minecraft/client/Minecraft getIntegratedServer ()Lnet/minecraft/server/integrated/IntegratedServer;"
 			},
 			depends={
 			"net/minecraft/client/Minecraft",
@@ -166,6 +168,9 @@ public class DynamicClientMappings
 			if (found) break;
 		}
 		
+		
+		String integratedServer_name = null;
+		
 		methods.clear();
 		for (MethodNode method : minecraft.methods) {
 			if (!DynamicMappings.checkMethodParameters(method,  Type.OBJECT, Type.OBJECT, Type.OBJECT)) continue;
@@ -181,7 +186,27 @@ public class DynamicClientMappings
 			addClassMapping("net/minecraft/world/WorldSettings", worldSettings);
 			addMethodMapping("net/minecraft/client/Minecraft launchIntegratedServer (Ljava/lang/String;Ljava/lang/String;Lnet/minecraft/world/WorldSettings;)V",
 					minecraft.name + " " + method.name + " " + method.desc);
+			
+			for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				if (insn.getOpcode() != Opcodes.NEW) continue;
+				TypeInsnNode tn = (TypeInsnNode)insn;
+				
+				if (DynamicMappings.searchConstantPoolForStrings(tn.desc, "saves", "Generating keypair", "Saving and pausing game...")) {
+					integratedServer_name = tn.desc;
+					addClassMapping("net/minecraft/server/integrated/IntegratedServer", tn.desc);
+					break;
+				}
+			}
 		}
+		
+		if (integratedServer_name != null) {
+			methods = DynamicMappings.getMatchingMethods(minecraft, null, "()L" + integratedServer_name + ";");
+			if (methods.size() == 1) {
+				addMethodMapping("net/minecraft/client/Minecraft getIntegratedServer ()Lnet/minecraft/server/integrated/IntegratedServer;",
+						minecraft.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			}
+		}
+		
 		
 		return true;
 	}
