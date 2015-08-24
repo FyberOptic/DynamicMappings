@@ -17,6 +17,7 @@ import java.util.zip.ZipFile;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.Remapper;
 import org.objectweb.asm.commons.RemappingClassAdapter;
 import org.objectweb.asm.tree.ClassNode;
@@ -59,7 +60,7 @@ public class DynamicRemap
 	
 	private boolean isObfInner(String s)
 	{
-		if (s.length() > 1) return false;
+		//if (s.length() > 1) return false;
 		
 		try {
 			Integer.parseInt(s);
@@ -95,15 +96,12 @@ public class DynamicRemap
 			String[] split = typeName.split("\\$");
 			if (classMappings.containsKey(split[0])) split[0] = classMappings.get(split[0]);			
 			typeName = split[0];
-			//if (typeName.startsWith("aci")) System.out.println(typeName);
 			
 			for (int n = 1; n < split.length; n++) {
 				String inner = split[n];
 				if (originallyUnpackaged && isObfInner(inner) && unpackagedInnerPrefix != null) inner = unpackagedInnerPrefix + inner;
 				typeName += "$" + inner;				
-			}
-			//if (typeName.startsWith("net/minecraft/item")) System.out.println(typeName);
-			
+			}			
 			
 			if (!typeName.contains("/") && unpackagedPrefix != null) typeName = unpackagedPrefix + typeName;
 			return super.map(typeName);
@@ -287,18 +285,70 @@ public class DynamicRemap
 	
 	
 	
+	// TODO - Make better access transformer system
+	public static void transformClass(ClassNode cn)
+	{		
+		
+		int allAccess = Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED | Opcodes.ACC_PRIVATE;
+		
+		if (cn.name.equals("net/minecraft/block/Block")) {
+			for (MethodNode method : cn.methods) {
+				// Make Block constructors public
+				if (method.name.equals("<init>")) method.access = (method.access & ~Opcodes.ACC_PROTECTED) | Opcodes.ACC_PUBLIC;
+				// Make registration methods public
+				else if (method.name.equals("registerBlock")) method.access = (method.access & ~Opcodes.ACC_PRIVATE) | Opcodes.ACC_PUBLIC; 
+			}
+		}
+		
+		
+		if (cn.name.equals("net/minecraft/item/Item")) {
+			for (MethodNode method : cn.methods) {
+				// Make registration methods public
+				if (method.name.startsWith("registerItem")) method.access = (method.access & ~allAccess) | Opcodes.ACC_PUBLIC; 
+			}
+		}
+	}
+	
 	
 	public static void main(String[] args)
 	{	
 				
 		DynamicMappings.generateClassMappings();
-		DynamicClientMappings.generateClassMappings();
 
 		
+		String blockClass = DynamicMappings.getClassMapping("net/minecraft/block/Block");
+		String itemClass = DynamicMappings.getClassMapping("net/minecraft/item/Item");
+		JarFile mcJar = DynamicMappings.getMinecraftJar();
+		
+		// Moves unmapped blocks and items to the appropriate package 
+		if (mcJar != null) 
+		{
+			for (Enumeration<JarEntry> enumerator = mcJar.entries(); enumerator.hasMoreElements();)
+			{
+				JarEntry entry = enumerator.nextElement();
+				String filename = entry.getName();				
+				if (!filename.endsWith(".class")) continue;
+				String className = filename.substring(0, filename.length() - 6);
+				
+				if (blockClass != null && DynamicMappings.isSubclassOf(className, blockClass) && !DynamicMappings.reverseClassMappings.containsKey(className)) {
+					DynamicMappings.addClassMapping("net/minecraft/block/BlockUnknown_" + className, className);
+				}
+				
+				else if (itemClass != null && DynamicMappings.isSubclassOf(className, itemClass) && !DynamicMappings.reverseClassMappings.containsKey(className)) {
+					DynamicMappings.addClassMapping("net/minecraft/item/ItemUnknown_" + className, className);
+				}
+			}
+			
+			try {
+				mcJar.close();
+			} catch (IOException e) {}
+		}
+		
+				
 		DynamicRemap remapper = new DynamicRemap(
 				DynamicMappings.reverseClassMappings, 
 				DynamicMappings.reverseFieldMappings, 
-				DynamicMappings.reverseMethodMappings);
+				DynamicMappings.reverseMethodMappings);		
 		
 		
 		URL url = DynamicRemap.class.getClassLoader().getResource("net/minecraft/server/MinecraftServer.class");	
@@ -339,7 +389,7 @@ public class DynamicRemap
 			if (name.endsWith(".class")) {
 				name = name.substring(0, name.length() - 6);			
 				ClassNode mapped = remapper.remapClass(name);
-				
+				transformClass(mapped);
 				ClassWriter writer = new ClassWriter(0);
 				mapped.accept(writer);
 				name = mapped.name + ".class";

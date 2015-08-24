@@ -26,7 +26,6 @@ public class Tweaker implements ITweaker
 	public void acceptOptions(List<String> args, File gameDir, File assetsDir, String profile)
 	{
 		DynamicMappings.generateClassMappings();
-		if (MeddleUtil.isClientJar()) DynamicClientMappings.generateClassMappings();
 	}
 
 	@Override
