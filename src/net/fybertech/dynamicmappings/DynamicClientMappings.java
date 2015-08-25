@@ -730,6 +730,39 @@ public class DynamicClientMappings
 	
 	
 	
+	@Mapping(
+			providesMethods={
+			"net/minecraft/block/state/BlockState getProperty (Ljava/lang/String;)Lnet/minecraft/block/properties/IProperty;"
+			},
+			depends={
+			"net/minecraft/block/state/BlockState",
+			"net/minecraft/block/properties/IProperty"
+			})
+	public static boolean processBlockStateClass()
+	{
+		ClassNode blockState = getClassNodeFromMapping("net/minecraft/block/state/BlockState");
+		ClassNode iProperty = getClassNodeFromMapping("net/minecraft/block/properties/IProperty");
+		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
+		if (!MeddleUtil.notNull(blockState, iProperty, block)) return false;
+		
+		List<MethodNode> methods = new ArrayList<MethodNode>();
+		
+		
+		// public IProperty getProperty(String param0)
+		// Note: Not an MCP name
+		methods = DynamicMappings.getMatchingMethods(blockState, null, "(Ljava/lang/String;)L" + iProperty.name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/state/BlockState getProperty (Ljava/lang/String;)Lnet/minecraft/block/properties/IProperty;",
+					blockState.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		return true;
+	}
+
+	
+	
+	
+	
 	
 
 	public static void generateClassMappings()
