@@ -548,7 +548,7 @@ public class DynamicMappings
 	// Used for debugging purposes
 	public static void main(String[] args)
 	{
-		boolean showMappings = false;
+		boolean showMappings = true;
 		
 		generateClassMappings();
 		
