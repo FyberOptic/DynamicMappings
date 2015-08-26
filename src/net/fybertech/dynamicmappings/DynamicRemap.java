@@ -90,7 +90,7 @@ public class DynamicRemap
 		{
 			boolean originallyUnpackaged = !typeName.contains("/");
 			
-			if (classMappings.containsKey(typeName)) typeName = classMappings.get(typeName);			
+			if (classMappings.containsKey(typeName)) return classMappings.get(typeName);			
 			
 			// Remap the parent class in the case of an inner class
 			String[] split = typeName.split("\\$");
@@ -221,6 +221,10 @@ public class DynamicRemap
 		@Override
 		public void visitInnerClass(String name, String outerName, String innerName, int access) 
 		{
+			if (classMappings.containsKey(name)) {
+				super.visitInnerClass(name, outerName, innerName, access);
+				return;
+			}
 			
 			if (!name.contains("/") && innerName != null && unpackagedInnerPrefix != null && isObfInner(innerName))
 			{

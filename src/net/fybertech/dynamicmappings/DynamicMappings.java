@@ -548,7 +548,7 @@ public class DynamicMappings
 	// Used for debugging purposes
 	public static void main(String[] args)
 	{
-		boolean showMappings = true;
+		boolean showMappings = false;
 		
 		generateClassMappings();
 		
@@ -953,6 +953,7 @@ public class DynamicMappings
 			addFieldMapping("net/minecraft/init/Blocks chest Lnet/minecraft/block/BlockChest;",
 					field.owner + " " + field.name + " " + field.desc);
 		}
+		
 
 
 		return true;
@@ -1058,6 +1059,139 @@ public class DynamicMappings
 		return false;
 	}
 
+	
+	@Mapping(provides={
+			"net/minecraft/tileentity/TileEntityChest"
+			},
+			providesMethods={
+			},
+			depends={
+			"net/minecraft/tileentity/TileEntity"
+			})
+	public static boolean processTileEntityClass()
+	{
+		ClassNode tileEntity = getClassNodeFromMapping("net/minecraft/tileentity/TileEntity");
+		if (tileEntity == null) return false;
+		
+		List<MethodNode> methods = getMatchingMethods(tileEntity, "<clinit>", "()V");
+		if (methods.size() != 1) return false;
+		
+		Map<String, String> teMap = new HashMap<>();
+		
+		String lastClass = null;
+		for (AbstractInsnNode insn = methods.get(0).instructions.getFirst(); insn != null; insn = insn.getNext()) {
+			String c = getLdcClass(insn);
+			if (c != null) { lastClass = c; continue; }
+			
+			String name = getLdcString(insn);
+			if (name == null || lastClass == null) continue;
+			
+			teMap.put(name, lastClass);			
+		}
+		
+		
+		String className = teMap.get("Chest");
+		if (className != null) {
+			addClassMapping("net/minecraft/tileentity/TileEntityChest", className);
+		}
+		
+		
+		return true;
+	}
+	
+	
+	
+	@Mapping(provides={
+			"net/minecraft/inventory/ContainerChest"
+			},
+			providesMethods={
+			},
+			depends={
+			"net/minecraft/tileentity/TileEntity",
+			"net/minecraft/tileentity/TileEntityChest",
+			"net/minecraft/entity/player/InventoryPlayer",
+			"net/minecraft/entity/player/EntityPlayer",
+			"net/minecraft/inventory/Container"
+			})
+	public static boolean processTileEntityChestClass()
+	{
+		ClassNode tileEntity = getClassNodeFromMapping("net/minecraft/tileentity/TileEntity");
+		ClassNode tileEntityChest = getClassNodeFromMapping("net/minecraft/tileentity/TileEntityChest");
+		ClassNode inventoryPlayer = getClassNodeFromMapping("net/minecraft/entity/player/InventoryPlayer");
+		ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
+		ClassNode container = getClassNodeFromMapping("net/minecraft/inventory/Container");
+		if (!MeddleUtil.notNull(tileEntity, tileEntityChest, inventoryPlayer, entityPlayer, container)) return false;
+		
+		// TODO - Get TileEntityLockable, IUpdatePlayerListBox
+		
+		
+		// public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn)
+		List<MethodNode> methods = getMatchingMethods(tileEntityChest, null, assembleDescriptor("(", inventoryPlayer, entityPlayer, ")", container));
+		if (methods.size() == 1) {
+			for (AbstractInsnNode insn = methods.get(0).instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				if (insn.getOpcode() != Opcodes.NEW) continue;
+				TypeInsnNode tn = (TypeInsnNode)insn;
+				ClassNode containerChest = getClassNode(tn.desc);
+				if (!containerChest.superName.equals(container.name)) continue;
+				addClassMapping("net/minecraft/inventory/ContainerChest", containerChest);
+			}
+		}
+		
+		return true;
+	}
+	
+	
+	
+	@Mapping(provides={
+			},
+			providesMethods={
+			"net/minecraft/inventory/IInventory openInventory (Lnet/minecraft/entity/player/EntityPlayer;)V",
+			"net/minecraft/inventory/IInventory closeInventory (Lnet/minecraft/entity/player/EntityPlayer;)V"
+			},
+			depends={			
+			"net/minecraft/inventory/ContainerChest",
+			"net/minecraft/inventory/IInventory",
+			"net/minecraft/entity/player/EntityPlayer"
+			})
+	public static boolean processContainerChest()
+	{		
+		ClassNode containerChest = getClassNodeFromMapping("net/minecraft/inventory/ContainerChest");
+		ClassNode iInventory = getClassNodeFromMapping("net/minecraft/inventory/IInventory");
+		ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
+		if (!MeddleUtil.notNull(containerChest, iInventory, entityPlayer)) return false;
+		
+		String openInventory = null;
+		
+		List<MethodNode> methods = getMatchingMethods(containerChest, "<init>", assembleDescriptor("(", iInventory, iInventory, entityPlayer, ")V"));
+		if (methods.size() == 1) {
+			for (AbstractInsnNode insn = methods.get(0).instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				if (insn.getOpcode() != Opcodes.INVOKEINTERFACE) continue;
+				MethodInsnNode mn = (MethodInsnNode)insn;
+				if (mn.owner.equals(iInventory.name) && mn.desc.equals("(L" + entityPlayer.name + ";)V")) {
+					openInventory = mn.name;
+				}
+			}
+		}
+		
+		methods = getMatchingMethods(iInventory, null, "(L" + entityPlayer.name + ";)V");
+		if (openInventory != null && methods.size() == 2) {
+			for (MethodNode method : methods) {
+				if (method.name.equals(openInventory)) {			
+					addMethodMapping("net/minecraft/inventory/IInventory openInventory (Lnet/minecraft/entity/player/EntityPlayer;)V",
+							iInventory.name + " " + method.name + " " + method.desc);
+				}
+				else {
+					addMethodMapping("net/minecraft/inventory/IInventory closeInventory (Lnet/minecraft/entity/player/EntityPlayer;)V",
+							iInventory.name + " " + method.name + " " + method.desc);
+				}
+			}
+		}
+		
+		
+		return true;
+	}
+	
+	
 
 	@Mapping(provides="net/minecraft/entity/player/EntityPlayer",
 			depends={
@@ -1273,14 +1407,437 @@ public class DynamicMappings
 	
 	
 	
+	
+	@Mapping(provides={
+			"net/minecraft/block/BlockAnvil"
+			},
+			dependsMethods={
+			"net/minecraft/block/Block registerBlocks ()V"
+			},
+			depends={
+			"net/minecraft/block/Block"
+			})
+	public static boolean discoverBlocks()
+	{
+		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
+		if (block == null) return false;
+		
+		MethodNode registerBlocks = getMethodNodeFromMapping(block, "net/minecraft/block/Block registerBlocks ()V");
+		if (registerBlocks == null) return false;
+		
+		Map<String, String> blockClasses = new HashMap<>();
+		
+		String className;
+		String blockName = null;
+		
+		// Create a map if the block names and their respective classes.
+		// Note: May still just be the generic Block class.
+		for (AbstractInsnNode insn = registerBlocks.instructions.getFirst(); insn != null; insn = insn.getNext()) 
+		{
+			String ldcString = getLdcString(insn);
+			if (ldcString != null) { blockName = ldcString; continue; }
+			
+			if (blockName != null && insn.getOpcode() == Opcodes.NEW) {
+				TypeInsnNode tn = (TypeInsnNode)insn;
+				blockClasses.put(blockName, tn.desc);				
+				blockName = null;
+			}			
+		}
+		
+		className = blockClasses.get("anvil");
+		if (className != null && searchConstantPoolForStrings(className, "damage"))
+		{
+			// TODO - Better detection method
+			addClassMapping("net/minecraft/block/BlockAnvil", className);
+		}
+		
+		
+		return true;
+	}
+	
+	
+	
+	
+	@Mapping(provides={
+			"net/minecraft/world/IInteractionObject",
+			"net/minecraft/block/BlockAnvil$Anvil",
+			"net/minecraft/entity/player/InventoryPlayer",
+			"net/minecraft/inventory/Container"
+			},
+			providesMethods={
+			"net/minecraft/world/IInteractionObject getGuiID ()Ljava/lang/String;",
+			"net/minecraft/world/IInteractionObject createContainer (Lnet/minecraft/entity/player/InventoryPlayer;Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/inventory/Container;",
+			"net/minecraft/entity/player/EntityPlayer displayGui (Lnet/minecraft/world/IInteractionObject;)V"
+			},
+			dependsMethods={
+			"net/minecraft/block/Block onBlockActivated (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumFacing;FFF)Z"
+			},
+			depends={
+			"net/minecraft/block/BlockAnvil",
+			"net/minecraft/entity/player/EntityPlayer"
+			})
+	public static boolean getIInteractionObjectClass()
+	{
+		ClassNode blockAnvil = getClassNodeFromMapping("net/minecraft/block/BlockAnvil");
+		ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
+		if (blockAnvil == null || entityPlayer == null) return false;
+
+		MethodNode onBlockActivated = getMethodNodeFromMapping(blockAnvil, "net/minecraft/block/Block onBlockActivated (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumFacing;FFF)Z");
+		if (onBlockActivated == null) return false;
+
+		String iInteractionObject = null;
+		String anvilInteractionObject = null;
+		
+		for (AbstractInsnNode insn = onBlockActivated.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+			if (insn.getOpcode() != Opcodes.NEW) continue;
+			TypeInsnNode tn = (TypeInsnNode)insn;
+			if (searchConstantPoolForStrings(tn.desc, "anvil")) {
+				anvilInteractionObject = tn.desc;
+				addClassMapping("net/minecraft/block/BlockAnvil$Anvil", tn.desc);
+				break;
+			}
+		}
+		
+		if (anvilInteractionObject != null) {
+			ClassNode anvil = getClassNode(anvilInteractionObject);
+			if (anvil.interfaces.size() == 1) {
+				iInteractionObject = anvil.interfaces.get(0);
+				addClassMapping("net/minecraft/world/IInteractionObject", iInteractionObject);
+			}
+		}
+		
+		if (iInteractionObject != null) {
+			ClassNode iiobject = getClassNode(iInteractionObject);			
+			
+			// String getGuiID();
+			List<MethodNode> methods = getMatchingMethods(iiobject, null, "()Ljava/lang/String;");
+			if (methods.size() == 1) {
+				addMethodMapping("net/minecraft/world/IInteractionObject getGuiID ()Ljava/lang/String;",
+						iInteractionObject + " " + methods.get(0).name + " " + methods.get(0).desc);
+			}			
+			
+			// Container createContainer(InventoryPlayer, EntityPlayer);
+			methods.clear();
+			for (MethodNode method : iiobject.methods) {
+				if (!checkMethodParameters(method, Type.OBJECT, Type.OBJECT)) continue;
+				Type t = Type.getMethodType(method.desc);
+				if (t.getReturnType().getSort() != Type.OBJECT) continue;
+				Type[] args = t.getArgumentTypes();
+				if (!args[1].getClassName().equals(entityPlayer.name)) continue;
+				methods.add(method);
+			}
+			if (methods.size() == 1) {
+				MethodNode m = methods.get(0);
+				Type t = Type.getMethodType(m.desc);
+				String inventoryPlayer = t.getArgumentTypes()[0].getClassName();
+				String container = t.getReturnType().getClassName();
+				
+				boolean match1 = false;
+				if (searchConstantPoolForStrings(inventoryPlayer, "Adding item to inventory", "container.inventory")) {
+					match1 = true;
+					addClassMapping("net/minecraft/entity/player/InventoryPlayer", inventoryPlayer);
+				}
+				
+				boolean match2 = false;
+				if (searchConstantPoolForStrings(container, "Listener already listening")) {
+					match2 = true;
+					addClassMapping("net/minecraft/inventory/Container", container);
+				}
+				
+				if (match1 && match2) {
+					addMethodMapping("net/minecraft/world/IInteractionObject createContainer (Lnet/minecraft/entity/player/InventoryPlayer;Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/inventory/Container;",
+							iInteractionObject + " " + m.name + " " + m.desc);
+				}
+			}
+			
+			
+			// EntityPlayer.displayGui(IInteractionObject)V
+			for (AbstractInsnNode insn = onBlockActivated.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				if (insn.getOpcode() != Opcodes.INVOKEVIRTUAL) continue;
+				MethodInsnNode mn = (MethodInsnNode)insn;
+				if (mn.desc.equals("(L" + iInteractionObject + ";)V")) {
+					addMethodMapping("net/minecraft/entity/player/EntityPlayer displayGui (Lnet/minecraft/world/IInteractionObject;)V",
+							entityPlayer.name + " " + mn.name + " " + mn.desc);
+				}
+			}
+		}
+		
+		
+		return true;
+	}
+	
+	
+	
+	@Mapping(provides={
+			"net/minecraft/inventory/Slot"
+			},
+			providesMethods={
+			"net/minecraft/inventory/Container addSlotToContainer (Lnet/minecraft/inventory/Slot;)Lnet/minecraft/inventory/Slot;",
+			"net/minecraft/inventory/Container canInteractWith (Lnet/minecraft/entity/player/EntityPlayer;)Z",
+			"net/minecraft/inventory/Container transferStackInSlot (Lnet/minecraft/entity/player/EntityPlayer;I)Lnet/minecraft/item/ItemStack;",
+			"net/minecraft/inventory/Container onContainerClosed (Lnet/minecraft/entity/player/EntityPlayer;)V"
+			},
+			depends={
+			"net/minecraft/inventory/Container",
+			"net/minecraft/entity/player/EntityPlayer",
+			"net/minecraft/item/ItemStack"
+			})
+	public static boolean processContainerClass()
+	{
+		ClassNode container = getClassNodeFromMapping("net/minecraft/inventory/Container");
+		ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
+		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
+		if (container == null || entityPlayer == null || itemStack == null) return false;
+		
+		List<MethodNode> methods = new ArrayList<>();
+		
+		String slotClass = null;
+		
+		// protected Slot addSlotToContainer(Slot slotIn)
+		for (MethodNode method : container.methods) {
+			Type t = Type.getMethodType(method.desc);
+			Type[] args = t.getArgumentTypes();
+			Type returnType = t.getReturnType();			
+			if (args.length != 1) continue;
+			if (args[0].getSort() != Type.OBJECT || returnType.getSort() != Type.OBJECT) continue;			
+			if (args[0].getClassName().equals(returnType.getClassName())) methods.add(method);
+		}
+		if (methods.size() == 1) {
+			slotClass = Type.getMethodType(methods.get(0).desc).getReturnType().getClassName();
+			// TODO - Better class detection
+			addClassMapping("net/minecraft/inventory/Slot", slotClass);
+			addMethodMapping("net/minecraft/inventory/Container addSlotToContainer (Lnet/minecraft/inventory/Slot;)Lnet/minecraft/inventory/Slot;",
+					container.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public abstract boolean canInteractWith(EntityPlayer playerIn);
+		methods.clear();
+		for (MethodNode method : container.methods) {
+			if ((method.access & Opcodes.ACC_ABSTRACT) == 0) continue;
+			if (!method.desc.equals("(L" + entityPlayer.name + ";)Z")) continue;
+			methods.add(method);
+		}
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/Container canInteractWith (Lnet/minecraft/entity/player/EntityPlayer;)Z", 
+					container.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public ItemStack transferStackInSlot(EntityPlayer playerIn, int index)
+		methods = getMatchingMethods(container, null, assembleDescriptor("(", entityPlayer, "I)", itemStack));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/Container transferStackInSlot (Lnet/minecraft/entity/player/EntityPlayer;I)Lnet/minecraft/item/ItemStack;", 
+					container.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public void onContainerClosed(EntityPlayer playerIn)
+		methods = getMatchingMethods(container, null, assembleDescriptor("(", entityPlayer, ")V"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/Container onContainerClosed (Lnet/minecraft/entity/player/EntityPlayer;)V", 
+					container.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		return true;
+	}
+	
+	
+	
+	@Mapping(providesMethods={
+			"net/minecraft/inventory/Slot onSlotChange (Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)V",
+			"net/minecraft/inventory/Slot onCrafting (Lnet/minecraft/item/ItemStack;I)V",
+			"net/minecraft/inventory/Slot onCrafting (Lnet/minecraft/item/ItemStack;)V",
+			"net/minecraft/inventory/Slot putStack (Lnet/minecraft/item/ItemStack;)V",
+			"net/minecraft/inventory/Slot onPickupFromSlot (Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)V",
+			"net/minecraft/inventory/Slot isItemValid (Lnet/minecraft/item/ItemStack;)Z",
+			"net/minecraft/inventory/Slot getStack ()Lnet/minecraft/item/ItemStack;",
+			"net/minecraft/inventory/Slot getHasStack ()Z",
+			"net/minecraft/inventory/Slot onSlotChanged ()V",
+			"net/minecraft/inventory/Slot getSlotStackLimit ()I",
+			"net/minecraft/inventory/Slot getItemStackLimit (Lnet/minecraft/item/ItemStack;)I",
+			"net/minecraft/inventory/Slot decrStackSize (I)Lnet/minecraft/item/ItemStack;",
+			"net/minecraft/inventory/Slot isHere (Lnet/minecraft/inventory/IInventory;I)Z",
+			"net/minecraft/inventory/Slot canTakeStack (Lnet/minecraft/entity/player/EntityPlayer;)Z"
+			},
+			depends={
+			"net/minecraft/inventory/Slot",
+			"net/minecraft/item/ItemStack",
+			"net/minecraft/entity/player/EntityPlayer",
+			"net/minecraft/inventory/IInventory"
+			})
+	public static boolean processSlotClass()
+	{
+		ClassNode slot = getClassNodeFromMapping("net/minecraft/inventory/Slot");
+		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
+		ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
+		ClassNode iInventory = getClassNodeFromMapping("net/minecraft/inventory/IInventory");
+		if (!MeddleUtil.notNull(slot, itemStack, entityPlayer, iInventory)) return false;	
+		
+		
+		// public void onSlotChange(ItemStack, ItemStack)
+		List<MethodNode> methods = getMatchingMethods(slot, null, assembleDescriptor("(", itemStack, itemStack, ")V"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/Slot onSlotChange (Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)V",
+					slot.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// protected void onCrafting(ItemStack, int)
+		methods = getMatchingMethods(slot, null, assembleDescriptor("(",itemStack,"I)V"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/Slot onCrafting (Lnet/minecraft/item/ItemStack;I)V",
+					slot.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// protected void onCrafting(ItemStack)
+		// public void putStack(ItemStack)
+		methods = getMatchingMethods(slot, null, assembleDescriptor("(",itemStack,")V"));		
+		if (methods.size() == 2) 
+		{
+			MethodNode onCrafting = null;
+			MethodNode putStack = null;			
+				
+			boolean isReturn1 = getNextRealOpcode(methods.get(0).instructions.getFirst()).getOpcode() == Opcodes.RETURN;
+			boolean isReturn2 = getNextRealOpcode(methods.get(1).instructions.getFirst()).getOpcode() == Opcodes.RETURN;
+			
+			if (isReturn1 && !isReturn2) {
+				onCrafting = methods.get(0);
+				putStack = methods.get(1);
+			}
+			else if (!isReturn1 && isReturn2) {
+				onCrafting = methods.get(1);
+				putStack = methods.get(0);
+			}
+			
+			if (onCrafting != null && putStack != null) {
+				addMethodMapping("net/minecraft/inventory/Slot onCrafting (Lnet/minecraft/item/ItemStack;)V",
+						slot.name + " " + onCrafting.name + " " + onCrafting.desc);
+				addMethodMapping("net/minecraft/inventory/Slot putStack (Lnet/minecraft/item/ItemStack;)V",
+						slot.name + " " + putStack.name + " " + putStack.desc);
+			}
+			
+			
+		}
+		
+		// public void onPickupFromSlot(EntityPlayer, ItemStack)
+		methods = getMatchingMethods(slot, null, assembleDescriptor("(",entityPlayer, itemStack,")V"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/Slot onPickupFromSlot (Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)V",
+					slot.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public boolean isItemValid(ItemStack)
+		methods = getMatchingMethods(slot, null, assembleDescriptor("(",itemStack,")Z"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/Slot isItemValid (Lnet/minecraft/item/ItemStack;)Z",
+					slot.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public ItemStack getStack()
+		String getStack = null;
+		methods = getMatchingMethods(slot, null, assembleDescriptor("()",itemStack));
+		if (methods.size() == 1) {
+			getStack = slot.name + " " + methods.get(0).name + " " + methods.get(0).desc;
+			addMethodMapping("net/minecraft/inventory/Slot getStack ()Lnet/minecraft/item/ItemStack;", getStack);
+		}
+		
+		
+		// public boolean getHasStack()
+		methods = getMatchingMethods(slot, null, "()Z");
+		// Do this since canBeHovered()Z is client-only and may or may not be here
+		if (getStack != null && (methods.size() == 1 || methods.size() == 2)) {
+			startloop:
+			for (MethodNode method : methods) {
+				for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+					// getHasStack() will call getStack
+					if (insn.getOpcode() != Opcodes.INVOKEVIRTUAL) continue;
+					MethodInsnNode mn = (MethodInsnNode)insn;					
+					if (!getStack.equals(mn.owner + " " + mn.name + " " + mn.desc)) continue;
+					
+					addMethodMapping("net/minecraft/inventory/Slot getHasStack ()Z", slot.name + " " + method.name + " " + method.desc);
+					break startloop;
+				}
+			}
+		}
+		
+		
+		// public void onSlotChanged()
+		methods = getMatchingMethods(slot, null, "()V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/Slot onSlotChanged ()V",
+					slot.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public int getSlotStackLimit()
+		methods = getMatchingMethods(slot, null, "()I");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/Slot getSlotStackLimit ()I",
+					slot.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public int getItemStackLimit(ItemStack)
+		methods = getMatchingMethods(slot, null, assembleDescriptor("(", itemStack, ")I"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/Slot getItemStackLimit (Lnet/minecraft/item/ItemStack;)I",
+					slot.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public ItemStack decrStackSize(int)
+		methods = getMatchingMethods(slot, null, assembleDescriptor("(I)", itemStack));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/Slot decrStackSize (I)Lnet/minecraft/item/ItemStack;",
+					slot.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public boolean isHere(IInventory, int)
+		methods = getMatchingMethods(slot, null, assembleDescriptor("(", iInventory, "I)Z"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/Slot isHere (Lnet/minecraft/inventory/IInventory;I)Z",
+					slot.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public boolean canTakeStack(EntityPlayer)
+		methods = getMatchingMethods(slot, null, assembleDescriptor("(", entityPlayer, ")Z"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/Slot canTakeStack (Lnet/minecraft/entity/player/EntityPlayer;)Z",
+					slot.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		
+		/*		
+		TODO:
+		
+		@ClientOnly
+		public String getSlotTexture()
+		@ClientOnly
+		public boolean canBeHovered()		
+		 */
+		
+		return true;
+	}
+	
+	
+	
+	
 	@Mapping(provides={
 			"net/minecraft/item/ItemSword",
 			"net/minecraft/item/ItemSoup",
-	"net/minecraft/item/ItemBanner"},
-	providesMethods={
+			"net/minecraft/item/ItemBanner"},
+			providesMethods={
 			"net/minecraft/item/Item registerItems ()V"
-	},
-	depends="net/minecraft/item/Item")
+			},
+			depends="net/minecraft/item/Item")
 	public static boolean discoverItems()
 	{
 		ClassNode itemClass = getClassNodeFromMapping("net/minecraft/item/Item");
@@ -3030,6 +3587,8 @@ public class DynamicMappings
 						iInventory.name + " " + method.name + " " + method.desc);
 			}
 		}
+		
+		
 
 		return true;
 	}
