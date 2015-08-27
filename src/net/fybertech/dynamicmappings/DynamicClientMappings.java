@@ -14,6 +14,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
@@ -759,6 +760,151 @@ public class DynamicClientMappings
 		return true;
 	}
 
+	
+	@Mapping(provides={
+			"net/minecraft/client/entity/EntityPlayerSP",
+			"net/minecraft/client/entity/AbstractClientPlayer"
+			},
+			depends={
+			"net/minecraft/client/Minecraft",
+			"net/minecraft/entity/player/EntityPlayer"
+			})		
+	public static boolean getEntityPlayerSPClass()
+	{
+		ClassNode minecraft = getClassNodeFromMapping("net/minecraft/client/Minecraft");
+		ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
+		if (minecraft == null || entityPlayer == null) return false;		
+		
+		String entityPlayerSP_name = null;
+		
+		List<MethodNode> methods = DynamicMappings.getMatchingMethods(minecraft,  null, "(I)V");
+		startloop:
+		for (MethodNode method : methods) {
+			for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				if (insn.getOpcode() != Opcodes.PUTFIELD) continue;
+				FieldInsnNode fn = (FieldInsnNode)insn;
+				if (!fn.owner.equals(minecraft.name) || fn.desc.contains("/")) continue;
+				String className = fn.desc.substring(1, fn.desc.length() - 1);				
+				if (DynamicMappings.searchConstantPoolForStrings(className, "minecraft:chest", "minecraft:anvil", "portal.trigger")) {
+					entityPlayerSP_name = className;
+					break startloop;
+				}
+			}
+		}
+		
+		if (entityPlayerSP_name == null) return false;		
+		ClassNode entityPlayerSP = getClassNode(entityPlayerSP_name);
+		if (entityPlayerSP == null) return false;
+		
+		// Confirm parents
+		if (DynamicMappings.searchConstantPoolForStrings(entityPlayerSP.superName, "http://skins.minecraft.net/MinecraftSkins/%s.png")) {
+			ClassNode abstractClientPlayer = getClassNode(entityPlayerSP.superName);
+			if (abstractClientPlayer == null) return false;			
+			if (!abstractClientPlayer.superName.equals(entityPlayer.name)) return false;
+		}
+		
+		addClassMapping("net/minecraft/client/entity/EntityPlayerSP", entityPlayerSP);
+		addClassMapping("net/minecraft/client/entity/AbstractClientPlayer", entityPlayerSP.superName);
+		
+		return true;
+	}
+	
+	
+	
+	@Mapping(provides={			
+			},
+			depends={			
+			"net/minecraft/entity/player/EntityPlayer",
+			"net/minecraft/client/entity/EntityPlayerSP",
+			"net/minecraft/world/IInteractionObject"
+			})		
+	public static boolean processEntityPlayerSPClass()
+	{		
+		ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
+		ClassNode entityPlayerSP = getClassNodeFromMapping("net/minecraft/client/entity/EntityPlayerSP");
+		ClassNode iInteractionObject = getClassNodeFromMapping("net/minecraft/world/IInteractionObject");
+		if (!MeddleUtil.notNull(entityPlayer, entityPlayerSP, iInteractionObject)) return false;
+		
+		// TODO		
+		
+		return true;
+	}
+	
+	
+	
+	@Mapping(provides={
+			"net/minecraft/client/gui/inventory/GuiChest",
+			"net/minecraft/client/gui/inventory/GuiContainer"
+			},
+			dependsMethods={
+			"net/minecraft/entity/player/EntityPlayer displayGUIChest (Lnet/minecraft/inventory/IInventory;)V"
+			},
+			depends={
+			"net/minecraft/client/gui/GuiScreen",
+			"net/minecraft/client/entity/EntityPlayerSP"
+			})
+	public static boolean getGuiChestClass()
+	{
+		ClassNode guiScreen = getClassNodeFromMapping("net/minecraft/client/gui/GuiScreen");
+		ClassNode entityPlayerSP = getClassNodeFromMapping("net/minecraft/client/entity/EntityPlayerSP");		
+		if (!MeddleUtil.notNull(guiScreen, entityPlayerSP)) return false;
+		
+		MethodNode displayGuiChest = DynamicMappings.getMethodNodeFromMapping(entityPlayerSP, "net/minecraft/entity/player/EntityPlayer displayGUIChest (Lnet/minecraft/inventory/IInventory;)V");
+		if (displayGuiChest == null) return false;
+		
+		Map<String, String> guiMap = new HashMap<>();
+		
+		String lastString = null;
+		for (AbstractInsnNode insn = displayGuiChest.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+			String s = DynamicMappings.getLdcString(insn);
+			if (s != null) { lastString = s; continue; }
+			
+			if (insn.getOpcode() != Opcodes.NEW) continue;
+			TypeInsnNode tn = (TypeInsnNode)insn;
+			if (lastString != null) guiMap.put(lastString, tn.desc);			
+		}
+		
+		String className = guiMap.get("minecraft:chest");
+		if (className != null) {
+			if (!DynamicMappings.searchConstantPoolForStrings(className, "textures/gui/container/generic_54.png")) return false;
+			
+			ClassNode guiChest = getClassNode(className);
+			if (guiChest == null) return false;
+			
+			ClassNode guiContainer = getClassNode(guiChest.superName);
+			if (!DynamicMappings.searchConstantPoolForStrings(guiContainer.name, "textures/gui/container/inventory.png")) return false;
+			if (!guiContainer.superName.equals(guiScreen.name)) return false;
+			
+			addClassMapping("net/minecraft/client/gui/inventory/GuiChest", guiChest);
+			addClassMapping("net/minecraft/client/gui/inventory/GuiContainer", guiContainer);			
+		}
+		
+		return true;
+	}
+	
+	
+	@Mapping(providesMethods={
+			"net/minecraft/client/gui/inventory/GuiContainer handleMouseClick (Lnet/minecraft/inventory/Slot;III)V"
+			},			
+			depends={
+			"net/minecraft/client/gui/inventory/GuiContainer",
+			"net/minecraft/inventory/Slot"
+			})	
+	public static boolean processGuiContainerClass()
+	{
+		ClassNode guiContainer = getClassNodeFromMapping("net/minecraft/client/gui/inventory/GuiContainer");
+		ClassNode slot = getClassNodeFromMapping("net/minecraft/inventory/Slot");
+		if (!MeddleUtil.notNull(guiContainer, slot)) return false;
+		
+		// protected void handleMouseClick(Slot slotIn, int slotId, int clickedButton, int clickType)
+		List<MethodNode> methods = DynamicMappings.getMatchingMethods(guiContainer, null, "(L" + slot.name + ";III)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/gui/inventory/GuiContainer handleMouseClick (Lnet/minecraft/inventory/Slot;III)V",
+					guiContainer.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		return true;
+	}
 	
 	
 	

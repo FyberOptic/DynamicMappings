@@ -548,7 +548,7 @@ public class DynamicMappings
 	// Used for debugging purposes
 	public static void main(String[] args)
 	{
-		boolean showMappings = true;
+		boolean showMappings = false;
 		
 		generateClassMappings();
 		
@@ -1061,17 +1061,37 @@ public class DynamicMappings
 
 	
 	@Mapping(provides={
-			"net/minecraft/tileentity/TileEntityChest"
+			"net/minecraft/tileentity/TileEntityChest",
+			"net/minecraft/network/PacketBuffer",
+			"net/minecraft/network/Packet"
 			},
 			providesMethods={
+			"net/minecraft/tileentity/TileEntity addMapping (Ljava/lang/Class;Ljava/lang/String;)V",
+			"net/minecraft/tileentity/TileEntity getWorld ()Lnet/minecraft/world/World;",
+			"net/minecraft/tileentity/TileEntity setWorldObj (Lnet/minecraft/world/World;)V",
+			"net/minecraft/tileentity/TileEntity createAndLoadEntity (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/tileentity/TileEntity;",
+			"net/minecraft/tileentity/TileEntity getBlockMetadata ()I",
+			"net/minecraft/tileentity/TileEntity getPos ()Lnet/minecraft/util/BlockPos;",
+			"net/minecraft/tileentity/TileEntity setPos (Lnet/minecraft/util/BlockPos;)V",
+			"net/minecraft/tileentity/TileEntity getBlockType ()Lnet/minecraft/block/Block;",
+			"net/minecraft/tileentity/TileEntity receiveClientEvent (II)Z",
+			"net/minecraft/tileentity/TileEntity getDescriptionPacket ()Lnet/minecraft/network/Packet;"
 			},
 			depends={
-			"net/minecraft/tileentity/TileEntity"
+			"net/minecraft/tileentity/TileEntity",
+			"net/minecraft/world/World",
+			"net/minecraft/nbt/NBTTagCompound",
+			"net/minecraft/util/BlockPos",
+			"net/minecraft/block/Block"
 			})
 	public static boolean processTileEntityClass()
 	{
 		ClassNode tileEntity = getClassNodeFromMapping("net/minecraft/tileentity/TileEntity");
-		if (tileEntity == null) return false;
+		ClassNode world = getClassNodeFromMapping("net/minecraft/world/World");
+		ClassNode tagCompound = getClassNodeFromMapping("net/minecraft/nbt/NBTTagCompound");
+		ClassNode blockPos = getClassNodeFromMapping("net/minecraft/util/BlockPos");
+		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
+		if (!MeddleUtil.notNull(tileEntity, world, tagCompound, blockPos, block)) return false;
 		
 		List<MethodNode> methods = getMatchingMethods(tileEntity, "<clinit>", "()V");
 		if (methods.size() != 1) return false;
@@ -1094,6 +1114,131 @@ public class DynamicMappings
 		if (className != null) {
 			addClassMapping("net/minecraft/tileentity/TileEntityChest", className);
 		}
+		
+		
+		// TODO		
+		// protected World worldObj;
+		// protected BlockPos pos;
+		// protected boolean tileEntityInvalid;
+		// private int blockMetadata;
+		// protected Block blockType;
+		
+		
+		
+		// public static void addMapping(Class cl, String id)
+		methods = getMatchingMethods(tileEntity, null, "(Ljava/lang/Class;Ljava/lang/String;)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/tileentity/TileEntity addMapping (Ljava/lang/Class;Ljava/lang/String;)V",
+					tileEntity.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		// public World getWorld()
+		methods = getMatchingMethods(tileEntity, null, "()L" + world.name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/tileentity/TileEntity getWorld ()Lnet/minecraft/world/World;",
+					tileEntity.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}		
+		
+		// public void setWorldObj(World worldIn)
+		methods = getMatchingMethods(tileEntity, null, "(L" + world.name + ";)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/tileentity/TileEntity setWorldObj (Lnet/minecraft/world/World;)V",
+					tileEntity.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public static TileEntity createAndLoadEntity(NBTTagCompound nbt)
+		methods = getMatchingMethods(tileEntity, null, "(L" + tagCompound.name + ";)L" + tileEntity.name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/tileentity/TileEntity createAndLoadEntity (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/tileentity/TileEntity;",
+					tileEntity.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public int getBlockMetadata()
+		methods = getMatchingMethods(tileEntity, null, "()I");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/tileentity/TileEntity getBlockMetadata ()I",
+					tileEntity.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+				
+		// public BlockPos getPos()
+		methods = getMatchingMethods(tileEntity, null, "()L" + blockPos.name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/tileentity/TileEntity getPos ()Lnet/minecraft/util/BlockPos;",
+					tileEntity.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		// public void setPos(BlockPos posIn)
+		methods = getMatchingMethods(tileEntity, null, "(L" + blockPos.name + ";)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/tileentity/TileEntity setPos (Lnet/minecraft/util/BlockPos;)V",
+					tileEntity.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public Block getBlockType()
+		methods = getMatchingMethods(tileEntity, null, "()L" + block.name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/tileentity/TileEntity getBlockType ()Lnet/minecraft/block/Block;",
+					tileEntity.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public boolean receiveClientEvent(int id, int type)	
+		methods = getMatchingMethods(tileEntity, null, "(II)Z");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/tileentity/TileEntity receiveClientEvent (II)Z",
+					tileEntity.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public Packet getDescriptionPacket()
+		for (MethodNode method : tileEntity.methods) {
+			if (!method.desc.startsWith("()L")) continue;
+			String packetClass = Type.getMethodType(method.desc).getReturnType().getClassName();
+			if (packetClass.contains(".")) continue;
+			ClassNode packet = getClassNode(packetClass);
+			if (packet == null) continue;
+			if ((packet.access & Opcodes.ACC_INTERFACE) == 0) continue;
+			
+			boolean isPacket = false;
+			for (MethodNode m : packet.methods) {		
+				Type t = Type.getMethodType(m.desc);
+				Type[] args = t.getArgumentTypes();
+				if (args.length != 1) continue;
+				String packetBuffer_name = args[0].getClassName();
+				if (searchConstantPoolForStrings(packetBuffer_name, "VarInt too big", "String too big (was"))
+				{
+					addClassMapping("net/minecraft/network/PacketBuffer", packetBuffer_name);
+					isPacket = true;
+					break;
+				}
+			}			
+			if (!isPacket) continue;
+			
+			addClassMapping("net/minecraft/network/Packet", packet);
+			addMethodMapping("net/minecraft/tileentity/TileEntity getDescriptionPacket ()Lnet/minecraft/network/Packet;",
+					tileEntity.name + " " + method.name + " " + method.desc);
+			break;
+		}
+		
+		// public void addInfoToCrashReport(CrashReportCategory reportCategory)				
+		
+		// public void markDirty()	
+		// public void invalidate()		
+		// public void validate()
+		// public void updateContainingBlockInfo()
+		// public boolean hasWorldObj()
+		// public boolean isInvalid()		
+		// public void readFromNBT(NBTTagCompound compound)		
+		// public void writeToNBT(NBTTagCompound compound)
+		
+		// @ClientOnly
+		// public double getDistanceSq(double x, double y, double z)
+	    // @ClientOnly
+	    // public double getMaxRenderDistanceSquared()
 		
 		
 		return true;
@@ -1571,11 +1716,16 @@ public class DynamicMappings
 	@Mapping(provides={
 			"net/minecraft/inventory/Slot"
 			},
+			providesFields={
+			"net/minecraft/inventory/Container inventorySlots Ljava/util/List;"
+			},
 			providesMethods={
 			"net/minecraft/inventory/Container addSlotToContainer (Lnet/minecraft/inventory/Slot;)Lnet/minecraft/inventory/Slot;",
 			"net/minecraft/inventory/Container canInteractWith (Lnet/minecraft/entity/player/EntityPlayer;)Z",
 			"net/minecraft/inventory/Container transferStackInSlot (Lnet/minecraft/entity/player/EntityPlayer;I)Lnet/minecraft/item/ItemStack;",
-			"net/minecraft/inventory/Container onContainerClosed (Lnet/minecraft/entity/player/EntityPlayer;)V"
+			"net/minecraft/inventory/Container onContainerClosed (Lnet/minecraft/entity/player/EntityPlayer;)V",
+			"net/minecraft/inventory/Container getSlot (I)Lnet/minecraft/inventory/Slot;",
+			"net/minecraft/inventory/Container mergeItemStack (Lnet/minecraft/item/ItemStack;IIZ)Z"
 			},
 			depends={
 			"net/minecraft/inventory/Container",
@@ -1639,13 +1789,45 @@ public class DynamicMappings
 					container.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
+		// inventorySlots
+		// public Slot getSlot(int slotId)
+		methods = getMatchingMethods(container, null, "(I)L" + slotClass + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/Container getSlot (I)Lnet/minecraft/inventory/Slot;", 
+					container.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			
+			for (AbstractInsnNode insn = methods.get(0).instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				if (insn.getOpcode() != Opcodes.GETFIELD) continue;
+				FieldInsnNode fn = (FieldInsnNode)insn;
+				if (fn.desc.equals("Ljava/util/List;")) {
+					addFieldMapping("net/minecraft/inventory/Container inventorySlots Ljava/util/List;", 
+							container.name + " " + fn.name + " " + fn.desc);
+				}
+			}
+		}
+		
+		
+		// protected boolean mergeItemStack(ItemStack, int, int, boolean)
+		methods = getMatchingMethods(container, null, "(L" + itemStack.name + ";IIZ)Z");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/Container mergeItemStack (Lnet/minecraft/item/ItemStack;IIZ)Z", 
+					container.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
 		
 		return true;
 	}
 	
 	
 	
-	@Mapping(providesMethods={
+	@Mapping(providesFields={
+			"net/minecraft/inventory/Slot inventory Lnet/minecraft/inventory/IInventory;",
+			"net/minecraft/inventory/Slot slotIndex I",
+			"net/minecraft/inventory/Slot xDisplayPosition I",
+			"net/minecraft/inventory/Slot yDisplayPosition I",
+			"net/minecraft/inventory/Slot slotNumber I"
+			},
+			providesMethods={
 			"net/minecraft/inventory/Slot onSlotChange (Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)V",
 			"net/minecraft/inventory/Slot onCrafting (Lnet/minecraft/item/ItemStack;I)V",
 			"net/minecraft/inventory/Slot onCrafting (Lnet/minecraft/item/ItemStack;)V",
@@ -1676,8 +1858,47 @@ public class DynamicMappings
 		if (!MeddleUtil.notNull(slot, itemStack, entityPlayer, iInventory)) return false;	
 		
 		
-		// public void onSlotChange(ItemStack, ItemStack)
-		List<MethodNode> methods = getMatchingMethods(slot, null, assembleDescriptor("(", itemStack, itemStack, ")V"));
+
+		List<MethodNode> methods = getMatchingMethods(slot, "<init>", assembleDescriptor("(",iInventory, "III)V"));
+		String slotIndex = null;
+		String xDisplayPosition = null;
+		String yDisplayPosition = null;
+		if (methods.size() == 1) {
+			for (AbstractInsnNode insn = methods.get(0).instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				if (insn.getOpcode() != Opcodes.PUTFIELD) continue;
+				FieldInsnNode fn = (FieldInsnNode)insn;
+				if (!fn.owner.equals(slot.name)) continue;
+				if (fn.desc.equals("L" + iInventory.name + ";")) {
+					addFieldMapping("net/minecraft/inventory/Slot inventory Lnet/minecraft/inventory/IInventory;",
+							slot.name + " " + fn.name + " " + fn.desc);
+					continue;					
+				}
+				if (fn.desc.equals("I")) {
+					if (slotIndex == null) { slotIndex = fn.name; continue; }
+					if (xDisplayPosition == null) { xDisplayPosition = fn.name; continue; }
+					if (yDisplayPosition == null) { yDisplayPosition = fn.name; continue; }
+				}
+			}
+		}	
+		
+		if (MeddleUtil.notNull(slotIndex, xDisplayPosition, yDisplayPosition)) {
+			List<FieldNode> fields = getMatchingFields(slot, null, "I");
+			if (fields.size() == 4) {
+				for (FieldNode field : fields) {
+					if (field.name.equals(slotIndex))
+						addFieldMapping("net/minecraft/inventory/Slot slotIndex I", slot.name + " " + field.name + " I");
+					else if (field.name.equals(xDisplayPosition))
+						addFieldMapping("net/minecraft/inventory/Slot xDisplayPosition I", slot.name + " " + field.name + " I");
+					else if (field.name.equals(yDisplayPosition))
+						addFieldMapping("net/minecraft/inventory/Slot yDisplayPosition I", slot.name + " " + field.name + " I");
+					else addFieldMapping("net/minecraft/inventory/Slot slotNumber I", slot.name + " " + field.name + " I");
+				}
+			}
+		}
+		
+		
+		// public void onSlotChange(ItemStack, ItemStack)		
+		methods = getMatchingMethods(slot, null, assembleDescriptor("(", itemStack, itemStack, ")V"));
 		if (methods.size() == 1) {
 			addMethodMapping("net/minecraft/inventory/Slot onSlotChange (Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)V",
 					slot.name + " " + methods.get(0).name + " " + methods.get(0).desc);
@@ -3104,15 +3325,18 @@ public class DynamicMappings
 
 
 
-	@Mapping(provides={
-	},
-	depends={
-			"net/minecraft/entity/player/EntityPlayer"
-	})
+	@Mapping(providesFields={
+			"net/minecraft/entity/player/EntityPlayer inventory Lnet/minecraft/entity/player/InventoryPlayer;"
+			},
+			depends={
+			"net/minecraft/entity/player/EntityPlayer",
+			"net/minecraft/entity/player/InventoryPlayer"
+			})
 	public static boolean processEntityPlayerClass()
 	{
 		ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
-		if (entityPlayer == null) return false;
+		ClassNode inventoryPlayer = getClassNodeFromMapping("net/minecraft/entity/player/InventoryPlayer");
+		if (entityPlayer == null || inventoryPlayer == null) return false;
 
 		for (MethodNode method : entityPlayer.methods) {
 			Type t = Type.getMethodType(method.desc);
@@ -3121,7 +3345,11 @@ public class DynamicMappings
 			//System.out.println(method.name + " " + method.desc);
 		}
 
-		// TODO - Get displayChestGui
+		List<FieldNode> fields = getMatchingFields(entityPlayer, null, "L" + inventoryPlayer.name + ";");
+		if (fields.size() == 1) {
+			addFieldMapping("net/minecraft/entity/player/EntityPlayer inventory Lnet/minecraft/entity/player/InventoryPlayer;", 
+					entityPlayer.name + " " + fields.get(0).name + " " + fields.get(0).desc);
+		}
 
 
 		return true;
@@ -3871,7 +4099,9 @@ public class DynamicMappings
 
 	
 	@Mapping(providesFields={
-			"net/minecraft/item/ItemStack stackTagCompound Lnet/minecraft/nbt/NBTTagCompound;"
+			"net/minecraft/item/ItemStack stackTagCompound Lnet/minecraft/nbt/NBTTagCompound;",
+			"net/minecraft/item/ItemStack stackSize I",
+			"net/minecraft/item/ItemStack itemDamage I"
 			},
 			providesMethods={
 			"net/minecraft/item/ItemStack loadItemStackFromNBT (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/item/ItemStack;",
@@ -3882,7 +4112,8 @@ public class DynamicMappings
 			"net/minecraft/item/ItemStack getItem ()Lnet/minecraft/item/Item;",
 			"net/minecraft/item/ItemStack getTagCompound ()Lnet/minecraft/nbt/NBTTagCompound;",
 			"net/minecraft/item/ItemStack getDisplayName ()Ljava/lang/String;",
-			"net/minecraft/item/ItemStack getUnlocalizedName ()Ljava/lang/String;"
+			"net/minecraft/item/ItemStack getUnlocalizedName ()Ljava/lang/String;",
+			"net/minecraft/item/ItemStack copy ()Lnet/minecraft/item/ItemStack;"
 			},
 			depends={
 			"net/minecraft/item/ItemStack",
@@ -3931,11 +4162,45 @@ public class DynamicMappings
 			}
 
 			// public void readFromNBT(NBTTagCompound nbt)
+			boolean isReadNBT = false;
 			for (AbstractInsnNode insn = firstReal; insn != null; insn = insn.getNext()) {
 				if (!isLdcWithString(insn, "id")) continue;
+				isReadNBT = true;
 				addMethodMapping("net/minecraft/item/ItemStack readFromNBT (Lnet/minecraft/nbt/NBTTagCompound;)V",
 						itemStack.name + " " + method.name + " " + method.desc);
 				break;
+			}
+			
+			if (isReadNBT) {
+				boolean foundCount = false;
+				boolean foundDamage = false;
+				boolean foundstackSize = false;
+				boolean founditemDamage = false;
+				for (AbstractInsnNode insn = firstReal; insn != null; insn = insn.getNext()) {
+					String s = getLdcString(insn);
+					if (s != null) {
+						foundCount = false; foundDamage = false;
+						if (s.equals("Count")) foundCount = true;
+						else if (s.equals("Damage")) foundDamage = true;
+					}
+					
+					if (insn.getOpcode() != Opcodes.PUTFIELD) continue;
+					FieldInsnNode fn = (FieldInsnNode)insn;
+					if (!fn.owner.equals(itemStack.name)) continue;
+					
+					if (foundCount && !foundstackSize) {
+						addFieldMapping("net/minecraft/item/ItemStack stackSize I", itemStack.name + " " + fn.name + " I");
+						foundCount = false;
+						foundstackSize = true;
+					}
+					else if (foundDamage) {
+						addFieldMapping("net/minecraft/item/ItemStack itemDamage I", itemStack.name + " " + fn.name + " I");
+						foundDamage = false;
+						founditemDamage = true;
+					}
+					
+					if (foundstackSize && founditemDamage) break;
+				}
 			}
 		}
 
@@ -4022,6 +4287,15 @@ public class DynamicMappings
 						itemStack.name + " " + method.name + " " + method.desc);
 			}
 		}
+		
+		
+		// public ItemStack copy()
+		methods = getMatchingMethods(itemStack,  null,  "()L" + itemStack.name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/item/ItemStack copy ()Lnet/minecraft/item/ItemStack;",
+					itemStack.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+				
 
 		return true;
 	}

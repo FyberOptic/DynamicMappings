@@ -21,6 +21,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.Remapper;
 import org.objectweb.asm.commons.RemappingClassAdapter;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
 
@@ -309,6 +310,14 @@ public class DynamicRemap
 			for (MethodNode method : cn.methods) {
 				// Make registration methods public
 				if (method.name.startsWith("registerItem")) method.access = (method.access & ~allAccess) | Opcodes.ACC_PUBLIC; 
+			}
+		}
+		
+		if (cn.name.equals("net/minecraft/inventory/Slot")) {
+			for (FieldNode field : cn.fields) {
+				if (field.desc.equals("I")) {
+					field.access = (field.access & ~allAccess) | Opcodes.ACC_PUBLIC; 
+				}
 			}
 		}
 	}
