@@ -907,6 +907,149 @@ public class DynamicClientMappings
 	}
 	
 	
+	@Mapping(provides="net/minecraft/client/network/NetHandlerPlayClient",
+			 depends="net/minecraft/client/entity/EntityPlayerSP")
+	public static boolean getNetHandlerPlayClientClass()
+	{
+		ClassNode playerSP = getClassNodeFromMapping("net/minecraft/client/entity/EntityPlayerSP");		
+		if (playerSP == null) return false;
+		
+		for (FieldNode field : playerSP.fields) {
+			Type t = Type.getType(field.desc);
+			if (t.getSort() != Type.OBJECT) continue;
+			if (DynamicMappings.searchConstantPoolForStrings(t.getClassName(), "MC|Brand", "disconnect.lost", "minecraft:container"))
+			{
+				addClassMapping("net/minecraft/client/network/NetHandlerPlayClient", t.getClassName());
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	
+	@Mapping(provides={
+			},
+			providesMethods={
+			"net/minecraft/client/network/NetHandlerPlayClient handleOpenWindow (Lnet/minecraft/network/play/server/S2DPacketOpenWindow;)V"
+			},
+			depends={
+			"net/minecraft/client/network/NetHandlerPlayClient",
+			"net/minecraft/network/play/server/S2DPacketOpenWindow"
+			})
+	public static boolean processNetHandlerPlayClientClass()
+	{
+		ClassNode clientHandler = getClassNodeFromMapping("net/minecraft/client/network/NetHandlerPlayClient");
+		ClassNode openWindow = getClassNodeFromMapping("net/minecraft/network/play/server/S2DPacketOpenWindow");
+		if (!MeddleUtil.notNull(clientHandler, openWindow)) return false;
+		
+		// public void handleOpenWindow(S2DPacketOpenWindow packetIn)
+		List<MethodNode> methods = DynamicMappings.getMatchingMethods(clientHandler, null, "(L" + openWindow.name + ";)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/network/NetHandlerPlayClient handleOpenWindow (Lnet/minecraft/network/play/server/S2DPacketOpenWindow;)V",
+					clientHandler.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+				
+		return true;
+	}
+	
+	@Mapping(providesFields={
+			"net/minecraft/network/play/server/S2DPacketOpenWindow windowId I",
+			"net/minecraft/network/play/server/S2DPacketOpenWindow inventoryType Ljava/lang/String",
+			"net/minecraft/network/play/server/S2DPacketOpenWindow windowTitle Lnet/minecraft/util/IChatComponent;",
+			"net/minecraft/network/play/server/S2DPacketOpenWindow slotCount I"
+			},
+			providesMethods={
+			"net/minecraft/network/play/server/S2DPacketOpenWindow getGuiId ()Ljava/lang/String;",
+			"net/minecraft/network/play/server/S2DPacketOpenWindow getWindowTitle ()Lnet/minecraft/util/IChatComponent;",
+			"net/minecraft/network/play/server/S2DPacketOpenWindow getWindowId ()I",
+			"net/minecraft/network/play/server/S2DPacketOpenWindow getSlotCount ()I",
+			"net/minecraft/network/play/server/S2DPacketOpenWindow hasSlots ()Z"
+			},
+			depends={
+			"net/minecraft/network/play/server/S2DPacketOpenWindow",
+			"net/minecraft/util/IChatComponent"
+			})
+	public static boolean processS2DPacketOpenWindowClass()
+	{
+		ClassNode packet = getClassNodeFromMapping("net/minecraft/network/play/server/S2DPacketOpenWindow");
+		ClassNode iChatComponent = getClassNodeFromMapping("net/minecraft/util/IChatComponent");
+		if (packet == null || iChatComponent == null) return false;
+		
+		String windowId = null;
+		String inventoryType = null;
+		String windowTitle = null;
+		String slotCount = null;
+		
+		List<MethodNode> methods = DynamicMappings.getMatchingMethods(packet, "<init>", "(ILjava/lang/String;L" + iChatComponent.name + ";I)V");
+		if (methods.size() == 1) {			
+			for (AbstractInsnNode insn = methods.get(0).instructions.getFirst(); insn != null; insn = insn.getNext()) {				
+				if (insn.getOpcode() != Opcodes.PUTFIELD) continue;
+				FieldInsnNode fn = (FieldInsnNode)insn;				
+				if (!fn.owner.equals(packet.name)) continue;				
+				if (windowId == null && fn.desc.equals("I")) { windowId = fn.name; continue; }
+				if (windowId != null && inventoryType == null && fn.desc.equals("Ljava/lang/String;")) { inventoryType = fn.name; continue; }
+				if (windowId != null && inventoryType != null && windowTitle == null && fn.desc.equals("L" + iChatComponent.name + ";")) { windowTitle = fn.name; continue; }
+				if (windowId != null && inventoryType != null && windowTitle != null && slotCount == null && fn.desc.equals("I")) { slotCount = fn.name; continue; }
+			}
+		}
+
+		if (MeddleUtil.notNull(windowId, inventoryType, windowTitle, slotCount)) {
+			addFieldMapping("net/minecraft/network/play/server/S2DPacketOpenWindow windowId I",	packet.name + " " + windowId + " I");
+			addFieldMapping("net/minecraft/network/play/server/S2DPacketOpenWindow inventoryType Ljava/lang/String", packet.name + " " + inventoryType + " Ljava/lang/String;");
+			addFieldMapping("net/minecraft/network/play/server/S2DPacketOpenWindow windowTitle Lnet/minecraft/util/IChatComponent;", packet.name + " " + windowTitle + " L" + iChatComponent.name + ";");
+			addFieldMapping("net/minecraft/network/play/server/S2DPacketOpenWindow slotCount I",	packet.name + " " + slotCount + " I");
+		}
+		
+		// public String getGuiId()
+		methods = DynamicMappings.getMatchingMethods(packet, null, "()Ljava/lang/String;");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/network/play/server/S2DPacketOpenWindow getGuiId ()Ljava/lang/String;",
+					packet.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		// public IChatComponent getWindowTitle()
+		methods = DynamicMappings.getMatchingMethods(packet, null, "()L" + iChatComponent.name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/network/play/server/S2DPacketOpenWindow getWindowTitle ()Lnet/minecraft/util/IChatComponent;",
+					packet.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public int getWindowId() - windowId
+		// public int getSlotCount() - slotCount
+		// public int getEntityId() - TODO
+		methods = DynamicMappings.getMatchingMethods(packet, null, "()I");
+		for (MethodNode method : methods) {
+			for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {				
+				if (insn.getOpcode() != Opcodes.GETFIELD) continue;
+				FieldInsnNode fn = (FieldInsnNode)insn;
+				if (!fn.owner.equals(packet.name)) continue;
+				
+				if (fn.name.equals(windowId)) {
+					addMethodMapping("net/minecraft/network/play/server/S2DPacketOpenWindow getWindowId ()I",
+							packet.name + " " + method.name + " " + method.desc);
+					break;
+				}
+				
+				if (fn.name.equals(slotCount)) {
+					addMethodMapping("net/minecraft/network/play/server/S2DPacketOpenWindow getSlotCount ()I",
+							packet.name + " " + method.name + " " + method.desc);
+					break;
+				}				
+			}			
+		}
+		
+		
+		// public boolean hasSlots()
+		methods = DynamicMappings.getMatchingMethods(packet, null, "()Z");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/network/play/server/S2DPacketOpenWindow hasSlots ()Z",
+					packet.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		return true;
+	}
 	
 	
 	

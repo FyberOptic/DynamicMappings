@@ -4927,6 +4927,125 @@ public class DynamicMappings
 	}
 
 
+	@Mapping(provides="net/minecraft/entity/player/EntityPlayerMP", depends="net/minecraft/server/MinecraftServer")
+	public static boolean getEntityPlayerMPClass()
+	{
+		ClassNode server = getClassNodeFromMapping("net/minecraft/server/MinecraftServer");
+		if (server == null) return false;
+		
+		List<MethodNode> methods = getMatchingMethods(server, null, "()V");
+		for (MethodNode method : methods) {
+			for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				if (insn.getOpcode() != Opcodes.CHECKCAST) continue;
+				TypeInsnNode tn = (TypeInsnNode)insn;
+				if (searchConstantPoolForStrings(tn.desc, "en_US", "playerGameType", "Player being ticked")) {
+					addClassMapping("net/minecraft/entity/player/EntityPlayerMP", tn.desc);
+					return true;
+				}
+			}
+		}	
+		
+		return false;
+	}
+	
+	
+	@Mapping(provides={
+			"net/minecraft/network/play/server/S2DPacketOpenWindow",
+			"net/minecraft/network/NetHandlerPlayServer",
+			"net/minecraft/inventory/ICrafting"
+			},
+			providesFields={
+			"net/minecraft/entity/player/EntityPlayer openContainer Lnet/minecraft/inventory/Container;",
+			"net/minecraft/inventory/Container windowId I"
+			},
+			providesMethods={
+			"net/minecraft/network/NetHandlerPlayServer sendPacket (Lnet/minecraft/network/Packet;)V",
+			"net/minecraft/inventory/Container onCraftGuiOpened (Lnet/minecraft/inventory/ICrafting;)V"
+			},
+			depends={
+			"net/minecraft/entity/player/EntityPlayerMP",
+			"net/minecraft/entity/player/EntityPlayer",
+			"net/minecraft/world/IInteractionObject",
+			"net/minecraft/network/Packet",
+			"net/minecraft/inventory/Container"
+			})
+	public static boolean processEntityPlayerMPClass()
+	{
+		ClassNode playerMP = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayerMP");
+		ClassNode player = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
+		ClassNode iInteractionObject = getClassNodeFromMapping("net/minecraft/world/IInteractionObject");
+		ClassNode packet = getClassNodeFromMapping("net/minecraft/network/Packet");
+		ClassNode container = getClassNodeFromMapping("net/minecraft/inventory/Container");
+		if (!MeddleUtil.notNull(playerMP, player, iInteractionObject, packet, container)) return false;
+		
+		
+		String iCrafting_name = null;
+		if (playerMP.interfaces.size() == 1) {
+			String className = playerMP.interfaces.get(0);
+			ClassNode iCrafting = getClassNode(className);
+			if (iCrafting != null) {
+				boolean matched = true;
+				for (MethodNode method : iCrafting.methods) {
+					Type t = Type.getMethodType(method.desc);
+					if (t.getReturnType().getSort() != Type.VOID) matched = false;
+					if (t.getArgumentTypes().length < 1) matched = false;
+					if (!t.getArgumentTypes()[0].getClassName().equals(container.name)) matched = false;					
+				}
+				if (matched) {
+					addClassMapping("net/minecraft/inventory/ICrafting", iCrafting);
+					iCrafting_name = iCrafting.name;
+				}
+			}
+		}
+		
+		
+		List<MethodNode> methods = getMatchingMethods(playerMP, null, "(L" + iInteractionObject.name + ";)V");
+		if (methods.size() == 1) {
+			for (AbstractInsnNode insn = methods.get(0).instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				if (insn.getOpcode() == Opcodes.NEW) {
+					TypeInsnNode tn = (TypeInsnNode)insn;
+					ClassNode cn = getClassNode(tn.desc);
+					if (cn == null) continue;
+					for (String iface : cn.interfaces) {
+						if (iface.equals(packet.name))
+							addClassMapping("net/minecraft/network/play/server/S2DPacketOpenWindow", cn.name);
+					}
+				}
+				
+				// net/minecraft/network/NetHandlerPlayServer.sendPacket (Lnet/minecraft/network/Packet;)V
+				if (insn.getOpcode() == Opcodes.INVOKEVIRTUAL) {
+					MethodInsnNode mn = (MethodInsnNode)insn;
+					if (mn.desc.equals("(L" + packet.name + ";)V")) {
+						if (searchConstantPoolForStrings(mn.owner, "keepAlive", "Illegal position", "Sending packet")) {
+							addClassMapping("net/minecraft/network/NetHandlerPlayServer", mn.owner);
+							addMethodMapping("net/minecraft/network/NetHandlerPlayServer sendPacket (Lnet/minecraft/network/Packet;)V",
+									mn.owner + " " + mn.name + " " + mn.desc);
+						}
+					}
+					
+					
+					// public void Container.onCraftGuiOpened(ICrafting listener)
+					if (mn.owner.equals(container.name) && mn.desc.equals("(L" + iCrafting_name + ";)V")) {
+						addMethodMapping("net/minecraft/inventory/Container onCraftGuiOpened (Lnet/minecraft/inventory/ICrafting;)V",
+								container.name + " " + mn.name + " " + mn.desc);
+					}
+				}
+				
+				if (insn.getOpcode() == Opcodes.PUTFIELD) {
+					FieldInsnNode fn = (FieldInsnNode)insn;
+					if (fn.owner.equals(playerMP.name) && fn.desc.equals("L" + container.name + ";")) {
+						addFieldMapping("net/minecraft/entity/player/EntityPlayer openContainer Lnet/minecraft/inventory/Container;",
+								player.name + " " + fn.name + " " + fn.desc);
+					}
+					if (fn.owner.equals(container.name) && fn.desc.equals("I")) {
+						addFieldMapping("net/minecraft/inventory/Container windowId I",
+								container.name + " " + fn.name + " " + fn.desc);
+					}
+				}
+			}
+		}		
+		return true;
+	}
 	
 	
     
