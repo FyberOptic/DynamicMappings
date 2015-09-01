@@ -3,8 +3,11 @@ package net.fybertech.dynamicmappings;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.fybertech.meddle.Meddle;
 import net.fybertech.meddle.MeddleUtil;
@@ -522,7 +525,8 @@ public class DynamicClientMappings
 	
 	
 	@Mapping(provides={
-			"net/minecraft/client/gui/FontRenderer"
+			"net/minecraft/client/gui/FontRenderer",
+			"net/minecraft/client/gui/GuiButton"
 			},
 			providesFields={
 			"net/minecraft/client/gui/GuiScreen mc Lnet/minecraft/client/Minecraft;",
@@ -536,7 +540,10 @@ public class DynamicClientMappings
 			"net/minecraft/client/Minecraft displayGuiScreen (Lnet/minecraft/client/gui/GuiScreen;)V",
 			"net/minecraft/client/gui/GuiScreen setWorldAndResolution (Lnet/minecraft/client/Minecraft;II)V",
 			"net/minecraft/client/gui/GuiScreen initGui ()V",
-			"net/minecraft/client/gui/GuiScreen drawScreen (IIF)V"
+			"net/minecraft/client/gui/GuiScreen drawScreen (IIF)V",
+			"net/minecraft/client/gui/GuiScreen keyTyped (CI)V",
+			"net/minecraft/client/gui/GuiScreen mouseClicked (III)V",
+			"net/minecraft/client/gui/GuiScreen mouseReleased (III)V"
 			},
 			depends={
 			"net/minecraft/client/gui/GuiScreen",
@@ -659,10 +666,50 @@ public class DynamicClientMappings
 					guiScreen.name + " " + drawScreenMethodName + " (IIF)V");
 		}
 		if (drawScreenMethodName == null) return false;
-				
+		
+		
+		// protected void keyTyped(char typedChar, int keyCode) throws IOException
+		methods = DynamicMappings.getMatchingMethods(guiScreen, null, "(CI)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/gui/GuiScreen keyTyped (CI)V",
+					guiScreen.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException
+		// protected void mouseReleased(int mouseX, int mouseY, int state)
+		methods = DynamicMappings.getMatchingMethods(guiScreen, null, "(III)V");
+		if (methods.size() == 2) {
+			MethodNode mouseClicked = null;
+			MethodNode mouseReleased = null;
+			for (MethodNode method : methods) {
+				for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+					if (insn.getOpcode() == Opcodes.CHECKCAST) {
+						TypeInsnNode tn = (TypeInsnNode)insn;
+						if (DynamicMappings.searchConstantPoolForStrings(tn.desc, "textures/gui/widgets.png", "gui.button.press")) {
+							addClassMapping("net/minecraft/client/gui/GuiButton", tn.desc);
+						}
+						continue;
+					}					
+					if (insn.getOpcode() != Opcodes.GETFIELD) continue;
+					FieldInsnNode fn = (FieldInsnNode)insn;
+					if (!fn.owner.equals(guiScreen.name)) continue;
+					if (fn.desc.equals("Ljava/util/List;"))	mouseClicked = method;
+					else mouseReleased = method;
+				}
+			}
+			if (mouseClicked != null && mouseReleased != null && mouseClicked != mouseReleased) {
+				addMethodMapping("net/minecraft/client/gui/GuiScreen mouseClicked (III)V",
+						guiScreen.name + " " + mouseClicked.name + " " + mouseClicked.desc);
+				addMethodMapping("net/minecraft/client/gui/GuiScreen mouseReleased (III)V",
+						guiScreen.name + " " + mouseReleased.name + " " + mouseReleased.desc);
+			}
+		}
 		
 		return true;
 	}
+	
+	
 	
 	
 	@Mapping(provides={			
@@ -883,18 +930,51 @@ public class DynamicClientMappings
 	}
 	
 	
-	@Mapping(providesMethods={
-			"net/minecraft/client/gui/inventory/GuiContainer handleMouseClick (Lnet/minecraft/inventory/Slot;III)V"
-			},			
+	
+	
+	@Mapping(provides={
+			"net/minecraft/client/settings/GameSettings"
+			},
+			providesFields={
+			"net/minecraft/client/Minecraft thePlayer Lnet/minecraft/client/entity/EntityPlayerSP;"
+			},
+			providesMethods={
+			"net/minecraft/client/gui/inventory/GuiContainer handleMouseClick (Lnet/minecraft/inventory/Slot;III)V",
+			"net/minecraft/client/gui/inventory/GuiContainer checkHotbarKeys (I)Z",
+			"net/minecraft/client/gui/inventory/GuiContainer drawItemStack (Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V",
+			"net/minecraft/client/gui/inventory/GuiContainer drawGuiContainerForegroundLayer (II)V",
+			"net/minecraft/client/gui/inventory/GuiContainer drawGuiContainerBackgroundLayer (FII)V",
+			"net/minecraft/client/gui/inventory/GuiContainer drawSlot (Lnet/minecraft/inventory/Slot;)V",
+			"net/minecraft/client/gui/inventory/GuiContainer getSlotAtPosition (II)Lnet/minecraft/inventory/Slot;",
+			"net/minecraft/client/gui/GuiScreen mouseClickMove (IIIJ)V",
+			"net/minecraft/client/gui/inventory/GuiContainer isMouseOverSlot (Lnet/minecraft/inventory/Slot;II)Z",
+			"net/minecraft/client/gui/inventory/GuiContainer isPointInRegion (IIIIII)Z",
+			"net/minecraft/client/gui/GuiScreen doesGuiPauseGame ()Z",
+			"net/minecraft/client/gui/GuiScreen onGuiClosed ()V",
+			"net/minecraft/client/gui/GuiScreen updateScreen ()V",
+			"net/minecraft/client/gui/inventory/GuiContainer updateDragSplitting ()V"
+			},
+			dependsMethods={
+			"net/minecraft/inventory/Container onContainerClosed (Lnet/minecraft/entity/player/EntityPlayer;)V",
+			"net/minecraft/client/gui/GuiScreen initGui ()V"
+			},
 			depends={
 			"net/minecraft/client/gui/inventory/GuiContainer",
-			"net/minecraft/inventory/Slot"
+			"net/minecraft/inventory/Slot",
+			"net/minecraft/client/Minecraft",
+			"net/minecraft/client/entity/EntityPlayerSP",
+			"net/minecraft/item/ItemStack",
+			"net/minecraft/client/gui/GuiScreen"
 			})	
 	public static boolean processGuiContainerClass()
 	{
 		ClassNode guiContainer = getClassNodeFromMapping("net/minecraft/client/gui/inventory/GuiContainer");
 		ClassNode slot = getClassNodeFromMapping("net/minecraft/inventory/Slot");
-		if (!MeddleUtil.notNull(guiContainer, slot)) return false;
+		ClassNode minecraft = getClassNodeFromMapping("net/minecraft/client/Minecraft");
+		ClassNode playerSP = getClassNodeFromMapping("net/minecraft/client/entity/EntityPlayerSP");
+		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
+		ClassNode guiScreen = getClassNodeFromMapping("net/minecraft/client/gui/GuiScreen");
+		if (!MeddleUtil.notNull(guiContainer, slot, minecraft, playerSP, itemStack, guiScreen)) return false;
 		
 		// protected void handleMouseClick(Slot slotIn, int slotId, int clickedButton, int clickType)
 		List<MethodNode> methods = DynamicMappings.getMatchingMethods(guiContainer, null, "(L" + slot.name + ";III)V");
@@ -903,8 +983,154 @@ public class DynamicClientMappings
 					guiContainer.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
+		
+		// protected boolean checkHotbarKeys(int keyCode)
+		methods = DynamicMappings.getMatchingMethods(guiContainer, null, "(I)Z");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/gui/inventory/GuiContainer checkHotbarKeys (I)Z",
+					guiContainer.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			
+			// Find Minecraft.thePlayer and Minecraft.gameSettings
+			for (AbstractInsnNode insn = methods.get(0).instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				if (insn.getOpcode() != Opcodes.GETFIELD) continue;
+				FieldInsnNode fn = (FieldInsnNode)insn;
+				if (!fn.owner.equals(minecraft.name)) continue;
+				Type t = Type.getType(fn.desc);				
+				if (t.getSort() != Type.OBJECT) continue;
+				if (t.getClassName().equals(playerSP.name)) {
+					addFieldMapping("net/minecraft/client/Minecraft thePlayer Lnet/minecraft/client/entity/EntityPlayerSP;",
+							minecraft.name + " " + fn.name + " " + fn.desc);
+				}
+				else if (DynamicMappings.searchConstantPoolForStrings(t.getClassName(), "options.particles.all", "key.forward", "enableVsync:")) {					
+					addClassMapping("net/minecraft/client/settings/GameSettings", t.getClassName());
+					addFieldMapping("net/minecraft/client/Minecraft gameSettings Lnet/minecraft/client/entity/EntityPlayerSP;",
+							minecraft.name + " " + fn.name + " " + fn.desc);					
+				}
+			}
+		}
+		
+		
+		// private void drawItemStack(ItemStack stack, int x, int y, String altText)
+		methods = DynamicMappings.getMatchingMethods(guiContainer, null, "(L" + itemStack.name + ";IILjava/lang/String;)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/gui/inventory/GuiContainer drawItemStack (Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V",
+					guiContainer.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {}
+		methods = DynamicMappings.getMatchingMethods(guiContainer, null, "(II)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/gui/inventory/GuiContainer drawGuiContainerForegroundLayer (II)V",
+					guiContainer.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+
+		
+	    // protected abstract void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY);
+		methods = DynamicMappings.getMatchingMethods(guiContainer, null, "(FII)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/gui/inventory/GuiContainer drawGuiContainerBackgroundLayer (FII)V",
+					guiContainer.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// private void drawSlot(Slot slotIn)
+		methods = DynamicMappings.getMatchingMethods(guiContainer, null, "(L" + slot.name + ";)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/gui/inventory/GuiContainer drawSlot (Lnet/minecraft/inventory/Slot;)V",
+					guiContainer.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}		
+		
+		// private Slot getSlotAtPosition(int x, int y)
+		methods = DynamicMappings.getMatchingMethods(guiContainer, null, "(II)L" + slot.name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/gui/inventory/GuiContainer getSlotAtPosition (II)Lnet/minecraft/inventory/Slot;",
+					guiContainer.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}		
+		
+		// protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick)
+		methods = DynamicMappings.getMatchingMethods(guiContainer, null, "(IIIJ)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/gui/GuiScreen mouseClickMove (IIIJ)V",
+					guiScreen.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		// private boolean isMouseOverSlot(Slot slotIn, int mouseX, int mouseY)
+		methods = DynamicMappings.getMatchingMethods(guiContainer, null, "(L" + slot.name + ";II)Z");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/gui/inventory/GuiContainer isMouseOverSlot (Lnet/minecraft/inventory/Slot;II)Z",
+					guiContainer.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		// protected boolean isPointInRegion(int left, int top, int right, int bottom, int pointX, int pointY)
+		methods = DynamicMappings.getMatchingMethods(guiContainer, null, "(IIIIII)Z");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/gui/inventory/GuiContainer isPointInRegion (IIIIII)Z",
+					guiContainer.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public boolean doesGuiPauseGame()
+		methods = DynamicMappings.getMatchingMethods(guiContainer, null, "()Z");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/gui/GuiScreen doesGuiPauseGame ()Z",
+					guiScreen.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}		
+		
+		
+		String onContainerClosed = DynamicMappings.getMethodMapping("net/minecraft/inventory/Container onContainerClosed (Lnet/minecraft/entity/player/EntityPlayer;)V");
+		String initGui = DynamicMappings.getMethodMapping("net/minecraft/client/gui/GuiScreen initGui ()V");		
+		
+		// public void onGuiClosed()
+		// public void updateScreen()
+		methods = DynamicMappings.getMatchingMethods(guiContainer, null, "()V");
+		if (methods.size() == 5 && onContainerClosed != null && initGui != null) 
+		{
+			MethodNode onGuiClosed = null;
+			MethodNode updateScreen = null;
+			MethodNode updateDragSplitting = null;
+			
+			for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
+				MethodNode method = it.next();
+				if (method.name.contains("<")) { it.remove(); continue; }
+				if (initGui.endsWith(" " + method.name + " " + method.desc)) { it.remove(); continue; }
+				
+				for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) 
+				{				
+					if (insn.getOpcode() != Opcodes.INVOKEVIRTUAL) continue;
+					MethodInsnNode mn = (MethodInsnNode)insn;
+					if (onContainerClosed.equals(mn.owner + " " + mn.name + " " + mn.desc)) {
+						onGuiClosed = method;
+						it.remove();
+						break;
+					}
+				}
+			}
+			if (methods.size() == 2) {
+				for (MethodNode method : methods) {
+					if ((method.access & Opcodes.ACC_PRIVATE) > 0) updateDragSplitting = method;
+					else updateScreen = method;
+				}
+			}
+			
+			if (MeddleUtil.notNull(onGuiClosed, updateScreen, updateDragSplitting)) {
+				addMethodMapping("net/minecraft/client/gui/GuiScreen onGuiClosed ()V",
+						guiScreen.name + " " + onGuiClosed.name + " " + onGuiClosed.desc);
+				addMethodMapping("net/minecraft/client/gui/GuiScreen updateScreen ()V",
+						guiScreen.name + " " + updateScreen.name + " " + updateScreen.desc);
+				addMethodMapping("net/minecraft/client/gui/inventory/GuiContainer updateDragSplitting ()V",
+						guiContainer.name + " " + updateDragSplitting.name + " " + updateDragSplitting.desc);
+			}
+		}
+		
+		
+		
 		return true;
 	}
+	
+	
+	
+	
 	
 	
 	@Mapping(provides="net/minecraft/client/network/NetHandlerPlayClient",
@@ -1050,6 +1276,401 @@ public class DynamicClientMappings
 		
 		return true;
 	}
+	
+	
+	
+	public static class TallyKeeper<T>
+	{
+		private Map<T, Integer> counts = new HashMap<>();
+		
+		public void put(T t)
+		{
+			Integer count = counts.get(t);
+			if (count == null) count = new Integer(0);
+			count++;
+			counts.put(t, count);
+		}
+		
+		public T getHighestObj()
+		{
+			int maxCount = -1;
+			T maxKey = null;
+			for (T key : counts.keySet()) {
+				int count = counts.get(key);
+				if (count > maxCount) { maxCount = count; maxKey = key; }
+			}
+			return maxKey;
+		}
+		
+		public int getHighestCount()
+		{
+			int maxCount = -1;
+			for (T key : counts.keySet()) {
+				int count = counts.get(key);
+				if (count > maxCount) maxCount = count;
+			}
+			return maxCount;
+		}
+	}
+	
+	
+	@Mapping(provides={
+			"net/minecraft/client/settings/KeyBinding"
+			},
+			depends={
+			"net/minecraft/client/settings/GameSettings",
+			"net/minecraft/client/Minecraft"
+			})
+	public static boolean getKeybindingClass()
+	{
+		ClassNode gameSettings = getClassNodeFromMapping("net/minecraft/client/settings/GameSettings");
+		ClassNode minecraft = getClassNodeFromMapping("net/minecraft/client/Minecraft");
+		if (gameSettings == null || minecraft == null) return false;
+		
+		// Bit of a roundabout way to locate and confirm KeyBinding
+		List<MethodNode> methods = DynamicMappings.getMatchingMethods(gameSettings, "<init>", "(L" + minecraft.name + ";Ljava/io/File;)V");
+		if (methods.size() == 1) 
+		{
+			TallyKeeper<String> tallies = new TallyKeeper<>();
+			
+			for (AbstractInsnNode insn = methods.get(0).instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				if (insn.getOpcode() != Opcodes.NEW) continue;
+				TypeInsnNode tn = (TypeInsnNode)insn;
+				tallies.put(tn.desc);
+			}
+			
+			String keyBinding_name = tallies.getHighestObj();
+			ClassNode keyBinding = getClassNode(keyBinding_name);
+			
+			boolean comparable = false;
+			for (String iface : keyBinding.interfaces) {
+				if (iface.equals("java/lang/Comparable")) comparable = true;
+			}
+			if (comparable) {
+				addClassMapping("net/minecraft/client/settings/KeyBinding", keyBinding_name);
+				return true;
+			}
+		}		
+		
+		return false;
+	}
+	
+	
+	@Mapping(providesFields={
+			"net/minecraft/client/settings/KeyBinding keyDescription Ljava/lang/String;",
+			"net/minecraft/client/settings/KeyBinding keyCode I",
+			"net/minecraft/client/settings/KeyBinding keyCodeDefault I",
+			"net/minecraft/client/settings/KeyBinding keyCategory Ljava/lang/String;",
+			"net/minecraft/client/settings/KeyBinding pressed Z",
+			"net/minecraft/client/settings/KeyBinding pressTime I"
+			},
+			providesMethods={
+			"net/minecraft/client/settings/KeyBinding onTick (I)V",
+			"net/minecraft/client/settings/KeyBinding setKeyBindState (IZ)V",
+			"net/minecraft/client/settings/KeyBinding getKeybinds ()Ljava/util/Set;",
+			"net/minecraft/client/settings/KeyBinding unpressKey ()V",
+			"net/minecraft/client/settings/KeyBinding unPressAllKeys ()V",
+			"net/minecraft/client/settings/KeyBinding resetKeyBindingArrayAndHash ()V",
+			"net/minecraft/client/settings/KeyBinding setKeyCode (I)V",
+			"net/minecraft/client/settings/KeyBinding isKeyDown ()Z",
+			"net/minecraft/client/settings/KeyBinding isPressed ()Z"
+			},
+			depends={
+			"net/minecraft/client/settings/KeyBinding"
+			})
+	public static boolean processKeybindingClass()
+	{
+		ClassNode keyBinding = getClassNodeFromMapping("net/minecraft/client/settings/KeyBinding");
+		if (keyBinding == null) return false;
+		
+		String keyDescription = null;
+		String keyCode = null;
+		String keyCodeDefault = null;
+		String keyCategory = null;
+		
+		// public KeyBinding(String description, int keyCode, String category)
+		List<MethodNode> methods = DynamicMappings.getMatchingMethods(keyBinding, "<init>", "(Ljava/lang/String;ILjava/lang/String;)V");
+		if (methods.size() == 1) {
+			List<FieldInsnNode> fields = new ArrayList<>();
+			for (AbstractInsnNode insn = methods.get(0).instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				if (insn.getOpcode() != Opcodes.PUTFIELD) continue;
+				fields.add((FieldInsnNode)insn);
+			}
+			if (fields.size() == 4) {
+				if (fields.get(0).desc.equals("Ljava/lang/String;")) {
+					keyDescription = fields.get(0).name;
+					addFieldMapping("net/minecraft/client/settings/KeyBinding keyDescription Ljava/lang/String;",
+							keyBinding.name + " " + fields.get(0).name + " Ljava/lang/String;");
+				}
+				if (fields.get(1).desc.equals("I") && fields.get(2).desc.equals("I")) {
+					keyCode = fields.get(1).name;
+					keyCodeDefault = fields.get(2).name;
+					addFieldMapping("net/minecraft/client/settings/KeyBinding keyCode I",
+							keyBinding.name + " " + fields.get(1).name + " I");
+					addFieldMapping("net/minecraft/client/settings/KeyBinding keyCodeDefault I",
+							keyBinding.name + " " + fields.get(2).name + " I");
+				}
+				if (fields.get(3).desc.equals("Ljava/lang/String;")) {
+					keyCategory = fields.get(3).name;
+					addFieldMapping("net/minecraft/client/settings/KeyBinding keyCategory Ljava/lang/String;",
+							keyBinding.name + " " + fields.get(3).name + " Ljava/lang/String;");
+				}
+			}
+		}	
+				
+		
+		// public static void onTick(int keyCode)
+		methods = DynamicMappings.getMatchingMethods(keyBinding, null, "(I)V");
+		methods = DynamicMappings.removeMethodsWithoutFlags(methods, Opcodes.ACC_STATIC);
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/settings/KeyBinding onTick (I)V",
+					keyBinding.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		// public static void setKeyBindState(int keyCode, boolean pressed)
+		methods = DynamicMappings.getMatchingMethods(keyBinding, null, "(IZ)V");
+		methods = DynamicMappings.removeMethodsWithoutFlags(methods, Opcodes.ACC_STATIC);
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/settings/KeyBinding setKeyBindState (IZ)V",
+					keyBinding.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		// public static Set getKeybinds()	
+		methods = DynamicMappings.getMatchingMethods(keyBinding, null, "()Ljava/util/Set;");
+		methods = DynamicMappings.removeMethodsWithoutFlags(methods, Opcodes.ACC_STATIC);
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/settings/KeyBinding getKeybinds ()Ljava/util/Set;",
+					keyBinding.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// private void unpressKey()
+		String unpressKey = null;
+		methods = DynamicMappings.getMatchingMethods(keyBinding, null, "()V");
+		methods = DynamicMappings.removeMethodsWithFlags(methods, Opcodes.ACC_STATIC);
+		for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
+			if (it.next().name.contains("<")) it.remove();
+		}
+		if (methods.size() == 1) {
+			unpressKey = methods.get(0).name;
+			addMethodMapping("net/minecraft/client/settings/KeyBinding unpressKey ()V",
+					keyBinding.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			
+			String pressTime = null;
+			int count = 0;
+			for (AbstractInsnNode insn = methods.get(0).instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				if (insn.getOpcode() != Opcodes.PUTFIELD) continue;
+				FieldInsnNode fn = (FieldInsnNode)insn;
+				if (fn.owner.equals(keyBinding.name) && fn.desc.equals("I")) {
+					count++;
+					pressTime = fn.name;
+				}
+			}
+			
+			if (count == 1 && pressTime != null) {
+				addFieldMapping("net/minecraft/client/settings/KeyBinding pressTime I",
+						keyBinding.name + " " + pressTime + " I");
+			}
+		}
+		
+		
+		// public static void unPressAllKeys()
+		// public static void resetKeyBindingArrayAndHash()
+		methods = DynamicMappings.getMatchingMethods(keyBinding, null, "()V");
+		methods = DynamicMappings.removeMethodsWithoutFlags(methods, Opcodes.ACC_STATIC);
+		for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
+			if (it.next().name.contains("<")) it.remove();
+		}
+		if (methods.size() == 2 && unpressKey != null) 
+		{
+			MethodNode unPressAllKeys = null;
+			MethodNode resetKeyBindingArrayAndHash = null;
+			
+			for (MethodNode method : methods) {
+				boolean is_unpressAllKeys = false;
+				for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+					if (insn.getOpcode() != Opcodes.INVOKESPECIAL) continue;
+					MethodInsnNode mn = (MethodInsnNode)insn;
+					if (mn.owner.equals(keyBinding.name) && mn.name.equals(unpressKey) && mn.desc.equals("()V")) {
+						unPressAllKeys = method;
+						is_unpressAllKeys = true;
+						break;
+					}
+				}
+				if (!is_unpressAllKeys) resetKeyBindingArrayAndHash = method;
+			}
+			
+			if (unPressAllKeys != null && resetKeyBindingArrayAndHash != null) {		
+				addMethodMapping("net/minecraft/client/settings/KeyBinding unPressAllKeys ()V",
+						keyBinding.name + " " + unPressAllKeys.name + " " + unPressAllKeys.desc);
+				addMethodMapping("net/minecraft/client/settings/KeyBinding resetKeyBindingArrayAndHash ()V",
+						keyBinding.name + " " + resetKeyBindingArrayAndHash.name + " " + resetKeyBindingArrayAndHash.desc);
+			}
+		}
+		
+		
+		// public void setKeyCode(int keyCode)
+		methods = DynamicMappings.getMatchingMethods(keyBinding, null, "(I)V");
+		methods = DynamicMappings.removeMethodsWithFlags(methods, Opcodes.ACC_STATIC);
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/settings/KeyBinding setKeyCode (I)V",
+					keyBinding.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public boolean isKeyDown()
+		// public boolean isPressed()
+		methods = DynamicMappings.getMatchingMethods(keyBinding, null, "()Z");
+		if (methods.size() == 2) {
+			boolean isGetter0 = DynamicMappings.matchOpcodeSequence(methods.get(0).instructions.getFirst(), Opcodes.ALOAD, Opcodes.GETFIELD, Opcodes.IRETURN);
+			boolean isGetter1 = DynamicMappings.matchOpcodeSequence(methods.get(1).instructions.getFirst(), Opcodes.ALOAD, Opcodes.GETFIELD, Opcodes.IRETURN);			
+			MethodNode isKeyDown = null;
+			MethodNode isPressed = null;
+			if (isGetter0 && !isGetter1) { isKeyDown = methods.get(0); isPressed = methods.get(1); }
+			if (!isGetter0 && isGetter1) { isKeyDown = methods.get(1); isPressed = methods.get(0); }
+			
+			if (isKeyDown != null && isPressed != null) {
+				addMethodMapping("net/minecraft/client/settings/KeyBinding isKeyDown ()Z",
+						keyBinding.name + " " + isKeyDown.name + " " + isKeyDown.desc);
+				addMethodMapping("net/minecraft/client/settings/KeyBinding isPressed ()Z",
+						keyBinding.name + " " + isPressed.name + " " + isPressed.desc);
+				
+				for (AbstractInsnNode insn = isKeyDown.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+					if (insn.getOpcode() != Opcodes.GETFIELD) continue;
+					FieldInsnNode fn = (FieldInsnNode)insn;
+					if (fn.owner.equals(keyBinding.name) && fn.desc.equals("Z")) {
+						addFieldMapping("net/minecraft/client/settings/KeyBinding pressed Z",
+								keyBinding.name + " " + fn.name + " " + fn.desc);
+					}
+				}
+			}
+		}
+		
+		
+		// TODO
+		
+		// public String getKeyCategory()
+		// public String getKeyDescription()	
+		
+		// public int getKeyCodeDefault()
+		// public int getKeyCode()	
+		
+		// public int compareTo(KeyBinding p_compareTo_1_)
+
+		
+		return true;
+	}
+
+	
+	@Mapping(provides={
+			"net/minecraft/client/renderer/RenderHelper"
+			},
+			dependsMethods={
+			"net/minecraft/client/gui/GuiScreen drawScreen (IIF)V"
+			},
+			depends={
+			"net/minecraft/client/gui/inventory/GuiContainer",
+			"net/minecraft/util/Vec3"
+			})
+	public static boolean getRenderHelperClass()
+	{
+		ClassNode guiContainer = getClassNodeFromMapping("net/minecraft/client/gui/inventory/GuiContainer");
+		ClassNode vec3 = getClassNodeFromMapping("net/minecraft/util/Vec3");
+		if (guiContainer == null || vec3 == null) return false;
+		
+		MethodNode drawScreen = DynamicMappings.getMethodNodeFromMapping(guiContainer, "net/minecraft/client/gui/GuiScreen drawScreen (IIF)V");
+		if (drawScreen == null) return false;
+		
+		String renderHelper = null;
+		int count = 0;
+		
+		for (AbstractInsnNode insn = drawScreen.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+			if (insn.getOpcode() != Opcodes.INVOKESTATIC) continue;
+			MethodInsnNode mn = (MethodInsnNode)insn;
+			if (DynamicMappings.searchConstantPoolForClasses(mn.owner, vec3.name, "java/nio/FloatBuffer"))
+			{
+				if (!mn.owner.equals(renderHelper)) {
+					renderHelper = mn.owner;
+					count++;
+				}
+			}				
+		}
+		
+		if (count == 1) {
+			addClassMapping("net/minecraft/client/renderer/RenderHelper", renderHelper);
+		}
+		
+		return true;
+	}
+	
+	
+	@Mapping(providesMethods={
+			"net/minecraft/client/renderer/RenderHelper enableStandardItemLighting ()V",
+			"net/minecraft/client/renderer/RenderHelper enableGUIStandardItemLighting ()V",
+			"net/minecraft/client/renderer/RenderHelper disableStandardItemLighting ()V"
+			},
+			depends={
+			"net/minecraft/client/renderer/RenderHelper"
+			})
+	public static boolean processRenderHelperClass()
+	{
+		ClassNode renderHelper = getClassNodeFromMapping("net/minecraft/client/renderer/RenderHelper");		
+		if (renderHelper == null) return false;
+		
+		List<MethodNode> methods = DynamicMappings.getMatchingMethods(renderHelper, null, "()V");
+		for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
+			MethodNode method = it.next();
+			if ((method.access & Opcodes.ACC_STATIC) == 0) it.remove();
+			if ((method.access & Opcodes.ACC_PRIVATE) > 0) it.remove();
+			if (method.name.contains("<")) it.remove();
+		}
+		
+		if (methods.size() != 3) return false;
+
+		MethodNode enableStandardItemLighting = null;
+		for (MethodNode method : methods) {
+			for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				if (insn.getOpcode() != Opcodes.INVOKESTATIC) continue;
+				MethodInsnNode mn = (MethodInsnNode)insn;
+				if (!mn.owner.equals("org/lwjgl/opengl/GL11") || !mn.name.equals("glLight")) continue;
+				if (enableStandardItemLighting != null) return false;
+				enableStandardItemLighting = method; 
+				break;
+			}
+		}
+		if (enableStandardItemLighting == null) return false;
+		
+		addMethodMapping("net/minecraft/client/renderer/RenderHelper enableStandardItemLighting ()V",
+				renderHelper.name + " " + enableStandardItemLighting.name + " ()V");
+		methods.remove(enableStandardItemLighting);
+		
+		
+		
+		MethodNode enableGUIStandardItemLighting = null;
+		for (MethodNode method : methods) {
+			for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				if (insn.getOpcode() != Opcodes.INVOKESTATIC) continue;
+				MethodInsnNode mn = (MethodInsnNode)insn;
+				if (!mn.owner.equals(renderHelper.name) || !mn.name.equals(enableStandardItemLighting.name)) continue;
+				if (enableGUIStandardItemLighting != null) return false;
+				enableGUIStandardItemLighting = method; 
+				break;
+			}
+		}
+		if (enableGUIStandardItemLighting == null) return false;
+		
+		addMethodMapping("net/minecraft/client/renderer/RenderHelper enableGUIStandardItemLighting ()V",
+				renderHelper.name + " " + enableGUIStandardItemLighting.name + " ()V");
+		methods.remove(enableGUIStandardItemLighting);
+		
+		
+		addMethodMapping("net/minecraft/client/renderer/RenderHelper disableStandardItemLighting ()V",
+				renderHelper.name + " " + methods.get(0).name + " ()V");	
+		
+		
+		return true;
+	}	
+	
 	
 	
 	

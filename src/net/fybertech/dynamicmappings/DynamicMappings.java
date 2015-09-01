@@ -123,6 +123,15 @@ public class DynamicMappings
 		if (!(ldc.cst instanceof Integer)) return false;
 		return ((Integer)ldc.cst) == val;
 	}
+	
+	// Check if LDC is loading specified int
+	public static boolean isLdcWithFloat(AbstractInsnNode node, float val)
+	{
+		if (!(node instanceof LdcInsnNode)) return false;
+		LdcInsnNode ldc = (LdcInsnNode)node;
+		if (!(ldc.cst instanceof Float)) return false;
+		return ((Float)ldc.cst) == val;
+	}
 
 
 	// Get the description of the specified field from the class
@@ -398,6 +407,12 @@ public class DynamicMappings
 	}
 
 	
+	public static String getReverseFieldMapping(String obfField)
+	{
+		return reverseFieldMappings.get(obfField);
+	}
+	
+	
 	// Returns just the obfuscated name of a method matching the deobfuscated input
 	public static String getMethodMappingName(String className, String methodName, String methodDesc)
 	{
@@ -548,7 +563,7 @@ public class DynamicMappings
 	// Used for debugging purposes
 	public static void main(String[] args)
 	{
-		boolean showMappings = false;
+		boolean showMappings = true;
 		
 		generateClassMappings();
 		
@@ -4715,19 +4730,22 @@ public class DynamicMappings
 			"net/minecraft/command/ICommand getCommandName ()Ljava/lang/String;",
 			"net/minecraft/command/ICommand getCommandUsage (Lnet/minecraft/command/ICommandSender;)Ljava/lang/String;",
 			"net/minecraft/command/ICommand getCommandAliases ()Ljava/util/List;",
-			"net/minecraft/command/ICommand processCommand (Lnet/minecraft/command/ICommandSender;[Ljava/lang/String;)V",
-			"net/minecraft/command/ICommand canCommandSenderUseCommand (Lnet/minecraft/command/ICommandSender;)Z",
-			"net/minecraft/command/ICommand addTabCompletionOptions (Lnet/minecraft/command/ICommandSender;[Ljava/lang/String;Lnet/minecraft/util/BlockPos;)Ljava/util/List;"
+			"net/minecraft/command/ICommand processCommand (Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/command/ICommandSender;[Ljava/lang/String;)V",
+			"net/minecraft/command/ICommand canCommandSenderUseCommand (Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/command/ICommandSender;)Z",
+			"net/minecraft/command/ICommand addTabCompletionOptions (Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/command/ICommandSender;[Ljava/lang/String;Lnet/minecraft/util/BlockPos;)Ljava/util/List;",
+			"net/minecraft/command/ICommand isUsernameIndex ([Ljava/lang/String;I)Z"
 			},
 			depends={
 			"net/minecraft/command/ICommand",
-			"net/minecraft/util/BlockPos"
+			"net/minecraft/util/BlockPos",
+			"net/minecraft/server/MinecraftServer"
 			})
 	public static boolean processICommandClass()
 	{
 		ClassNode iCommand = getClassNodeFromMapping("net/minecraft/command/ICommand");
 		ClassNode blockPos = getClassNodeFromMapping("net/minecraft/util/BlockPos");
-		if (iCommand == null || blockPos == null) return false;
+		ClassNode server = getClassNodeFromMapping("net/minecraft/server/MinecraftServer");
+		if (iCommand == null || blockPos == null || server == null) return false;
 	
 		// String getCommandName();
 		List<MethodNode> methods = getMatchingMethods(iCommand, null, "()Ljava/lang/String;");	
@@ -4763,12 +4781,13 @@ public class DynamicMappings
 			addMethodMapping("net/minecraft/command/ICommand getCommandAliases ()Ljava/util/List;",
 					iCommand.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
+	
 		
-		
-		// void processCommand(ICommandSender sender, String[] args) throws CommandException;
-		methods = getMatchingMethods(iCommand, null, "(L" + iCommandSender.name + ";[Ljava/lang/String;)V");
+		// POST-15w35c, added MinecraftServer
+		// void processCommand(MinecraftServer, ICommandSender sender, String[] args) throws CommandException;
+		methods = getMatchingMethods(iCommand, null, "(L" + server.name + ";L" + iCommandSender.name + ";[Ljava/lang/String;)V");
 		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/command/ICommand processCommand (Lnet/minecraft/command/ICommandSender;[Ljava/lang/String;)V",
+			addMethodMapping("net/minecraft/command/ICommand processCommand (Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/command/ICommandSender;[Ljava/lang/String;)V",
 					iCommand.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		
 			if (methods.get(0).exceptions.size() == 1) {
@@ -4777,20 +4796,23 @@ public class DynamicMappings
 		}
 		
 		
-		// boolean canCommandSenderUseCommand(ICommandSender sender);
-		methods = getMatchingMethods(iCommand, null, "(L" + iCommandSender.name + ";)Z");
+		// POST-15w35c, added MinecraftServer
+		// boolean canCommandSenderUseCommand(MinecraftServer, ICommandSender sender);
+		methods = getMatchingMethods(iCommand, null, "(L" + server.name + ";L" + iCommandSender.name + ";)Z");
 		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/command/ICommand canCommandSenderUseCommand (Lnet/minecraft/command/ICommandSender;)Z",
+			addMethodMapping("net/minecraft/command/ICommand canCommandSenderUseCommand (Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/command/ICommandSender;)Z",
+					iCommand.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}		
+		
+		
+		// POST-15w35c, added MinecraftServer
+	    // List addTabCompletionOptions(MinecraftServer, ICommandSender sender, String[] args, BlockPos pos);		
+		methods = getMatchingMethods(iCommand, null, "(L" + server.name + ";L" + iCommandSender.name + ";[Ljava/lang/String;L" + blockPos.name + ";)Ljava/util/List;");		
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/command/ICommand addTabCompletionOptions (Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/command/ICommandSender;[Ljava/lang/String;Lnet/minecraft/util/BlockPos;)Ljava/util/List;",
 					iCommand.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
-		
-	    // List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos);		
-		methods = getMatchingMethods(iCommand, null, "(L" + iCommandSender.name + ";[Ljava/lang/String;L" + blockPos.name + ";)Ljava/util/List;");		
-		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/command/ICommand addTabCompletionOptions (Lnet/minecraft/command/ICommandSender;[Ljava/lang/String;Lnet/minecraft/util/BlockPos;)Ljava/util/List;",
-					iCommand.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-		}
 		
 	    //boolean isUsernameIndex(String[] args, int index);
 		methods = getMatchingMethods(iCommand, null, "([Ljava/lang/String;I)Z");
@@ -5046,6 +5068,9 @@ public class DynamicMappings
 		}		
 		return true;
 	}
+
+
+	
 	
 	
     

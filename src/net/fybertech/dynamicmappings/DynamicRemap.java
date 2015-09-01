@@ -52,7 +52,7 @@ public class DynamicRemap
 	}
 	
 	
-	protected ClassNode getClassNode(String className)
+	public ClassNode getClassNode(String className)
 	{
 		return DynamicMappings.getClassNode(className);
 	}
@@ -289,37 +289,82 @@ public class DynamicRemap
 	}
 	
 	
+	static String[] fieldTransformers = new String[] {
+		"net/minecraft/inventory/Slot * I 1"
+	};
+	
+	static String[] methodTransformers = new String[] {
+		"net/minecraft/block/Block <init> * 1",
+		"net/minecraft/block/Block registerBlock * 1",
+		"net/minecraft/item/Item registerItem * 1",
+		"net/minecraft/item/Item registerItemBlock * 1",
+		"net/minecraft/client/gui/inventory/GuiContainer drawItemStack (Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V 1"
+	};
+	
 	
 	// TODO - Make better access transformer system
 	public static void transformClass(ClassNode cn)
 	{		
 		
-		int allAccess = Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED | Opcodes.ACC_PRIVATE;
+		int allAccess = Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED | Opcodes.ACC_PRIVATE;	
 		
-		if (cn.name.equals("net/minecraft/block/Block")) {
-			for (MethodNode method : cn.methods) {
-				// Make Block constructors public
-				if (method.name.equals("<init>")) method.access = (method.access & ~Opcodes.ACC_PROTECTED) | Opcodes.ACC_PUBLIC;
-				// Make registration methods public
-				else if (method.name.equals("registerBlock")) method.access = (method.access & ~Opcodes.ACC_PRIVATE) | Opcodes.ACC_PUBLIC; 
+		
+		for (String transformer : fieldTransformers) {
+			String[] split = transformer.split(" ");
+			if (split.length != 4) continue;
+			
+			String className = split[0];
+			String fieldName = split[1];
+			String fieldDesc = split[2];
+			int access = 0;
+			try {
+				access = Integer.parseInt(split[3]);
 			}
-		}
-		
-		
-		if (cn.name.equals("net/minecraft/item/Item")) {
-			for (MethodNode method : cn.methods) {
-				// Make registration methods public
-				if (method.name.startsWith("registerItem")) method.access = (method.access & ~allAccess) | Opcodes.ACC_PUBLIC; 
-			}
-		}
-		
-		if (cn.name.equals("net/minecraft/inventory/Slot")) {
+			catch (NumberFormatException e) {}
+			if (access < 1) continue;
+			
+			if (!cn.name.equals(className)) continue;
+			
+			boolean wildcardName = fieldName.equals("*");
+			boolean wildcardDesc = fieldDesc.equals("*");
+			
 			for (FieldNode field : cn.fields) {
-				if (field.desc.equals("I")) {
-					field.access = (field.access & ~allAccess) | Opcodes.ACC_PUBLIC; 
-				}
-			}
+				if (!field.name.equals(fieldName) && !wildcardName) continue;
+				if (!field.desc.equals(fieldDesc) && !wildcardDesc) continue;
+				field.access = (field.access & ~allAccess) | access;
+				System.out.println("Modifying access of " + className + " " + field.name + " " + field.desc);
+			}			
 		}
+		
+		
+		for (String transformer : methodTransformers) {
+			String[] split = transformer.split(" ");
+			if (split.length != 4) continue;
+			
+			String className = split[0];
+			String methodName = split[1];
+			String methodDesc = split[2];
+			int access = 0;
+			try {
+				access = Integer.parseInt(split[3]);
+			}
+			catch (NumberFormatException e) {}
+			if (access < 1) continue;
+			
+			if (!cn.name.equals(className)) continue;
+			
+			boolean wildcardName = methodName.equals("*");
+			boolean wildcardDesc = methodDesc.equals("*");
+			
+			for (MethodNode method : cn.methods) {
+				if (!method.name.equals(methodName) && !wildcardName) continue;
+				if (!method.desc.equals(methodDesc) && !wildcardDesc) continue;
+				method.access = (method.access & ~allAccess) | access;
+				System.out.println("Modifying access of " + className + " " + method.name + " " + method.desc);
+			}			
+		}
+		
+		
 	}
 	
 	
