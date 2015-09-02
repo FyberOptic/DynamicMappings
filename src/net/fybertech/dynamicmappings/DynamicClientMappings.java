@@ -936,7 +936,9 @@ public class DynamicClientMappings
 			"net/minecraft/client/settings/GameSettings"
 			},
 			providesFields={
-			"net/minecraft/client/Minecraft thePlayer Lnet/minecraft/client/entity/EntityPlayerSP;"
+			"net/minecraft/client/Minecraft thePlayer Lnet/minecraft/client/entity/EntityPlayerSP;",
+			"net/minecraft/client/gui/inventory/GuiContainer guiLeft I",
+			"net/minecraft/client/gui/inventory/GuiContainer guiTop I"
 			},
 			providesMethods={
 			"net/minecraft/client/gui/inventory/GuiContainer handleMouseClick (Lnet/minecraft/inventory/Slot;III)V",
@@ -1067,6 +1069,18 @@ public class DynamicClientMappings
 		if (methods.size() == 1) {
 			addMethodMapping("net/minecraft/client/gui/inventory/GuiContainer isPointInRegion (IIIIII)Z",
 					guiContainer.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			
+			List<String> fields = new ArrayList<>();
+			for (AbstractInsnNode insn = methods.get(0).instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				if (insn.getOpcode() != Opcodes.GETFIELD) continue;
+				FieldInsnNode fn = (FieldInsnNode)insn;
+				if (fn.owner.equals(guiContainer.name) && fn.desc.equals("I")) fields.add(fn.name);				
+			}
+			
+			if (fields.size() == 2) {
+				addFieldMapping("net/minecraft/client/gui/inventory/GuiContainer guiLeft I", guiContainer.name + " " + fields.get(0) + " I");
+				addFieldMapping("net/minecraft/client/gui/inventory/GuiContainer guiTop I", guiContainer.name + " " + fields.get(1) + " I");
+			}
 		}
 		
 		
