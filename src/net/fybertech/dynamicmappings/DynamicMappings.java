@@ -328,6 +328,24 @@ public class DynamicMappings
 		return true;
 	}
 
+	// Extracst the opcode sequence as an array
+	// Ignores synthetic opcodes added by ASM, such as labels.
+	public static AbstractInsnNode[] getOpcodeSequenceArray(AbstractInsnNode insn, int...opcodes)
+	{
+		AbstractInsnNode[] outNodes = new AbstractInsnNode[opcodes.length];
+		int pos = 0;
+		
+		for (int opcode : opcodes) {
+			insn = getNextRealOpcode(insn);
+			if (insn == null) return null;
+			if (opcode != insn.getOpcode()) return null;
+			outNodes[pos++] = insn;
+			insn = insn.getNext();
+		}
+
+		return outNodes;
+	}
+
 
 	// Still here in case anything still references it
 	@Deprecated
@@ -410,6 +428,24 @@ public class DynamicMappings
 	public static String getReverseFieldMapping(String obfField)
 	{
 		return reverseFieldMappings.get(obfField);
+	}
+	
+	
+	public static FieldNode getFieldNodeFromMapping(ClassNode cn, String deobfMapping)
+	{
+		String mapping = getFieldMapping(deobfMapping);
+		if (cn == null || mapping == null) return null;
+
+		String[] split = mapping.split(" ");
+		if (split.length < 3) return null;
+
+		for (FieldNode field : cn.fields) {
+			if (field.name.equals(split[1]) && field.desc.equals(split[2])) {
+				return field;
+			}
+		}
+
+		return null;
 	}
 	
 	
@@ -601,6 +637,93 @@ public class DynamicMappings
 		}
 	}
 
+	
+	public static JarFile getMinecraftJar()
+	{
+		URL url = MeddleUtil.class.getClassLoader().getResource("net/minecraft/server/MinecraftServer.class");	
+		if (url == null) return null;		
+		
+		JarFile jar = null;
+		
+		if ("jar".equals(url.getProtocol())) {
+			JarURLConnection connection = null;
+			try {
+				connection = (JarURLConnection) url.openConnection();
+				jar = connection.getJarFile();
+			} catch (IOException e) {}
+		}
+		
+		return jar;
+	}	
+
+
+	
+	public static boolean isSubclassOf(String className, String superClassName)
+	{
+		InputStream stream = DynamicMappings.class.getClassLoader().getResourceAsStream(className + ".class");
+		if (stream == null) return false;	
+		ClassReader reader = null;
+		try {
+			reader = new ClassReader(stream);
+		} catch (IOException e) {}
+		if (reader == null) return false;
+		
+		String superName = reader.getSuperName();
+		if (superName.equals(superClassName)) return true;
+		if (superName.equals("java/lang/Object")) return false;
+		return isSubclassOf(superName, superClassName);
+	}
+	
+	
+	public static void generateClassMappings()
+	{		
+		DynamicMappings.registerMappingsClass(DynamicMappings.class);
+		if (MeddleUtil.isClientJar()) DynamicClientMappings.generateClassMappings();
+		
+	}
+
+
+	// Use untyped list in case someone compiles without debug version of ASM.
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static List<MethodNode> getMethodsWithDescriptor(List methods, String desc)
+	{
+		List<MethodNode> list = new ArrayList<MethodNode>();
+		for (MethodNode method : (List<MethodNode>)methods) {
+			if (method.desc.equals(desc)) list.add(method);
+		}
+		return list;
+	}
+
+	
+	public static List<MethodNode> removeMethodsWithFlags(List<MethodNode> methods, int accFlags)
+	{
+		List<MethodNode> outList = new ArrayList<MethodNode>();
+		for (MethodNode mn : methods) {
+			if ((mn.access & accFlags) == 0) outList.add(mn);
+		}
+		return outList;
+	}
+
+	
+	public static List<MethodNode> removeMethodsWithoutFlags(List<MethodNode> methods, int accFlags)
+	{
+		List<MethodNode> outList = new ArrayList<MethodNode>();
+		for (MethodNode mn : methods) {
+			if ((mn.access & accFlags) != 0) outList.add(mn);
+		}
+		return outList;
+	}
+	
+	
+	public static AbstractInsnNode findNextOpcodeNum(AbstractInsnNode insn, int opcode)
+	{
+		while (insn != null) {
+			if (insn.getOpcode() == opcode) break;
+			insn = insn.getNext();
+		}
+		return insn;
+	}
+	
 
 	
 	//////////////////////////////////////////////////////////////////////////
@@ -776,6 +899,76 @@ public class DynamicMappings
 		return true;
 	}
 
+	
+	@Mapping(provides={},
+			providesMethods={
+			"net/minecraft/block/state/IBlockState getPropertyNames ()Ljava/util/Collection;",
+			"net/minecraft/block/state/IBlockState getValue (Lnet/minecraft/block/properties/IProperty;)Ljava/lang/Comparable;",
+			"net/minecraft/block/state/IBlockState withProperty (Lnet/minecraft/block/properties/IProperty;Ljava/lang/Comparable;)Lnet/minecraft/block/state/IBlockState;",
+			"net/minecraft/block/state/IBlockState cycleProperty (Lnet/minecraft/block/properties/IProperty;)Lnet/minecraft/block/state/IBlockState;",
+			"net/minecraft/block/state/IBlockState getProperties ()Lcom/google/common/collect/ImmutableMap;",
+			"net/minecraft/block/state/IBlockState getBlock ()Lnet/minecraft/block/Block;"
+			},
+			depends={
+			"net/minecraft/block/Block", 
+			"net/minecraft/block/state/IBlockState",
+			"net/minecraft/block/properties/IProperty"
+			})
+	public static boolean processIBlockStateClass()
+	{
+		ClassNode block = getClassNode(getClassMapping("net/minecraft/block/Block"));
+		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
+		ClassNode iProperty = getClassNodeFromMapping("net/minecraft/block/properties/IProperty");
+		if (block == null || iBlockState == null || iProperty == null) return false;
+		
+		// Collection getPropertyNames();  
+		List<MethodNode> methods = getMatchingMethods(iBlockState, null, "()Ljava/util/Collection;");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/state/IBlockState getPropertyNames ()Ljava/util/Collection;",
+					iBlockState.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}		
+		
+	    // Comparable getValue(IProperty property);  
+		methods = getMatchingMethods(iBlockState, null, "(L" + iProperty.name + ";)Ljava/lang/Comparable;");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/state/IBlockState getValue (Lnet/minecraft/block/properties/IProperty;)Ljava/lang/Comparable;",
+					iBlockState.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+	    // IBlockState withProperty(IProperty property, Comparable value);
+		methods = getMatchingMethods(iBlockState, null, "(L" + iProperty.name + ";Ljava/lang/Comparable;)L" + iBlockState.name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/state/IBlockState withProperty (Lnet/minecraft/block/properties/IProperty;Ljava/lang/Comparable;)Lnet/minecraft/block/state/IBlockState;",
+					iBlockState.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		// IBlockState cycleProperty(IProperty property);
+		methods = getMatchingMethods(iBlockState, null, "(L" + iProperty.name + ";)L" + iBlockState.name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/state/IBlockState cycleProperty (Lnet/minecraft/block/properties/IProperty;)Lnet/minecraft/block/state/IBlockState;",
+					iBlockState.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+				
+	    // ImmutableMap getProperties();  
+		methods = getMatchingMethods(iBlockState, null, "()Lcom/google/common/collect/ImmutableMap;");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/state/IBlockState getProperties ()Lcom/google/common/collect/ImmutableMap;",
+					iBlockState.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		// Block getBlock();
+		methods = getMatchingMethods(iBlockState, null, "()L" + block.name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/state/IBlockState getBlock ()Lnet/minecraft/block/Block;",
+					iBlockState.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		return true;
+	}
+	
+	
 
 	@Mapping(provides="net/minecraft/world/IBlockAccess", depends="net/minecraft/world/World")
 	public static boolean getIBlockAccessClass()
@@ -791,6 +984,76 @@ public class DynamicMappings
 		return true;
 	}
 
+	
+	
+	@Mapping(providesMethods={
+			"net/minecraft/world/IBlockAccess getTileEntity (Lnet/minecraft/util/BlockPos;)Lnet/minecraft/tileentity/TileEntity;",
+			"net/minecraft/world/IBlockAccess getBlockState (Lnet/minecraft/util/BlockPos;)Lnet/minecraft/block/state/IBlockState;",
+			"net/minecraft/world/IBlockAccess isAirBlock (Lnet/minecraft/util/BlockPos;)Z",
+			"net/minecraft/world/IBlockAccess getStrongPower (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)I"
+			},
+			depends={
+			"net/minecraft/world/IBlockAccess",
+			"net/minecraft/block/state/IBlockState",
+			"net/minecraft/tileentity/TileEntity",
+			"net/minecraft/util/BlockPos",
+			"net/minecraft/util/EnumFacing"
+			})
+	public static boolean processIBlockAccessClass()
+	{
+		ClassNode iBlockAccess = getClassNodeFromMapping("net/minecraft/world/IBlockAccess");
+		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
+		ClassNode tileEntity = getClassNodeFromMapping("net/minecraft/tileentity/TileEntity");
+		ClassNode blockPos = getClassNodeFromMapping("net/minecraft/util/BlockPos");
+		ClassNode enumFacing = getClassNodeFromMapping("net/minecraft/util/EnumFacing");
+		if (!MeddleUtil.notNull(iBlockAccess, iBlockState, tileEntity, blockPos, enumFacing)) return false;
+		
+		// TileEntity getTileEntity(BlockPos pos)
+		List<MethodNode> methods = getMatchingMethods(iBlockAccess, null, assembleDescriptor("(", blockPos, ")", tileEntity));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/world/IBlockAccess getTileEntity (Lnet/minecraft/util/BlockPos;)Lnet/minecraft/tileentity/TileEntity;",
+					iBlockAccess.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}		
+		
+		// IBlockState getBlockState(BlockPos pos)
+		methods = getMatchingMethods(iBlockAccess, null, assembleDescriptor("(", blockPos, ")", iBlockState));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/world/IBlockAccess getBlockState (Lnet/minecraft/util/BlockPos;)Lnet/minecraft/block/state/IBlockState;",
+					iBlockAccess.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}	
+		
+		// boolean isAirBlock(BlockPos pos);
+		methods = getMatchingMethods(iBlockAccess, null, assembleDescriptor("(", blockPos, ")Z"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/world/IBlockAccess isAirBlock (Lnet/minecraft/util/BlockPos;)Z",
+					iBlockAccess.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// int getStrongPower(BlockPos pos, EnumFacing direction)
+		methods = getMatchingMethods(iBlockAccess, null, assembleDescriptor("(", blockPos, enumFacing, ")I"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/world/IBlockAccess getStrongPower (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)I",
+					iBlockAccess.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+				
+		
+	    // @ClientOnly
+	    // int getCombinedLight(BlockPos pos, int lightValue)
+
+	    // @ClientOnly
+	    // BiomeGenBase getBiomeGenForCoords(BlockPos pos);
+
+	    // @ClientOnly
+	    // boolean extendedLevelsInChunkCache();    
+
+	    // @ClientOnly
+	    // WorldType getWorldType();
+		
+		return true;
+	}
+	
+	
 
 	@Mapping(provides="net/minecraft/util/BlockPos", depends="net/minecraft/block/Block")
 	public static boolean getBlockPosClass()
@@ -830,17 +1093,172 @@ public class DynamicMappings
 		return true;
 	}
 
+	
+	
+	@Mapping(provides={
+			"net/minecraft/util/Vec3i"
+			},
+			providesMethods={
+			"net/minecraft/util/BlockPos down (I)Lnet/minecraft/util/BlockPos;",
+			"net/minecraft/util/BlockPos up (I)Lnet/minecraft/util/BlockPos;",
+			"net/minecraft/util/BlockPos north (I)Lnet/minecraft/util/BlockPos;",
+			"net/minecraft/util/BlockPos south (I)Lnet/minecraft/util/BlockPos;",
+			"net/minecraft/util/BlockPos west (I)Lnet/minecraft/util/BlockPos;",
+			"net/minecraft/util/BlockPos east (I)Lnet/minecraft/util/BlockPos;",
+			"net/minecraft/util/BlockPos down ()Lnet/minecraft/util/BlockPos;",
+			"net/minecraft/util/BlockPos up ()Lnet/minecraft/util/BlockPos;",
+			"net/minecraft/util/BlockPos north ()Lnet/minecraft/util/BlockPos;",
+			"net/minecraft/util/BlockPos south ()Lnet/minecraft/util/BlockPos;",
+			"net/minecraft/util/BlockPos west ()Lnet/minecraft/util/BlockPos;",
+			"net/minecraft/util/BlockPos east ()Lnet/minecraft/util/BlockPos;",
+			"net/minecraft/util/BlockPos offset (Lnet/minecraft/util/EnumFacing;)Lnet/minecraft/util/BlockPos;"
+			},
+			dependsFields={
+			"net/minecraft/util/EnumFacing DOWN Lnet/minecraft/util/EnumFacing;",
+			"net/minecraft/util/EnumFacing UP Lnet/minecraft/util/EnumFacing;",
+			"net/minecraft/util/EnumFacing NORTH Lnet/minecraft/util/EnumFacing;",
+			"net/minecraft/util/EnumFacing SOUTH Lnet/minecraft/util/EnumFacing;",
+			"net/minecraft/util/EnumFacing WEST Lnet/minecraft/util/EnumFacing;",
+			"net/minecraft/util/EnumFacing EAST Lnet/minecraft/util/EnumFacing;"
+			},
+			depends={
+			"net/minecraft/util/BlockPos",
+			"net/minecraft/util/EnumFacing"
+			})
+	public static boolean processBlockPosClass()
+	{
+		ClassNode blockPos = getClassNodeFromMapping("net/minecraft/util/BlockPos");
+		ClassNode enumFacing = getClassNodeFromMapping("net/minecraft/util/EnumFacing");
+		if (blockPos == null || enumFacing == null) return false;		
+		
+		if (searchConstantPoolForStrings(blockPos.superName, "x", "y", "z")) {
+			addClassMapping("net/minecraft/util/Vec3i", blockPos.superName);
+		}
+		
+		FieldNode[] facings = new FieldNode[6];
+		facings[0] = getFieldNodeFromMapping(enumFacing, "net/minecraft/util/EnumFacing DOWN Lnet/minecraft/util/EnumFacing;");
+		facings[1] = getFieldNodeFromMapping(enumFacing, "net/minecraft/util/EnumFacing UP Lnet/minecraft/util/EnumFacing;");
+		facings[2] = getFieldNodeFromMapping(enumFacing, "net/minecraft/util/EnumFacing NORTH Lnet/minecraft/util/EnumFacing;");
+		facings[3] = getFieldNodeFromMapping(enumFacing, "net/minecraft/util/EnumFacing SOUTH Lnet/minecraft/util/EnumFacing;");
+		facings[4] = getFieldNodeFromMapping(enumFacing, "net/minecraft/util/EnumFacing WEST Lnet/minecraft/util/EnumFacing;");
+		facings[5] = getFieldNodeFromMapping(enumFacing, "net/minecraft/util/EnumFacing EAST Lnet/minecraft/util/EnumFacing;");
+		for (int n = 0; n < 6; n++) { if (facings[n] == null) return false; }
+		
+		String[] dirs = new String[] { "down", "up", "north", "south", "west", "east" };
+		
+		MethodNode[] offsetMethods = new MethodNode[6];
+		
+		List<MethodNode> methods = getMatchingMethods(blockPos, null, "(I)L" + blockPos.name + ";");
+		if (methods.size() == 6) 
+		{		
+			for (int methodNum = 0; methodNum < 6; methodNum++) {
+				AbstractInsnNode insn = findNextOpcodeNum(methods.get(methodNum).instructions.getFirst(), Opcodes.GETSTATIC);
+				if (insn == null) continue;
+				FieldInsnNode fn = (FieldInsnNode)insn;
+				if (!fn.owner.equals(enumFacing.name) || !fn.desc.equals("L" + enumFacing.name + ";")) continue;
+				for (int dirNum = 0; dirNum < 6; dirNum++) {
+					if (facings[dirNum].name.equals(fn.name)) {
+						addMethodMapping("net/minecraft/util/BlockPos " + dirs[dirNum] + " (I)Lnet/minecraft/util/BlockPos;",
+								blockPos.name + " " + methods.get(methodNum).name + " " + methods.get(methodNum).desc);						
+						offsetMethods[dirNum] = methods.get(methodNum);
+					}
+				}
+			}
+		}
+		
+		
+		methods = getMatchingMethods(blockPos, null, "()L" + blockPos.name + ";");
+		if (methods.size() == 6) {
+			for (int methodNum = 0; methodNum < 6; methodNum++) {
+				AbstractInsnNode insn = findNextOpcodeNum(methods.get(methodNum).instructions.getFirst(), Opcodes.INVOKEVIRTUAL);
+				if (insn == null) continue;
+				MethodInsnNode mn = (MethodInsnNode)insn;
+				if (!mn.owner.equals(blockPos.name) || !mn.desc.equals("(I)L" + blockPos.name + ";")) continue;
+				for (int dirNum = 0; dirNum < 6; dirNum++) {
+					if (offsetMethods[dirNum].name.equals(mn.name)) {
+						addMethodMapping("net/minecraft/util/BlockPos " + dirs[dirNum] + " ()Lnet/minecraft/util/BlockPos;",
+								blockPos.name + " " + methods.get(methodNum).name + " " + methods.get(methodNum).desc);
+					}
+				}
+			}
+		}
+		
+		
+		// public BlockPos offset(EnumFacing facing)
+		methods = getMatchingMethods(blockPos, null, "(L" + enumFacing.name + ";)L" + blockPos.name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/util/BlockPos offset (Lnet/minecraft/util/EnumFacing;)Lnet/minecraft/util/BlockPos;",
+					blockPos.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		return true;
+	}
+	
+	
+	@Mapping(providesFields={
+			"net/minecraft/util/Vec3i x I",
+			"net/minecraft/util/Vec3i y I",
+			"net/minecraft/util/Vec3i z I"
+			},
+			providesMethods={
+			"net/minecraft/util/Vec3i getX ()I",
+			"net/minecraft/util/Vec3i getY ()I",
+			"net/minecraft/util/Vec3i getZ ()I"
+			},
+			depends={
+			"net/minecraft/util/Vec3i"
+			})
+	public static boolean processVec3iClass()
+	{
+		ClassNode vec3i = getClassNodeFromMapping("net/minecraft/util/Vec3i");
+		if (vec3i == null) return false;		
+		
+		String x = null;
+		String y = null;
+		String z = null;
+		
+		List<FieldNode> fields = getMatchingFields(vec3i, null, "I");
+		if (fields.size() == 3) {
+			x = fields.get(0).name;
+			y = fields.get(1).name;
+			z = fields.get(2).name;
+			addFieldMapping("net/minecraft/util/Vec3i x I", vec3i.name + " " + x + " I");
+			addFieldMapping("net/minecraft/util/Vec3i y I", vec3i.name + " " + y + " I");
+			addFieldMapping("net/minecraft/util/Vec3i z I", vec3i.name + " " + z + " I");			
+		}
+		
+		
+		// public int getX()
+		// public int getY()
+		// public int getZ()
+		List<MethodNode> methods = getMatchingMethods(vec3i, null, "()I");
+		for (MethodNode method : methods) {
+			if (matchOpcodeSequence(method.instructions.getFirst(), Opcodes.ALOAD, Opcodes.GETFIELD, Opcodes.IRETURN)) {
+				FieldInsnNode fn = (FieldInsnNode)findNextOpcodeNum(method.instructions.getFirst(), Opcodes.GETFIELD);
+				if (!fn.owner.equals(vec3i.name) || !fn.desc.equals("I")) continue;
+				
+				if (fn.name.equals(x)) addMethodMapping("net/minecraft/util/Vec3i getX ()I", vec3i.name + " " + method.name + " ()I");
+				else if (fn.name.equals(y)) addMethodMapping("net/minecraft/util/Vec3i getY ()I", vec3i.name + " " + method.name + " ()I");
+				else if (fn.name.equals(z)) addMethodMapping("net/minecraft/util/Vec3i getZ ()I", vec3i.name + " " + method.name + " ()I");
+			}
+		}
+		
+		
+		return true;
+	}
+	
+	
 
 	@Mapping(provides={
 			"net/minecraft/entity/item/EntityItem",
-	"net/minecraft/item/ItemStack"},
-	providesMethods={
+			"net/minecraft/item/ItemStack"},
+			providesMethods={
 			"net/minecraft/block/Block spawnAsEntity (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/item/ItemStack;)V"
-	},
-	depends={
+			},
+			depends={
 			"net/minecraft/world/World",
 			"net/minecraft/util/BlockPos",
-	"net/minecraft/block/Block"})
+			"net/minecraft/block/Block"})
 	public static boolean getEntityItemClass()
 	{
 		ClassNode worldClass = getClassNode(getClassMapping("net/minecraft/world/World"));
@@ -976,7 +1394,10 @@ public class DynamicMappings
 
 
 	@Mapping(provides="net/minecraft/block/BlockLeavesBase",
-			depends={"net/minecraft/block/Block", "net/minecraft/block/BlockLeaves"})
+			depends={
+			"net/minecraft/block/Block", 
+			"net/minecraft/block/BlockLeaves"
+			})
 	public static boolean getBlockLeavesBaseClass()
 	{
 		ClassNode blockLeaves = getClassNode(getClassMapping("net/minecraft/block/BlockLeaves"));
@@ -996,7 +1417,10 @@ public class DynamicMappings
 
 
 	@Mapping(provides="net/minecraft/item/Item",
-			depends={"net/minecraft/block/Block", "net/minecraft/item/ItemStack"})
+			depends={
+			"net/minecraft/block/Block", 
+			"net/minecraft/item/ItemStack"
+			})
 	public static boolean getItemClass()
 	{
 		ClassNode blockClass = getClassNode(getClassMapping("net/minecraft/block/Block"));
@@ -1032,8 +1456,14 @@ public class DynamicMappings
 
 
 
-	@Mapping(provides={"net/minecraft/block/BlockContainer", "net/minecraft/block/ITileEntityProvider"},
-			depends= {"net/minecraft/block/Block", "net/minecraft/block/BlockChest"})
+	@Mapping(provides={
+			"net/minecraft/block/BlockContainer", 
+			"net/minecraft/block/ITileEntityProvider"
+			},
+			depends={
+			"net/minecraft/block/Block", 
+			"net/minecraft/block/BlockChest"
+			})
 	public static boolean getBlockContainerClass()
 	{
 		ClassNode blockClass = getClassNode(getClassMapping("net/minecraft/block/Block"));
@@ -1590,6 +2020,48 @@ public class DynamicMappings
 		return true;
 	}
 
+	
+	@Mapping(providesMethods={
+			"net/minecraft/entity/Entity getFlag (I)Z",
+			"net/minecraft/entity/Entity isSneaking ()Z"
+			},
+			depends={
+			"net/minecraft/entity/Entity"
+			})
+	public static boolean processEntityClass()
+	{
+		ClassNode entity = getClassNodeFromMapping("net/minecraft/entity/Entity");
+		if (entity == null) return false;
+		
+		MethodNode getFlag = null;
+		
+		// protected boolean getFlag(int flag)
+		List<MethodNode> methods = getMatchingMethods(entity, null, "(I)Z");
+		if (methods.size() == 1) {
+			getFlag = methods.get(0);
+			addMethodMapping("net/minecraft/entity/Entity getFlag (I)Z",
+					entity.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		// public boolean isSneaking()
+		methods = getMatchingMethods(entity, null, "()Z");
+		for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) 
+		{
+			MethodNode method = it.next();
+			AbstractInsnNode[] nodes = getOpcodeSequenceArray(method.instructions.getFirst(), Opcodes.ALOAD, Opcodes.ICONST_1, Opcodes.INVOKEVIRTUAL, Opcodes.IRETURN);
+			if (nodes == null) { it.remove(); continue; }
+			MethodInsnNode mn = (MethodInsnNode)nodes[2];
+			if (!mn.owner.equals(entity.name) || !mn.name.equals(getFlag.name) || !mn.desc.equals(getFlag.desc)) it.remove();
+		}
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/entity/Entity isSneaking ()Z", 
+					entity.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		return true;
+	}
+	
+	
 
 	@Mapping(provides="net/minecraft/entity/EntityList", depends="net/minecraft/entity/Entity")
 	public static boolean getEntityListClass()
@@ -1744,7 +2216,10 @@ public class DynamicMappings
 	
 	
 	@Mapping(provides={
-			"net/minecraft/block/BlockAnvil"
+			"net/minecraft/block/BlockAnvil",
+			"net/minecraft/block/BlockDoor",
+			"net/minecraft/block/BlockBed",
+			"net/minecraft/block/BlockFenceGate"
 			},
 			dependsMethods={
 			"net/minecraft/block/Block registerBlocks ()V"
@@ -1786,10 +2261,315 @@ public class DynamicMappings
 			addClassMapping("net/minecraft/block/BlockAnvil", className);
 		}
 		
+		className = blockClasses.get("wooden_door");
+		if (className != null && searchConstantPoolForStrings(className, "hinge")) {
+			addClassMapping("net/minecraft/block/BlockDoor", className);
+		}
+		
+		className = blockClasses.get("bed");
+		if (className != null && searchConstantPoolForStrings(className, "occupied", "tile.bed.occupied")) {
+			addClassMapping("net/minecraft/block/BlockBed", className);
+		}
+		
+		className = blockClasses.get("fence_gate");
+		if (className != null && searchConstantPoolForStrings(className, "in_wall")) {
+			addClassMapping("net/minecraft/block/BlockFenceGate", className);
+		}
 		
 		return true;
 	}
 	
+	
+	@Mapping(provides={
+			"net/minecraft/block/properties/PropertyBool",
+			"net/minecraft/block/BlockDoor$EnumHingePosition",
+			"net/minecraft/block/BlockDoor$EnumDoorHalf"
+			},
+			providesFields={
+			"net/minecraft/block/BlockDoor FACING Lnet/minecraft/block/properties/PropertyDirection;",
+			"net/minecraft/block/BlockDoor HINGE Lnet/minecraft/block/properties/PropertyEnum;",
+			"net/minecraft/block/BlockDoor HALF Lnet/minecraft/block/properties/PropertyEnum;",
+			"net/minecraft/block/BlockDoor OPEN Lnet/minecraft/block/properties/PropertyBool;",
+			"net/minecraft/block/BlockDoor POWERED Lnet/minecraft/block/properties/PropertyBool;"
+			},
+			providesMethods={},
+			depends={
+			"net/minecraft/block/BlockDoor",
+			"net/minecraft/block/properties/PropertyDirection",
+			"net/minecraft/block/properties/PropertyHelper",
+			"net/minecraft/block/properties/PropertyEnum"
+			})
+	public static boolean processBlockDoorClass()
+	{
+		ClassNode blockDoor = getClassNodeFromMapping("net/minecraft/block/BlockDoor");
+		ClassNode propertyDirection = getClassNodeFromMapping("net/minecraft/block/properties/PropertyDirection");
+		ClassNode propertyHelper = getClassNodeFromMapping("net/minecraft/block/properties/PropertyHelper");
+		ClassNode propertyEnum = getClassNodeFromMapping("net/minecraft/block/properties/PropertyEnum");
+		if (!MeddleUtil.notNull(blockDoor, propertyDirection, propertyHelper, propertyEnum)) return false;
+		
+		Set<String> classNames = new HashSet<>();
+		
+		List<FieldNode> directionFields = new ArrayList<>();
+		List<FieldNode> enumFields = new ArrayList<>();
+		List<FieldNode> unknownFields = new ArrayList<>();
+		
+		for (FieldNode field : blockDoor.fields) {
+			Type t = Type.getType(field.desc);
+			if (t.getSort() != Type.OBJECT) continue;
+			if (t.getClassName().equals(propertyDirection.name)) directionFields.add(field);
+			else if (t.getClassName().equals(propertyEnum.name)) enumFields.add(field);
+			else {
+				unknownFields.add(field);
+				classNames.add(t.getClassName());
+			}
+		}
+		
+		if (directionFields.size() == 1) {
+			addFieldMapping("net/minecraft/block/BlockDoor FACING Lnet/minecraft/block/properties/PropertyDirection;",
+					blockDoor.name + " " + directionFields.get(0).name + " " + directionFields.get(0).desc);
+		}
+		
+		ClassNode propertyBool = null;
+		
+		for (String className : classNames) {
+			ClassNode cn = getClassNode(className);
+			if (!cn.superName.equals(propertyHelper.name)) continue;
+			List<MethodNode> methods = getMatchingMethods(cn, "<init>", "(Ljava/lang/String;)V");
+			if (methods.size() == 1) {
+				AbstractInsnNode insn = findNextOpcodeNum(methods.get(0).instructions.getFirst(), Opcodes.LDC);
+				if (insn == null) continue;
+				LdcInsnNode ldc = (LdcInsnNode)insn;
+				if (!(ldc.cst instanceof Type)) continue;
+				if (!((Type)ldc.cst).getClassName().equals("java.lang.Boolean")) continue;
+				addClassMapping("net/minecraft/block/properties/PropertyBool", className);
+				propertyBool = cn;
+				break;
+			}
+		}
+		
+		
+		// Find the PropertyEnum and PropertyBool fields
+		List<MethodNode> methods = getMatchingMethods(blockDoor, "<clinit>", "()V");
+		if (methods.size() == 1) {
+			for (AbstractInsnNode insn = methods.get(0).instructions.getFirst(); insn != null; insn = insn.getNext()) 
+			{				
+				AbstractInsnNode[] nodes;
+				
+				// Try to find PropertyEnum fields				
+				if ((nodes = getOpcodeSequenceArray(insn, Opcodes.LDC, Opcodes.LDC, Opcodes.INVOKESTATIC, Opcodes.PUTSTATIC)) != null) 
+				{			
+					LdcInsnNode ldc1 = (LdcInsnNode)nodes[0];
+					LdcInsnNode ldc2 = (LdcInsnNode)nodes[1];
+					MethodInsnNode mn = (MethodInsnNode)nodes[2];
+					FieldInsnNode fn = (FieldInsnNode)nodes[3];
+					
+					if (!(ldc1.cst instanceof String)) continue;
+					if (!(ldc2.cst instanceof Type)) continue;
+					if (!mn.owner.equals(propertyEnum.name)) continue;
+					if (!fn.owner.equals(blockDoor.name) || !fn.desc.equals("L" + propertyEnum.name + ";")) continue;
+					
+					if (((String)ldc1.cst).equals("hinge")) {
+						String enumHingePosition = ((Type)ldc2.cst).getClassName();
+						if (searchConstantPoolForStrings(enumHingePosition, "LEFT", "RIGHT")) {
+							addClassMapping("net/minecraft/block/BlockDoor$EnumHingePosition", enumHingePosition);
+							addFieldMapping("net/minecraft/block/BlockDoor HINGE Lnet/minecraft/block/properties/PropertyEnum;",
+									blockDoor.name + " " + fn.name + " " + fn.desc);
+						}
+					}
+					else if (((String)ldc1.cst).equals("half")) {
+						String enumDoorHalf = ((Type)ldc2.cst).getClassName();
+						if (searchConstantPoolForStrings(enumDoorHalf, "UPPER", "LOWER")) {
+							addClassMapping("net/minecraft/block/BlockDoor$EnumDoorHalf", enumDoorHalf);
+							addFieldMapping("net/minecraft/block/BlockDoor HALF Lnet/minecraft/block/properties/PropertyEnum;",
+									blockDoor.name + " " + fn.name + " " + fn.desc);
+						}
+					}
+					
+					insn = nodes[3];					
+					continue;
+				}
+				// Try to find PropertyBool fields
+				else if ((nodes = getOpcodeSequenceArray(insn, Opcodes.LDC, Opcodes.INVOKESTATIC, Opcodes.PUTSTATIC)) != null) 
+				{
+					LdcInsnNode ldc = (LdcInsnNode)nodes[0];					
+					MethodInsnNode mn = (MethodInsnNode)nodes[1];
+					FieldInsnNode fn = (FieldInsnNode)nodes[2];
+					
+					if (!(ldc.cst instanceof String)) continue;
+					if (!mn.owner.equals(propertyBool.name)) continue;
+					if (!fn.owner.equals(blockDoor.name) || !fn.desc.equals("L" + propertyBool.name + ";")) continue;
+					
+					if (((String)ldc.cst).equals("open")) {
+						addFieldMapping("net/minecraft/block/BlockDoor OPEN Lnet/minecraft/block/properties/PropertyBool;",
+								blockDoor.name + " " + fn.name + " " + fn.desc);
+					}
+					else if (((String)ldc.cst).equals("powered")) {
+						addFieldMapping("net/minecraft/block/BlockDoor POWERED Lnet/minecraft/block/properties/PropertyBool;",
+								blockDoor.name + " " + fn.name + " " + fn.desc);
+					}
+					
+					insn = nodes[2];					
+					continue;
+				}
+			}
+		}
+		
+		
+		
+		
+		return true;
+	}
+			
+	
+	
+	@Mapping(provides={
+			"net/minecraft/util/IStringSerializable"
+			},
+			providesMethods={
+			"net/minecraft/util/IStringSerializable getName ()Ljava/lang/String;"
+			},
+			providesFields={
+			"net/minecraft/block/BlockDoor$EnumHingePosition LEFT Lnet/minecraft/block/BlockDoor$EnumHingePosition;",
+			"net/minecraft/block/BlockDoor$EnumHingePosition RIGHT Lnet/minecraft/block/BlockDoor$EnumHingePosition;",
+			"net/minecraft/block/BlockDoor$EnumDoorHalf UPPER Lnet/minecraft/block/BlockDoor$EnumDoorHalf;",
+			"net/minecraft/block/BlockDoor$EnumDoorHalf LOWER Lnet/minecraft/block/BlockDoor$EnumDoorHalf;"			
+			},
+			depends={
+			"net/minecraft/block/BlockDoor$EnumHingePosition",
+			"net/minecraft/block/BlockDoor$EnumDoorHalf"
+			})
+	public static boolean processBlockDoorProperties()
+	{
+		ClassNode hingePosition = getClassNodeFromMapping("net/minecraft/block/BlockDoor$EnumHingePosition");
+		ClassNode doorHalf = getClassNodeFromMapping("net/minecraft/block/BlockDoor$EnumDoorHalf");
+		if (hingePosition == null || doorHalf == null) return false;
+		
+		List<FieldNode> fields = getMatchingFields(hingePosition, null, "L" + hingePosition.name + ";");
+		if (fields.size() == 2) {
+			addFieldMapping("net/minecraft/block/BlockDoor$EnumHingePosition LEFT Lnet/minecraft/block/BlockDoor$EnumHingePosition;",
+					hingePosition.name + " " + fields.get(0).name + " " + fields.get(0).desc);
+			addFieldMapping("net/minecraft/block/BlockDoor$EnumHingePosition RIGHT Lnet/minecraft/block/BlockDoor$EnumHingePosition;",
+					hingePosition.name + " " + fields.get(1).name + " " + fields.get(1).desc);
+		}
+		
+		fields = getMatchingFields(doorHalf, null, "L" + doorHalf.name + ";");
+		if (fields.size() == 2) {
+			addFieldMapping("net/minecraft/block/BlockDoor$EnumDoorHalf UPPER Lnet/minecraft/block/BlockDoor$EnumDoorHalf;",
+					doorHalf.name + " " + fields.get(0).name + " " + fields.get(0).desc);
+			addFieldMapping("net/minecraft/block/BlockDoor$EnumDoorHalf LOWER Lnet/minecraft/block/BlockDoor$EnumDoorHalf;",
+					doorHalf.name + " " + fields.get(1).name + " " + fields.get(1).desc);
+		}
+		
+		
+		// Find IStringSerializable while we're here
+		if (hingePosition.interfaces.size() == 1 && doorHalf.interfaces.size() == 1 && hingePosition.interfaces.get(0).equals(doorHalf.interfaces.get(0))) {
+			String iStringSerializable_name = hingePosition.interfaces.get(0);
+			
+			ClassNode iStringSerializable = getClassNode(iStringSerializable_name);
+			if (iStringSerializable == null) return false;
+			
+			List<MethodNode> methods = getMatchingMethods(iStringSerializable, null, "()Ljava/lang/String;");
+			if (methods.size() == 1) {
+				addClassMapping("net/minecraft/util/IStringSerializable", iStringSerializable_name);
+				addMethodMapping("net/minecraft/util/IStringSerializable getName ()Ljava/lang/String;", 
+						iStringSerializable_name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			}
+		}
+		
+		return true;
+	}
+	
+	
+	
+	
+	@Mapping(provides={
+			"net/minecraft/block/BlockDirectional",
+			"net/minecraft/block/properties/PropertyDirection"
+			},
+			providesFields={
+			"net/minecraft/block/BlockDirectional FACING Lnet/minecraft/block/properties/PropertyDirection;"
+			},
+			depends={
+			"net/minecraft/block/BlockBed", 
+			"net/minecraft/block/BlockFenceGate", 
+			"net/minecraft/block/Block",
+			"net/minecraft/util/EnumFacing"
+			})
+	public static boolean getBlockDirectionalClass()
+	{
+		ClassNode blockBed = getClassNodeFromMapping("net/minecraft/block/BlockBed");
+		ClassNode blockFenceGate = getClassNodeFromMapping("net/minecraft/block/BlockFenceGate");
+		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
+		ClassNode enumFacing = getClassNodeFromMapping("net/minecraft/util/EnumFacing");
+		if (!MeddleUtil.notNull(blockBed, blockFenceGate, block, enumFacing)) return false;
+		
+		// These should share this class as their parent
+		if (!blockBed.superName.equals(blockFenceGate.superName)) return false;
+		if (!searchConstantPoolForStrings(blockBed.superName, "facing")) return false;
+				
+		addClassMapping("net/minecraft/block/BlockDirectional", blockBed.superName);
+		
+		ClassNode blockDirectional = getClassNode(blockBed.superName);
+		
+		// Should only have one PropertyDirection field
+		if (blockDirectional.fields.size() != 1) return false;
+		if (!blockDirectional.fields.get(0).desc.startsWith("L")) return false;
+		
+		String propertyDirection_name = Type.getType(blockDirectional.fields.get(0).desc).getClassName();
+		if (!searchConstantPoolForClasses(propertyDirection_name, enumFacing.name)) return false;
+		addClassMapping("net/minecraft/block/properties/PropertyDirection", propertyDirection_name);
+		
+		addFieldMapping("net/minecraft/block/BlockDirectional FACING Lnet/minecraft/block/properties/PropertyDirection;", 
+				blockDirectional.name + " " + blockDirectional.fields.get(0).name + " " + blockDirectional.fields.get(0).desc);
+		
+		return true;
+	}
+	
+	
+	@Mapping(provides={
+			"net/minecraft/block/properties/PropertyEnum",
+			"net/minecraft/block/properties/PropertyHelper"
+			},
+			providesMethods = {
+			"net/minecraft/block/properties/PropertyDirection create (Ljava/lang/String;)Lnet/minecraft/block/properties/PropertyDirection;"
+			},
+			depends={
+			"net/minecraft/block/properties/PropertyDirection",
+			"net/minecraft/block/properties/IProperty"
+			})
+	public static boolean processPropertyDirectionClass()
+	{
+		ClassNode propertyDirection = getClassNodeFromMapping("net/minecraft/block/properties/PropertyDirection");
+		ClassNode iProperty = getClassNodeFromMapping("net/minecraft/block/properties/IProperty");
+		if (!MeddleUtil.notNull(propertyDirection,iProperty)) return false;
+		
+		
+		List<MethodNode> methods = getMatchingMethods(propertyDirection, null, "(Ljava/lang/String;)L" + propertyDirection.name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/properties/PropertyDirection create (Ljava/lang/String;)Lnet/minecraft/block/properties/PropertyDirection;",
+					propertyDirection.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		
+		String propertyEnum_name = null; 
+		if (searchConstantPoolForStrings(propertyDirection.superName, "Multiple values have the same name \'")) {
+			propertyEnum_name = propertyDirection.superName;
+			addClassMapping("net/minecraft/block/properties/PropertyEnum", propertyEnum_name);
+		}
+		else return false;
+		
+		ClassNode propertyEnum = getClassNode(propertyEnum_name);
+		if (propertyEnum == null) return false;
+		
+		String propertyHelper_name = null;
+		if (searchConstantPoolForStrings(propertyEnum.superName, "name", "clazz", "values")) {
+			propertyHelper_name = propertyEnum.superName;
+			addClassMapping("net/minecraft/block/properties/PropertyHelper", propertyHelper_name);
+		}
+		
+		return true;
+	}
 	
 	
 	
@@ -2774,6 +3554,8 @@ public class DynamicMappings
 							mn.owner + " " + mn.name + " " + mn.desc);
 				}
 			}
+			
+			
 		}
 		
 		
@@ -3326,17 +4108,63 @@ public class DynamicMappings
 		return true;
 	}
 
+	
+	
+	@Mapping(providesFields={
+			"net/minecraft/util/EnumFacing DOWN Lnet/minecraft/util/EnumFacing;",
+			"net/minecraft/util/EnumFacing UP Lnet/minecraft/util/EnumFacing;",
+			"net/minecraft/util/EnumFacing NORTH Lnet/minecraft/util/EnumFacing;",
+			"net/minecraft/util/EnumFacing SOUTH Lnet/minecraft/util/EnumFacing;",
+			"net/minecraft/util/EnumFacing WEST Lnet/minecraft/util/EnumFacing;",
+			"net/minecraft/util/EnumFacing EAST Lnet/minecraft/util/EnumFacing;"
+			},
+			depends={
+			"net/minecraft/util/EnumFacing"
+			})
+	public static boolean processEnumFacingClass()
+	{
+		ClassNode enumFacing = getClassNodeFromMapping("net/minecraft/util/EnumFacing");
+		if (enumFacing == null) return false;	
+		
+		List<FieldNode> fields = getMatchingFields(enumFacing, null, "L" + enumFacing.name + ";");
+		if (fields.size() == 6) {
+			
+			String[] names = new String[] { "DOWN", "UP", "NORTH", "SOUTH", "WEST", "EAST" };
+			
+			for (int n = 0; n < 6; n++) {				
+				addFieldMapping("net/minecraft/util/EnumFacing " + names[n] + " Lnet/minecraft/util/EnumFacing;",
+						enumFacing.name + " " + fields.get(n).name + " " + fields.get(n).desc);
+			}
+		}
+		
+		return true;
+	}
+	
+	
+	
 
 	@Mapping(providesFields={
 			"net/minecraft/world/World isRemote Z"
-	},
-	depends={
-			"net/minecraft/world/World"
-	})
+			},
+			providesMethods={
+			"net/minecraft/world/World setBlockState (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z",
+			"net/minecraft/world/World markBlockForUpdate (Lnet/minecraft/util/BlockPos;)V",
+			"net/minecraft/world/World markBlockRangeForRenderUpdate (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/BlockPos;)V",
+			"net/minecraft/world/World playAuxSFXAtEntity (Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/BlockPos;I)V"
+			},
+			depends={
+			"net/minecraft/world/World",
+			"net/minecraft/util/BlockPos",
+			"net/minecraft/block/state/IBlockState",
+			"net/minecraft/entity/player/EntityPlayer"
+			})
 	public static boolean processWorldClass()
 	{
 		ClassNode world = getClassNodeFromMapping("net/minecraft/world/World");
-		if (world == null) return false;
+		ClassNode blockPos = getClassNodeFromMapping("net/minecraft/util/BlockPos");
+		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
+		ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
+		if (world == null || blockPos == null || iBlockState == null || entityPlayer == null) return false;
 
 		int count = 0;
 
@@ -3350,6 +4178,45 @@ public class DynamicMappings
 		else isRemote = null;
 
 
+		// public boolean setBlockState(BlockPos pos, IBlockState newState, int flags)
+		List<MethodNode> methods = getMatchingMethods(world, null, assembleDescriptor("(", blockPos, iBlockState, "I)Z"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/world/World setBlockState (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z",
+					world.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			
+			
+			// public void markBlockForUpdate(BlockPos pos)
+			List<MethodInsnNode> nodes = new ArrayList<>();
+			for (AbstractInsnNode insn = methods.get(0).instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				if (insn.getOpcode() != Opcodes.INVOKEVIRTUAL) continue;
+				MethodInsnNode mn = (MethodInsnNode)insn;
+				if (mn.owner.equals(world.name) && mn.desc.equals("(L" + blockPos.name + ";)V")) {
+					nodes.add(mn);
+				}
+			}
+			
+			if (nodes.size() == 1) {
+				addMethodMapping("net/minecraft/world/World markBlockForUpdate (Lnet/minecraft/util/BlockPos;)V",
+						world.name + " " + nodes.get(0).name + " " + nodes.get(0).desc);
+			}
+		}	
+		
+		
+		// public void markBlockRangeForRenderUpdate(BlockPos rangeMin, BlockPos rangeMax)
+		methods = getMatchingMethods(world, null, assembleDescriptor("(", blockPos, blockPos, ")V"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/world/World markBlockRangeForRenderUpdate (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/BlockPos;)V",
+					world.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		// public void playAuxSFXAtEntity(EntityPlayer player, int sfxType, BlockPos pos, int p_180498_4_)
+		methods = getMatchingMethods(world, null, assembleDescriptor("(", entityPlayer, "I", blockPos, "I)V"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/world/World playAuxSFXAtEntity (Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/BlockPos;I)V",
+					world.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
 		return true;
 	}
 
@@ -3857,19 +4724,26 @@ public class DynamicMappings
 			"net/minecraft/inventory/IInventory getStackInSlot (I)Lnet/minecraft/item/ItemStack;",
 			"net/minecraft/inventory/IInventory getStackInSlotOnClosing (I)Lnet/minecraft/item/ItemStack;",
 			"net/minecraft/inventory/IInventory markDirty ()V",
-			"net/minecraft/inventory/IInventory clear ()V"
+			"net/minecraft/inventory/IInventory clear ()V",
+			"net/minecraft/inventory/IInventory decrStackSize (II)Lnet/minecraft/item/ItemStack;",
+			"net/minecraft/inventory/IInventory isUseableByPlayer (Lnet/minecraft/entity/player/EntityPlayer;)Z",
+			"net/minecraft/inventory/IInventory isItemValidForSlot (ILnet/minecraft/item/ItemStack;)Z",
+			"net/minecraft/inventory/IInventory getField (I)I",
+			"net/minecraft/inventory/IInventory setField (II)V"
 	},
 	depends={
 			"net/minecraft/inventory/IInventory",
 			"net/minecraft/inventory/InventoryBasic",
-			"net/minecraft/item/ItemStack"
+			"net/minecraft/item/ItemStack",
+			"net/minecraft/entity/player/EntityPlayer"
 	})
 	public static boolean processInventoryBasicClass()
 	{
 		ClassNode iInventory = getClassNodeFromMapping("net/minecraft/inventory/IInventory");
 		ClassNode inventoryBasic = getClassNodeFromMapping("net/minecraft/inventory/InventoryBasic");
 		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
-		if (iInventory == null || inventoryBasic == null || itemStack == null) return false;
+		ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
+		if (!MeddleUtil.notNull(iInventory, inventoryBasic, itemStack, entityPlayer)) return false;
 
 		String slotsCountField = null;
 		String inventoryTitleField = null;
@@ -4007,88 +4881,70 @@ public class DynamicMappings
 		}
 		
 		
+		// public ItemStack decrStackSize(int index, int count)
+		methods = getMatchingMethods(inventoryBasic, null, "(II)L" + itemStack.name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/IInventory decrStackSize (II)Lnet/minecraft/item/ItemStack;",
+					iInventory.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
 
+		// boolean isUseableByPlayer(EntityPlayer player)
+		methods = getMatchingMethods(inventoryBasic, null, "(L" + entityPlayer.name + ";)Z");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/IInventory isUseableByPlayer (Lnet/minecraft/entity/player/EntityPlayer;)Z",
+					iInventory.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// boolean isItemValidForSlot(int index, ItemStack stack)
+		methods = getMatchingMethods(inventoryBasic, null, "(IL" + itemStack.name + ";)Z");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/IInventory isItemValidForSlot (ILnet/minecraft/item/ItemStack;)Z",
+					iInventory.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// int getField(int id)		
+		methods = getMatchingMethods(inventoryBasic, null, "(I)I");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/IInventory getField (I)I",
+					iInventory.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// void setField(int id, int value)
+		methods = getMatchingMethods(inventoryBasic, null, "(II)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/IInventory setField (II)V",
+					iInventory.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
 		return true;
 	}
 
 	
 	
-	public static JarFile getMinecraftJar()
-	{
-		URL url = MeddleUtil.class.getClassLoader().getResource("net/minecraft/server/MinecraftServer.class");	
-		if (url == null) return null;		
-		
-		JarFile jar = null;
-		
-		if ("jar".equals(url.getProtocol())) {
-			JarURLConnection connection = null;
-			try {
-				connection = (JarURLConnection) url.openConnection();
-				jar = connection.getJarFile();
-			} catch (IOException e) {}
-		}
-		
-		return jar;
-	}	
-
-
-	
-	public static boolean isSubclassOf(String className, String superClassName)
-	{
-		InputStream stream = DynamicMappings.class.getClassLoader().getResourceAsStream(className + ".class");
-		if (stream == null) return false;	
-		ClassReader reader = null;
-		try {
-			reader = new ClassReader(stream);
-		} catch (IOException e) {}
-		if (reader == null) return false;
-		
-		String superName = reader.getSuperName();
-		if (superName.equals(superClassName)) return true;
-		if (superName.equals("java/lang/Object")) return false;
-		return isSubclassOf(superName, superClassName);
-	}
 	
 	
-	public static void generateClassMappings()
-	{		
-		DynamicMappings.registerMappingsClass(DynamicMappings.class);
-		if (MeddleUtil.isClientJar()) DynamicClientMappings.generateClassMappings();
-		
-	}
-
-
-	//////////////////////////////////////////////////////////////////////////
-
-
-	// Use untyped list in case someone compiles without debug version of ASM.
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static List<MethodNode> getMethodsWithDescriptor(List methods, String desc)
-	{
-		List<MethodNode> list = new ArrayList<MethodNode>();
-		for (MethodNode method : (List<MethodNode>)methods) {
-			if (method.desc.equals(desc)) list.add(method);
-		}
-		return list;
-	}
-
-	public static List<MethodNode> removeMethodsWithFlags(List<MethodNode> methods, int accFlags)
-	{
-		List<MethodNode> outList = new ArrayList<MethodNode>();
-		for (MethodNode mn : methods) {
-			if ((mn.access & accFlags) == 0) outList.add(mn);
-		}
-		return outList;
-	}
-
-	public static List<MethodNode> removeMethodsWithoutFlags(List<MethodNode> methods, int accFlags)
-	{
-		List<MethodNode> outList = new ArrayList<MethodNode>();
-		for (MethodNode mn : methods) {
-			if ((mn.access & accFlags) != 0) outList.add(mn);
-		}
-		return outList;
-	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 
 

@@ -222,7 +222,16 @@ public class DynamicRemap
 		@Override
 		public void visitInnerClass(String name, String outerName, String innerName, int access) 
 		{
+			// TODO - Might need to handle for nested inner classes
 			if (classMappings.containsKey(name)) {
+				String outer = classMappings.get(outerName);
+				if (outer == null) outer = outerName;
+				outerName = outer;
+				
+				name = classMappings.get(name);
+				innerName = name.substring(name.lastIndexOf("$") + 1);
+				//System.out.println("INNER: " + outerName + " " + innerName);
+				
 				super.visitInnerClass(name, outerName, innerName, access);
 				return;
 			}
@@ -387,6 +396,8 @@ public class DynamicRemap
 				String filename = entry.getName();				
 				if (!filename.endsWith(".class")) continue;
 				String className = filename.substring(0, filename.length() - 6);
+				
+				if (className.contains("$")) continue;
 				
 				if (blockClass != null && DynamicMappings.isSubclassOf(className, blockClass) && !DynamicMappings.reverseClassMappings.containsKey(className)) {
 					DynamicMappings.addClassMapping("net/minecraft/block/BlockUnknown_" + className, className);
