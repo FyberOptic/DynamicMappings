@@ -128,7 +128,11 @@ public class DynamicClientMappings
 	
 	@Mapping(provides={
 			"net/minecraft/world/WorldSettings",
-			"net/minecraft/server/integrated/IntegratedServer"
+			"net/minecraft/server/integrated/IntegratedServer",
+			"net/minecraft/client/multiplayer/WorldClient"
+			},
+			providesFields={
+			"net/minecraft/client/Minecraft theWorld Lnet/minecraft/client/multiplayer/WorldClient;"
 			},
 			providesMethods={
 			"net/minecraft/client/Minecraft getMinecraft ()Lnet/minecraft/client/Minecraft;",
@@ -139,20 +143,37 @@ public class DynamicClientMappings
 			},
 			depends={
 			"net/minecraft/client/Minecraft",
-			"net/minecraft/client/renderer/entity/RenderItem"
+			"net/minecraft/client/renderer/entity/RenderItem",
+			"net/minecraft/world/World"
 			})
-	public static boolean parseMinecraftClass()
+	public static boolean processMinecraftClass()
 	{
 		ClassNode minecraft = getClassNodeFromMapping("net/minecraft/client/Minecraft");
 		ClassNode renderItem = getClassNodeFromMapping("net/minecraft/client/renderer/entity/RenderItem");
-		if (minecraft == null || renderItem == null) return false;
+		ClassNode world = getClassNodeFromMapping("net/minecraft/world/World");
+		if (minecraft == null || renderItem == null || world == null) return false;
 		
+		
+		List<FieldNode> fields;
+		
+		Set<String> fieldClasses = new HashSet<String>();
+		for (FieldNode field : minecraft.fields) {
+			if (!field.desc.startsWith("L")) continue;
+			Type t = Type.getType(field.desc);			
+			fieldClasses.add(t.getClassName());
+		}
+		
+		
+		
+		// public static Minecraft getMinecraft()
 		List<MethodNode> methods = DynamicMappings.getMatchingMethods(minecraft,  null, "()L" + minecraft.name + ";");
 		if (methods.size() == 1) {
 			addMethodMapping("net/minecraft/client/Minecraft getMinecraft ()Lnet/minecraft/client/Minecraft;",
 					minecraft.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
+		
+		// public RenderItem getRenderItem()
 		methods = DynamicMappings.getMatchingMethods(minecraft, null, "()L" + renderItem.name + ";");
 		if (methods.size() == 1) {
 			addMethodMapping("net/minecraft/client/Minecraft getRenderItem ()Lnet/minecraft/client/renderer/entity/RenderItem;",
@@ -175,6 +196,9 @@ public class DynamicClientMappings
 		
 		String integratedServer_name = null;
 		
+		// public void launchIntegratedServer(String folderName, String worldName, WorldSettings worldSettingsIn)
+		// net/minecraft/world/WorldSettings
+		// net/minecraft/server/integrated/IntegratedServer
 		methods.clear();
 		for (MethodNode method : minecraft.methods) {
 			if (!DynamicMappings.checkMethodParameters(method,  Type.OBJECT, Type.OBJECT, Type.OBJECT)) continue;
@@ -203,11 +227,47 @@ public class DynamicClientMappings
 			}
 		}
 		
+		// public IntegratedServer getIntegratedServer()
 		if (integratedServer_name != null) {
 			methods = DynamicMappings.getMatchingMethods(minecraft, null, "()L" + integratedServer_name + ";");
 			if (methods.size() == 1) {
 				addMethodMapping("net/minecraft/client/Minecraft getIntegratedServer ()Lnet/minecraft/server/integrated/IntegratedServer;",
 						minecraft.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			}
+		}
+		
+		ClassNode worldClient = null;
+		
+		methods = DynamicMappings.getMatchingMethods(minecraft, null, "(I)V");
+		for (MethodNode method : methods) {
+			List<FieldInsnNode> fieldNodes = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), FieldInsnNode.class);
+			
+			String theWorld_name = null;
+			int count = 0;
+			
+			for (FieldInsnNode f : fieldNodes) {
+				if (!f.desc.startsWith("L")) continue;
+				if (!f.owner.equals(minecraft.name)) continue;
+				String className = Type.getType(f.desc).getClassName();
+				
+				if (worldClient == null) {					
+					ClassNode cn = getClassNode(className);
+					if (cn == null) continue;
+					if (cn.superName.equals(world.name) && DynamicMappings.searchConstantPoolForStrings(className, "MpServer", "doDaylightCycle", "Quitting")) {
+						addClassMapping("net/minecraft/client/multiplayer/WorldClient", className);
+						worldClient = cn;
+					}
+				}
+				
+				if (worldClient != null && worldClient.name.equals(className)) { 
+					if (theWorld_name == null) { theWorld_name = f.name; count++; }
+					else if (!theWorld_name.equals(f.name)) count++;
+				}
+			}
+			
+			if (count == 1) {
+				addFieldMapping("net/minecraft/client/Minecraft theWorld Lnet/minecraft/client/multiplayer/WorldClient;",
+						minecraft.name + " " + theWorld_name + " L" + worldClient.name + ";");
 			}
 		}
 		

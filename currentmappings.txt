@@ -1,4 +1,4 @@
-Minecraft version: 15w36c
+Minecraft version: 15w36d
 Minecraft jar type: client
 
 CLASSES:
@@ -16,6 +16,7 @@ net/minecraft/block/BlockFenceGate -> ake
 net/minecraft/block/BlockFire -> akf
 net/minecraft/block/BlockLeaves -> ale
 net/minecraft/block/BlockLeavesBase -> anu
+net/minecraft/block/BlockSlab -> aks
 net/minecraft/block/ITileEntityProvider -> aka
 net/minecraft/block/material/MapColor -> avx
 net/minecraft/block/material/Material -> avw
@@ -41,6 +42,7 @@ net/minecraft/client/gui/inventory/GuiContainer -> bcw
 net/minecraft/client/main/GameConfiguration -> bfd
 net/minecraft/client/main/Main -> net/minecraft/client/main/Main
 net/minecraft/client/multiplayer/GuiConnecting -> bbl
+net/minecraft/client/multiplayer/WorldClient -> bhu
 net/minecraft/client/network/NetHandlerPlayClient -> bhr
 net/minecraft/client/renderer/ItemModelMesher -> bkk
 net/minecraft/client/renderer/RenderGlobal -> bkn
@@ -83,6 +85,7 @@ net/minecraft/item/EnumDyeColor -> abv
 net/minecraft/item/Item -> aco
 net/minecraft/item/ItemBanner -> abb
 net/minecraft/item/ItemBlock -> abd
+net/minecraft/item/ItemDye -> abw
 net/minecraft/item/ItemSoup -> abj
 net/minecraft/item/ItemStack -> acq
 net/minecraft/item/ItemSword -> adx
@@ -153,6 +156,7 @@ net/minecraft/block/BlockDoor$EnumHingePosition LEFT Lnet/minecraft/block/BlockD
 net/minecraft/block/BlockDoor$EnumHingePosition RIGHT Lnet/minecraft/block/BlockDoor$EnumHingePosition; -> ajp$b b Lajp$b;
 net/minecraft/client/Minecraft gameSettings Lnet/minecraft/client/entity/EntityPlayerSP; -> azo t Lazr;
 net/minecraft/client/Minecraft thePlayer Lnet/minecraft/client/entity/EntityPlayerSP; -> azo h Lbjt;
+net/minecraft/client/Minecraft theWorld Lnet/minecraft/client/multiplayer/WorldClient; -> azo f Lbhu;
 net/minecraft/client/gui/GuiScreen buttonList Ljava/util/List; -> bce n Ljava/util/List;
 net/minecraft/client/gui/GuiScreen fontRendererObj Lnet/minecraft/client/gui/FontRenderer; -> bce q Lazx;
 net/minecraft/client/gui/GuiScreen height I -> bce m I
@@ -183,6 +187,8 @@ net/minecraft/entity/monster/EntityEnderman carriableBlocks Ljava/util/Set; -> x
 net/minecraft/entity/player/EntityPlayer inventory Lnet/minecraft/entity/player/InventoryPlayer; -> yw bp Lyv;
 net/minecraft/entity/player/EntityPlayer openContainer Lnet/minecraft/inventory/Container; -> yw br Lzw;
 net/minecraft/init/Blocks chest Lnet/minecraft/block/BlockChest; -> aio ae Laiy;
+net/minecraft/init/Blocks dirt Lnet/minecraft/block/Block; -> aio d Lain;
+net/minecraft/init/Blocks obsidian Lnet/minecraft/block/Block; -> aio Z Lain;
 net/minecraft/init/Items leather Lnet/minecraft/item/Item; -> acs aH Laco;
 net/minecraft/inventory/Container inventorySlots Ljava/util/List; -> zw c Ljava/util/List;
 net/minecraft/inventory/Container windowId I -> zw d I
@@ -243,6 +249,7 @@ net/minecraft/block/Block getStateId (Lnet/minecraft/block/state/IBlockState;)I 
 net/minecraft/block/Block getUnlocalizedName ()Ljava/lang/String; -> ain a ()Ljava/lang/String;
 net/minecraft/block/Block onBlockActivated (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumFacing;FFF)Z -> ain a (Lagq;Lcj;Lapp;Lyw;Lpx;Lacq;Lcq;FFF)Z
 net/minecraft/block/Block onBlockClicked (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/player/EntityPlayer;)V -> ain a (Lagq;Lcj;Lyw;)V
+net/minecraft/block/Block onBlockEventReceived (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;II)Z -> ain a (Lagq;Lcj;Lapp;II)Z
 net/minecraft/block/Block onBlockPlaced (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;FFFILnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/block/state/IBlockState; -> ain a (Lagq;Lcj;Lcq;FFFILrk;)Lapp;
 net/minecraft/block/Block onEntityCollidedWithBlock (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/Entity;)V -> ain a (Lagq;Lcj;Lrb;)V
 net/minecraft/block/Block onNeighborBlockChange (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/Block;)V -> ain a (Lagq;Lcj;Lapp;Lain;)V
@@ -253,6 +260,7 @@ net/minecraft/block/Block setBlockBounds (FFFFFF)V -> ain a (FFFFFF)V
 net/minecraft/block/Block setDefaultState (Lnet/minecraft/block/state/IBlockState;)V -> ain j (Lapp;)V
 net/minecraft/block/Block setUnlocalizedName (Ljava/lang/String;)Lnet/minecraft/block/Block; -> ain c (Ljava/lang/String;)Lain;
 net/minecraft/block/Block spawnAsEntity (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/item/ItemStack;)V -> ain a (Lagq;Lcj;Lacq;)V
+net/minecraft/block/ITileEntityProvider createNewTileEntity (Lnet/minecraft/world/World;I)Lnet/minecraft/tileentity/TileEntity; -> aka a (Lagq;I)Laok;
 net/minecraft/block/material/Material getMaterialMapColor ()Lnet/minecraft/block/material/MapColor; -> avw r ()Lavx;
 net/minecraft/block/properties/PropertyDirection create (Ljava/lang/String;)Lnet/minecraft/block/properties/PropertyDirection; -> aqb a (Ljava/lang/String;)Laqb;
 net/minecraft/block/state/BlockState getAllowedValues ()Ljava/util/List; -> apq e ()Ljava/util/List;
@@ -390,6 +398,7 @@ net/minecraft/item/Item registerItemBlock (Lnet/minecraft/block/Block;)V -> aco 
 net/minecraft/item/Item registerItemBlock (Lnet/minecraft/block/Block;Lnet/minecraft/item/Item;)V -> aco a (Lain;Laco;)V
 net/minecraft/item/Item registerItems ()V -> aco t ()V
 net/minecraft/item/Item setCreativeTab (Lnet/minecraft/creativetab/CreativeTabs;)Lnet/minecraft/item/Item; -> aco a (Labr;)Laco;
+net/minecraft/item/Item setHasSubtypes (Z)Lnet/minecraft/item/Item; -> aco a (Z)Laco;
 net/minecraft/item/Item setMaxDamage (I)Lnet/minecraft/item/Item; -> aco e (I)Laco;
 net/minecraft/item/Item setMaxStackSize (I)Lnet/minecraft/item/Item; -> aco d (I)Laco;
 net/minecraft/item/Item setUnlocalizedName (Ljava/lang/String;)Lnet/minecraft/item/Item; -> aco c (Ljava/lang/String;)Laco;
@@ -399,12 +408,16 @@ net/minecraft/item/ItemStack getItem ()Lnet/minecraft/item/Item; -> acq b ()Laco
 net/minecraft/item/ItemStack getTagCompound ()Lnet/minecraft/nbt/NBTTagCompound; -> acq o ()Ldn;
 net/minecraft/item/ItemStack getUnlocalizedName ()Ljava/lang/String; -> acq a ()Ljava/lang/String;
 net/minecraft/item/ItemStack hasTagCompound ()Z -> acq n ()Z
+net/minecraft/item/ItemStack isDamageableItemEqual (Lnet/minecraft/item/ItemStack;)Z -> acq b (Lacq;)Z
 net/minecraft/item/ItemStack isItemEnchanted ()Z -> acq w ()Z
 net/minecraft/item/ItemStack isItemEqual (Lnet/minecraft/item/ItemStack;)Z -> acq a (Lacq;)Z
-net/minecraft/item/ItemStack isItemStackEqual (Lnet/minecraft/item/ItemStack;)Z -> acq d (Lacq;)Z
+net/minecraft/item/ItemStack isItemStackDamageable ()Z -> acq e ()Z
+net/minecraft/item/ItemStack isItemStackEqual (Lnet/minecraft/item/ItemStack;)Z -> acq e (Lacq;)Z
 net/minecraft/item/ItemStack loadItemStackFromNBT (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/item/ItemStack; -> acq a (Ldn;)Lacq;
 net/minecraft/item/ItemStack readFromNBT (Lnet/minecraft/nbt/NBTTagCompound;)V -> acq c (Ldn;)V
 net/minecraft/item/ItemStack setTagCompound (Lnet/minecraft/nbt/NBTTagCompound;)V -> acq d (Ldn;)V
+net/minecraft/item/ItemStack setTagInfo (Ljava/lang/String;Lnet/minecraft/nbt/NBTBase;)V -> acq a (Ljava/lang/String;Leb;)V
+net/minecraft/item/ItemStack splitStack (I)Lnet/minecraft/item/ItemStack; -> acq a (I)Lacq;
 net/minecraft/item/ItemStack writeToNBT (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound; -> acq b (Ldn;)Ldn;
 net/minecraft/item/crafting/CraftingManager addRecipe (Lnet/minecraft/item/ItemStack;[Ljava/lang/Object;)Lnet/minecraft/item/crafting/ShapedRecipes; -> aev a (Lacq;[Ljava/lang/Object;)Laex;
 net/minecraft/item/crafting/CraftingManager addShapelessRecipe (Lnet/minecraft/item/ItemStack;[Ljava/lang/Object;)V -> aev b (Lacq;[Ljava/lang/Object;)V
@@ -412,10 +425,14 @@ net/minecraft/item/crafting/CraftingManager getInstance ()Lnet/minecraft/item/cr
 net/minecraft/nbt/NBTBase createNewByType (B)Lnet/minecraft/nbt/NBTBase; -> eb a (B)Leb;
 net/minecraft/nbt/NBTBase hashCode ()I -> eb hashCode ()I
 net/minecraft/nbt/NBTTagCompound getByte (Ljava/lang/String;)B -> dn f (Ljava/lang/String;)B
+net/minecraft/nbt/NBTTagCompound getInteger (Ljava/lang/String;)I -> dn h (Ljava/lang/String;)I
+net/minecraft/nbt/NBTTagCompound getString (Ljava/lang/String;)Ljava/lang/String; -> dn l (Ljava/lang/String;)Ljava/lang/String;
 net/minecraft/nbt/NBTTagCompound getTagList (Ljava/lang/String;I)Lnet/minecraft/nbt/NBTTagList; -> dn c (Ljava/lang/String;I)Ldu;
 net/minecraft/nbt/NBTTagCompound getTagType (Ljava/lang/String;)B -> dn d (Ljava/lang/String;)B
 net/minecraft/nbt/NBTTagCompound hasKey (Ljava/lang/String;I)Z -> dn b (Ljava/lang/String;I)Z
 net/minecraft/nbt/NBTTagCompound setByte (Ljava/lang/String;B)V -> dn a (Ljava/lang/String;B)V
+net/minecraft/nbt/NBTTagCompound setInteger (Ljava/lang/String;I)V -> dn a (Ljava/lang/String;I)V
+net/minecraft/nbt/NBTTagCompound setString (Ljava/lang/String;Ljava/lang/String;)V -> dn a (Ljava/lang/String;Ljava/lang/String;)V
 net/minecraft/nbt/NBTTagCompound setTag (Ljava/lang/String;Lnet/minecraft/nbt/NBTBase;)V -> dn a (Ljava/lang/String;Leb;)V
 net/minecraft/nbt/NBTTagCompound tagCount ()I -> dn d ()I
 net/minecraft/nbt/NBTTagList appendTag (Lnet/minecraft/nbt/NBTBase;)V -> du a (Leb;)V
@@ -474,7 +491,10 @@ net/minecraft/world/IInteractionObject getGuiID ()Ljava/lang/String; -> py k ()L
 net/minecraft/world/IWorldNameable getDisplayName ()Lnet/minecraft/util/IChatComponent; -> qe i_ ()Leu;
 net/minecraft/world/IWorldNameable getName ()Ljava/lang/String; -> qe h_ ()Ljava/lang/String;
 net/minecraft/world/IWorldNameable hasCustomName ()Z -> qe n_ ()Z
+net/minecraft/world/World addBlockEvent (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;II)V -> agq c (Lcj;Lain;II)V
 net/minecraft/world/World markBlockForUpdate (Lnet/minecraft/util/BlockPos;)V -> agq h (Lcj;)V
 net/minecraft/world/World markBlockRangeForRenderUpdate (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/BlockPos;)V -> agq b (Lcj;Lcj;)V
+net/minecraft/world/World markChunkDirty (Lnet/minecraft/util/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V -> agq b (Lcj;Laok;)V
 net/minecraft/world/World playAuxSFXAtEntity (Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/BlockPos;I)V -> agq a (Lyw;ILcj;I)V
 net/minecraft/world/World setBlockState (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z -> agq a (Lcj;Lapp;I)Z
+net/minecraft/world/World setTileEntity (Lnet/minecraft/util/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V -> agq a (Lcj;Laok;)V
