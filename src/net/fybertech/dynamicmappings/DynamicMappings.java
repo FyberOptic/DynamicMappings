@@ -1325,12 +1325,15 @@ public class DynamicMappings
 			"net/minecraft/block/BlockFire",
 			"net/minecraft/block/BlockLeaves",
 			"net/minecraft/block/BlockChest",
-			"net/minecraft/block/BlockSlab"
+			"net/minecraft/block/BlockSlab",
+			"net/minecraft/block/BlockHopper"
 			},
 			providesFields={
 			"net/minecraft/init/Blocks chest Lnet/minecraft/block/BlockChest;",
 			"net/minecraft/init/Blocks dirt Lnet/minecraft/block/Block;",
-			"net/minecraft/init/Blocks obsidian Lnet/minecraft/block/Block;"
+			"net/minecraft/init/Blocks obsidian Lnet/minecraft/block/Block;",
+			"net/minecraft/init/Blocks hopper Lnet/minecraft/block/BlockHopper;",
+			"net/minecraft/init/Blocks glass_pane Lnet/minecraft/block/Block;"
 			},
 			depends={
 			"net/minecraft/init/Blocks",
@@ -1409,6 +1412,12 @@ public class DynamicMappings
 					field.owner + " " + field.name + " " + field.desc);
 		}
 		
+		field = blocksFields.get("glass_pane");
+		if (field != null) {
+			addFieldMapping("net/minecraft/init/Blocks glass_pane Lnet/minecraft/block/Block;",
+					field.owner + " " + field.name + " " + field.desc);
+		}
+		
 		field = blocksFields.get("dirt");
 		if (field != null) {
 			addFieldMapping("net/minecraft/init/Blocks dirt Lnet/minecraft/block/Block;",
@@ -1421,9 +1430,34 @@ public class DynamicMappings
 					field.owner + " " + field.name + " " + field.desc);
 		}
 
+		className = blocksClassFields.get("hopper");
+		if (className != null && searchConstantPoolForStrings(className, "facing", "enabled")) {
+			// TODO - Better detection
+			addClassMapping("net/minecraft/block/BlockHopper", className);
+		}
+		field = blocksFields.get("hopper");
+		if (field != null) {
+			addFieldMapping("net/minecraft/init/Blocks hopper Lnet/minecraft/block/BlockHopper;",
+					field.owner + " " + field.name + " " + field.desc);
+		}
+		
+		
 		return true;
 	}
 
+	
+	@Mapping(providesMethods={}, depends={"net/minecraft/block/BlockHopper"})
+	public static boolean processBlockHopperClass()
+	{
+		ClassNode blockHopper = getClassNodeFromMapping("net/minecraft/block/BlockHopper");
+		if (!MeddleUtil.notNull(blockHopper)) return false;
+				
+		
+		
+		return true;
+	}
+	
+	
 
 	@Mapping(provides="net/minecraft/block/BlockLeavesBase",
 			depends={
@@ -2283,7 +2317,10 @@ public class DynamicMappings
 			"net/minecraft/block/BlockAnvil",
 			"net/minecraft/block/BlockDoor",
 			"net/minecraft/block/BlockBed",
-			"net/minecraft/block/BlockFenceGate"
+			"net/minecraft/block/BlockFenceGate",
+			"net/minecraft/block/BlockPane",
+			"net/minecraft/block/BlockDynamicLiquid",
+			"net/minecraft/block/BlockStaticLiquid"
 			},
 			dependsMethods={
 			"net/minecraft/block/Block registerBlocks ()V"
@@ -2340,8 +2377,47 @@ public class DynamicMappings
 			addClassMapping("net/minecraft/block/BlockFenceGate", className);
 		}
 		
+		className = blockClasses.get("glass_pane");
+		if (className != null && searchConstantPoolForStrings(className, "north", "south", "east", "west")) {
+			addClassMapping("net/minecraft/block/BlockPane", className);
+		}
+		
+		className = blockClasses.get("flowing_water");
+		if (className != null) { // TODO - Better detection
+			addClassMapping("net/minecraft/block/BlockDynamicLiquid", className);
+		}
+        
+		className = blockClasses.get("water");
+		if (className != null && searchConstantPoolForStrings(className, "doFireTick")) {
+			addClassMapping("net/minecraft/block/BlockStaticLiquid", className);
+		}
+			
+		
 		return true;
 	}
+	
+	
+	@Mapping(provides={
+			"net/minecraft/block/BlockLiquid"
+			},
+			providesMethods={			
+			},
+			depends={
+			"net/minecraft/block/BlockDynamicLiquid"
+			})
+	public static boolean processBlockDynamicLiquidClass()
+	{
+		ClassNode dynamicLiquid = getClassNodeFromMapping("net/minecraft/block/BlockDynamicLiquid");
+		if (!MeddleUtil.notNull(dynamicLiquid)) return false;
+		
+		String blockLiquid_name = dynamicLiquid.superName;
+		if (searchConstantPoolForStrings(blockLiquid_name, "level", "random.fizz")) {
+			addClassMapping("net/minecraft/block/BlockLiquid", blockLiquid_name);
+		}
+		
+		return true;
+	}
+	
 	
 	
 	@Mapping(provides={
@@ -3303,7 +3379,7 @@ public class DynamicMappings
 			providesMethods={
 			"net/minecraft/block/Block getIdFromBlock (Lnet/minecraft/block/Block;)I",
 			"net/minecraft/block/Block onBlockActivated (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumFacing;FFF)Z",
-			"net/minecraft/block/Block collisionRayTrace (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;)Lnet/minecraft/util/MovingObjectPosition;",
+			"net/minecraft/block/Block collisionRayTrace (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;)Lnet/minecraft/util/MovingObjectPosition;",
 			"net/minecraft/block/Block registerBlock (ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/block/Block;)V",
 			"net/minecraft/block/Block registerBlock (ILjava/lang/String;Lnet/minecraft/block/Block;)V",
 			"net/minecraft/block/Block getStateFromMeta (I)Lnet/minecraft/block/state/IBlockState;",
@@ -3470,23 +3546,24 @@ public class DynamicMappings
 		}
 
 		
-		// public MovingObjectPosition collisionRayTrace(World worldIn, BlockPos pos, Vec3 start, Vec3 end)
+		// (15w37a added IBlockState parm)
+		// public MovingObjectPosition collisionRayTrace(IBlockState param0, World worldIn, BlockPos pos, Vec3 start, Vec3 end)
 		methods.clear();
 		for (MethodNode method : block.methods) {
-			if (!method.desc.startsWith("(L" + world.name + ";L" + blockPos.name + ";L")) continue;			
+			if (!method.desc.startsWith("(L" + iBlockState.name + ";L" + world.name + ";L" + blockPos.name + ";L")) continue;			
 			if (!method.desc.endsWith(";)L" + movingObjectPosition.name + ";")) continue;			
 			Type t = Type.getMethodType(method.desc);
 			Type[] args = t.getArgumentTypes();			
-			if (args.length != 4) continue;
-			if (args[2].getSort() != Type.OBJECT) continue;
-			if (!args[2].getClassName().equals(args[3].getClassName())) continue;
+			if (args.length != 5) continue;
+			if (args[3].getSort() != Type.OBJECT) continue;
+			if (!args[3].getClassName().equals(args[4].getClassName())) continue;
 			methods.add(method);			
 		}
 		if (methods.size() == 1) {
 			MethodNode method = methods.get(0);			
-			String vec3_name = Type.getMethodType(method.desc).getArgumentTypes()[2].getClassName();
+			String vec3_name = Type.getMethodType(method.desc).getArgumentTypes()[3].getClassName();
 			addClassMapping("net/minecraft/util/Vec3", vec3_name);
-			addMethodMapping("net/minecraft/block/Block collisionRayTrace (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;)Lnet/minecraft/util/MovingObjectPosition;",
+			addMethodMapping("net/minecraft/block/Block collisionRayTrace (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;)Lnet/minecraft/util/MovingObjectPosition;",
 					block.name + " " + method.name + " " + method.desc);
 		}
 		
@@ -3664,10 +3741,9 @@ public class DynamicMappings
 			}
 			
 			
-		}
+		}		
 		
-		
-		List<FieldNode> fields = getMatchingFields(block, null, "L" + objectIntIdentityMap + ";");
+		List<FieldNode> fields = getMatchingFields(block, null, "L" + objectIntIdentityMap + ";");		
 		if (fields.size() == 1) {
 			addFieldMapping("net/minecraft/block/Block BLOCK_STATE_IDS Lnet/minecraft/util/ObjectIntIdentityMap;",
 					block.name + " " + fields.get(0).name + " " + fields.get(0).desc);
@@ -3679,14 +3755,19 @@ public class DynamicMappings
 
 	
 	@Mapping(provides={
-			"net/minecraft/item/ItemBlock"
+			"net/minecraft/item/ItemBlock",
+			"net/minecraft/util/AxisAlignedBB"
+			},
+			providesFields={
+			"net/minecraft/block/Block blockBounds Lnet/minecraft/util/AxisAlignedBB;"
 			},
 			providesMethods={
 			"net/minecraft/block/Block getStateId (Lnet/minecraft/block/state/IBlockState;)I",
 			"net/minecraft/block/Block getBlockById (I)Lnet/minecraft/block/Block;",
 			"net/minecraft/block/Block getBlockFromItem (Lnet/minecraft/item/Item;)Lnet/minecraft/block/Block;",
 			"net/minecraft/block/Block getBlockFromName (Ljava/lang/String;)Lnet/minecraft/block/Block;",
-			"net/minecraft/block/Block setBlockBounds (FFFFFF)V",
+			"net/minecraft/block/Block setBlockBounds (Lnet/minecraft/util/AxisAlignedBB;)V",
+			"net/minecraft/block/Block getBlockBounds (Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/util/AxisAlignedBB;",
 			"net/minecraft/block/Block onNeighborBlockChange (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/Block;)V"
 			},
 			depends={
@@ -3706,6 +3787,35 @@ public class DynamicMappings
 		if (!MeddleUtil.notNull(block, item, iBlockState, blockPos, world)) return false;
 		
 		List<MethodNode> methods;
+		
+		
+		String axisAlignedBB_name = null;
+		
+		// net/minecraft/util/AxisAlignedBB
+		// private AxisAlignedBB blockBounds
+		List<FieldNode> fields = getMatchingFields(block, null, null);		
+		for (Iterator<FieldNode> it = fields.iterator(); it.hasNext(); ) {
+			FieldNode fn = it.next();
+			if ((fn.access & Opcodes.ACC_STATIC) > 0 || !fn.desc.startsWith("L")) { it.remove(); continue; }			
+			Type t = Type.getType(fn.desc);
+			
+			if (axisAlignedBB_name == null && searchConstantPoolForStrings(t.getClassName(), "box[")) {
+				ClassNode cn = getClassNode(t.getClassName());
+				int doubles = 0;
+				for (FieldNode cnfn : cn.fields) { if (cnfn.desc.equals("D")) doubles++; }
+				if (cn.fields.size() == 6 && doubles == 6) {
+					axisAlignedBB_name = t.getClassName();
+					addClassMapping("net/minecraft/util/AxisAlignedBB", axisAlignedBB_name);					
+				}
+			}
+			
+			if (axisAlignedBB_name == null || !t.getClassName().equals(axisAlignedBB_name)) it.remove();
+		}
+		if (fields.size() == 1) {
+			addFieldMapping("net/minecraft/block/Block blockBounds Lnet/minecraft/util/AxisAlignedBB;", 
+					block.name + " " + fields.get(0).name + " " + fields.get(0).desc);
+		}
+		
 		
 		
 		// public static int getStateId(IBlockState)
@@ -3754,11 +3864,22 @@ public class DynamicMappings
 		
 		
 		// protected final void setBlockBounds(float, float, float, float, float, float)
-		methods = getMatchingMethods(block, null, "(FFFFFF)V");
+		// CHANGED in 15w37a
+		// public void setBlockBounds(AxisAlignedBB param0)
+		methods = getMatchingMethods(block, null, "(L" + axisAlignedBB_name + ";)V");
 		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/block/Block setBlockBounds (FFFFFF)V", 
+			addMethodMapping("net/minecraft/block/Block setBlockBounds (Lnet/minecraft/util/AxisAlignedBB;)V", 
 					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
+		
+		// NEW in 15w37a
+		// public AxisAlignedBB getBlockBounds(IBlockState param0)
+		methods = getMatchingMethods(block, null, "(L" + iBlockState.name + ";)L" + axisAlignedBB_name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block getBlockBounds (Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/util/AxisAlignedBB;", 
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
 		
 		//  public void onNeighborBlockChange(World, BlockPos, IBlockState, Block)
 		methods = getMatchingMethods(block, null, assembleDescriptor("(", world, blockPos, iBlockState, block, ")V"));

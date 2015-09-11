@@ -369,11 +369,16 @@ public class DynamicClientMappings
 	}
 
 
-	@Mapping(provides={
+	@Mapping(providesMethods={
+			"net/minecraft/client/Minecraft startGame ()V"			
+			},
+			provides={
 			"net/minecraft/client/gui/GuiMainMenu",  
 			"net/minecraft/client/gui/GuiIngame",
 			"net/minecraft/client/multiplayer/GuiConnecting",
-			"net/minecraft/client/renderer/RenderGlobal"},
+			"net/minecraft/client/renderer/RenderGlobal",
+			"net/minecraft/client/renderer/BlockRendererDispatcher"
+			},
 			depends="net/minecraft/client/Minecraft")
 	public static boolean getGuiMainMenuClass()
 	{
@@ -383,13 +388,10 @@ public class DynamicClientMappings
 		List<String> postStartupClasses = new ArrayList<String>();
 		List<String> startupClasses = new ArrayList<String>();
 
+		List<MethodNode> methods = DynamicMappings.getMatchingMethods(minecraft, null, "()V");
+		
 		boolean foundMethod = false;
-		for (MethodNode method : (List<MethodNode>)minecraft.methods) {
-			//if (!DynamicMappings.checkMethodParameters(method, Type.OBJECT)) continue;
-			Type t = Type.getMethodType(method.desc);
-			if (t.getReturnType().getSort() != Type.VOID) continue;
-			if (t.getArgumentTypes().length != 0) continue;
-
+		for (MethodNode method : methods) {
 			boolean foundLWJGLVersion = false;
 			boolean foundPostStartup = false;
 			boolean foundStartup = false;
@@ -402,6 +404,7 @@ public class DynamicClientMappings
 				foundStartup = true;
 				
 				foundMethod = true;
+				addMethodMapping("net/minecraft/client/Minecraft startGame ()V", minecraft.name + " " + method.name + " ()V");
 				
 				if (foundStartup && !foundPostStartup) {
 					if (insn.getOpcode() == Opcodes.NEW) {
@@ -449,24 +452,34 @@ public class DynamicClientMappings
 		}
 
 		String renderGlobal = null;
+		String blockRendererDispatcher = null;
+		
 		for (String className : startupClasses) {
 			if (renderGlobal == null && DynamicMappings.searchConstantPoolForStrings(className, "textures/environment/moon_phases.png", "Exception while adding particle", "random.click")) {
 				renderGlobal = className;
 				continue;
 			}
+			
+			if (blockRendererDispatcher == null && DynamicMappings.searchConstantPoolForStrings(className, "Tesselating block in world", "Block being tesselated")) {
+				blockRendererDispatcher = className;
+				continue;
+			}
 		}
+		
+		if (blockRendererDispatcher != null)
+			addClassMapping("net/minecraft/client/renderer/BlockRendererDispatcher", blockRendererDispatcher);
 
 		if (guiMainMenu != null)
-			addClassMapping("net/minecraft/client/gui/GuiMainMenu", getClassNode(guiMainMenu));
+			addClassMapping("net/minecraft/client/gui/GuiMainMenu", guiMainMenu);
 		
 		if (guiIngame != null)
-			addClassMapping("net/minecraft/client/gui/GuiIngame", getClassNode(guiIngame));
+			addClassMapping("net/minecraft/client/gui/GuiIngame", guiIngame);
 		
 		if (guiConnecting != null)
-			addClassMapping("net/minecraft/client/multiplayer/GuiConnecting", getClassNode(guiConnecting));
+			addClassMapping("net/minecraft/client/multiplayer/GuiConnecting", guiConnecting);
 		
 		if (renderGlobal != null)
-			addClassMapping("net/minecraft/client/renderer/RenderGlobal", getClassNode(renderGlobal));
+			addClassMapping("net/minecraft/client/renderer/RenderGlobal",renderGlobal);
 		
 		return true;
 	}
@@ -1447,7 +1460,8 @@ public class DynamicClientMappings
 			"net/minecraft/client/settings/KeyBinding resetKeyBindingArrayAndHash ()V",
 			"net/minecraft/client/settings/KeyBinding setKeyCode (I)V",
 			"net/minecraft/client/settings/KeyBinding isKeyDown ()Z",
-			"net/minecraft/client/settings/KeyBinding isPressed ()Z"
+			"net/minecraft/client/settings/KeyBinding isPressed ()Z",
+			"net/minecraft/client/settings/KeyBinding updateAllKeys ()V"
 			},
 			depends={
 			"net/minecraft/client/settings/KeyBinding"
@@ -1548,30 +1562,48 @@ public class DynamicClientMappings
 		}
 		
 		
+		// public static void updateAllKeys() - NEW in 15w37a
 		// public static void unPressAllKeys()
-		// public static void resetKeyBindingArrayAndHash()
+		// public static void resetKeyBindingArrayAndHash()		
 		methods = DynamicMappings.getMatchingMethods(keyBinding, null, "()V");
 		methods = DynamicMappings.removeMethodsWithoutFlags(methods, Opcodes.ACC_STATIC);
 		for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
 			if (it.next().name.contains("<")) it.remove();
-		}
-		if (methods.size() == 2 && unpressKey != null) 
+		}		
+		if (methods.size() == 3 && unpressKey != null) 
 		{
+			MethodNode updateAllKeys = null;
 			MethodNode unPressAllKeys = null;
 			MethodNode resetKeyBindingArrayAndHash = null;
 			
-			for (MethodNode method : methods) {
-				boolean is_unpressAllKeys = false;
-				for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
-					if (insn.getOpcode() != Opcodes.INVOKESPECIAL) continue;
-					MethodInsnNode mn = (MethodInsnNode)insn;
-					if (mn.owner.equals(keyBinding.name) && mn.name.equals(unpressKey) && mn.desc.equals("()V")) {
-						unPressAllKeys = method;
-						is_unpressAllKeys = true;
-						break;
+			outerloop:
+			for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
+				MethodNode method = it.next();
+				List<MethodInsnNode> list = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(),  MethodInsnNode.class);
+				for (MethodInsnNode mn : list) {
+					if (mn.owner.equals("org/lwjgl/input/Keyboard") && mn.name.equals("isKeyDown")) {
+						addMethodMapping("net/minecraft/client/settings/KeyBinding updateAllKeys ()V",
+								keyBinding.name + " " + method.name + " " + method.desc);
+						it.remove();
+						break outerloop;
 					}
 				}
-				if (!is_unpressAllKeys) resetKeyBindingArrayAndHash = method;
+			}
+			
+			if (methods.size() == 2) {
+				for (MethodNode method : methods) {
+					boolean is_unpressAllKeys = false;
+					for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+						if (insn.getOpcode() != Opcodes.INVOKESPECIAL) continue;
+						MethodInsnNode mn = (MethodInsnNode)insn;
+						if (mn.owner.equals(keyBinding.name) && mn.name.equals(unpressKey) && mn.desc.equals("()V")) {
+							unPressAllKeys = method;
+							is_unpressAllKeys = true;
+							break;
+						}
+					}
+					if (!is_unpressAllKeys) resetKeyBindingArrayAndHash = method;
+				}
 			}
 			
 			if (unPressAllKeys != null && resetKeyBindingArrayAndHash != null) {		
@@ -1747,6 +1779,507 @@ public class DynamicClientMappings
 	
 	
 	
+	@Mapping(providesMethods={
+			"net/minecraft/block/Block getRenderType ()I"
+			},
+			depends={
+			"net/minecraft/block/BlockLiquid",
+			"net/minecraft/block/Block"
+			})
+	public static boolean processBlockDynamicLiquidClass()
+	{
+		ClassNode liquid = getClassNodeFromMapping("net/minecraft/block/BlockLiquid");
+		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
+		if (!MeddleUtil.notNull(liquid, block)) return false;
+		
+		// public int getRenderType()
+		List<MethodNode> methods = DynamicMappings.getMatchingMethods(liquid, null, "()I");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block getRenderType ()I", block.name + " " + methods.get(0).name + " ()I");
+		}
+		
+		
+		return true;
+	}
+	
+	
+	
+	@Mapping(provides={
+			"net/minecraft/client/renderer/WorldRenderer"
+			},
+			providesMethods={
+			"net/minecraft/client/renderer/BlockRendererDispatcher renderBlock (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/BlockPos;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/client/renderer/WorldRenderer;)Z"
+			},
+			depends={
+			"net/minecraft/client/renderer/BlockRendererDispatcher",
+			"net/minecraft/block/state/IBlockState",
+			"net/minecraft/util/BlockPos",
+			"net/minecraft/world/IBlockAccess"
+			})
+	public static boolean processBlockRendererDispatcherClass()
+	{
+		ClassNode blockRenderer = getClassNodeFromMapping("net/minecraft/client/renderer/BlockRendererDispatcher");
+		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
+		ClassNode blockPos = getClassNodeFromMapping("net/minecraft/util/BlockPos");
+		ClassNode iBlockAccess = getClassNodeFromMapping("net/minecraft/world/IBlockAccess");		
+		if (!MeddleUtil.notNull(blockRenderer, iBlockState, blockPos, iBlockAccess)) return false;
+		
+		
+		List<MethodNode> methods = new ArrayList<>();
+		String worldRenderer_name = null;
+		
+		// public boolean renderBlock(IBlockState state, BlockPos pos, IBlockAccess blockAccess, WorldRenderer worldRendererIn)
+		String desc_front = DynamicMappings.assembleDescriptor("(", iBlockState, blockPos, iBlockAccess);
+		for (MethodNode method : blockRenderer.methods) {
+			if (method.desc.startsWith(desc_front) && method.desc.endsWith(";)Z")) {
+				methods.add(method);
+			}
+		}
+		if (methods.size() == 1) {
+			Type t = Type.getMethodType(methods.get(0).desc);
+			Type[] args = t.getArgumentTypes();
+			
+			worldRenderer_name = args[3].getClassName();
+			if (DynamicMappings.searchConstantPoolForStrings(worldRenderer_name, "Already building!", "Not building!")) {
+				addClassMapping("net/minecraft/client/renderer/WorldRenderer", worldRenderer_name);
+				
+				addMethodMapping("net/minecraft/client/renderer/BlockRendererDispatcher renderBlock (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/BlockPos;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/client/renderer/WorldRenderer;)Z",
+						blockRenderer.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			}
+			else worldRenderer_name = null;
+		}
+		
+		
+		return true;
+	}
+	
+	
+	
+	@Mapping(provides={			
+			"net/minecraft/client/renderer/vertex/VertexFormat"
+			},
+			providesMethods={
+			"net/minecraft/client/renderer/WorldRenderer startDrawing (ILnet/minecraft/client/renderer/vertex/VertexFormat;)V",
+			"net/minecraft/client/renderer/WorldRenderer finishDrawing ()V"
+			},
+			depends={
+			"net/minecraft/client/renderer/WorldRenderer"
+			})
+	public static boolean processWorldRendererClass()
+	{
+		ClassNode worldRenderer = getClassNodeFromMapping("net/minecraft/client/renderer/WorldRenderer");
+		if (!MeddleUtil.notNull(worldRenderer)) return false;
+		
+		List<MethodNode> methods = new ArrayList<>();
+		
+		String vertexFormat_name = null;
+		
+		// public void startDrawing(int mode, VertexFormat format)		
+		for (MethodNode method : worldRenderer.methods) {
+			Type t = Type.getMethodType(method.desc);
+			if (t.getReturnType().getSort() != Type.VOID) continue;
+			Type[] args = t.getArgumentTypes();
+			if (args.length != 2) continue;
+			if (args[0].getSort() != Type.INT || args[1].getSort() != Type.OBJECT) continue;
+			methods.add(method);
+			vertexFormat_name = args[1].getClassName();
+		}
+		if (methods.size() == 1 && DynamicMappings.searchConstantPoolForStrings(vertexFormat_name, "VertexFormat error: Trying to add a position VertexFormatElement when one already exists, ignoring.")) {
+			addClassMapping("net/minecraft/client/renderer/vertex/VertexFormat", vertexFormat_name);
+			addMethodMapping("net/minecraft/client/renderer/WorldRenderer startDrawing (ILnet/minecraft/client/renderer/vertex/VertexFormat;)V", 
+					worldRenderer.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		else vertexFormat_name = null;
+		
+		// public void finishDrawing()
+		methods = DynamicMappings.getMatchingMethods(worldRenderer, null, "()V");
+		int count = 0;
+		String finishDrawing = null;
+		
+		for (MethodNode method : methods) {			
+			for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				if (DynamicMappings.isLdcWithString(insn, "Not building!")) {
+					finishDrawing = method.name;
+					count++;
+				}
+			}
+		}
+		
+		if (count == 1 && finishDrawing != null) {
+			addMethodMapping("net/minecraft/client/renderer/WorldRenderer finishDrawing ()V", worldRenderer.name + " " + finishDrawing + " ()V");
+		}
+		
+		
+		return true;
+	}
+	
+	
+	@Mapping(providesMethods={
+			"net/minecraft/client/renderer/WorldRenderer sortQuads (FFF)V",
+			"net/minecraft/client/renderer/WorldRenderer putColor4 (I)V",
+			"net/minecraft/client/renderer/WorldRenderer getByteBuffer ()Ljava/nio/ByteBuffer;",
+			"net/minecraft/client/renderer/WorldRenderer postNormal (FFF)V",
+			"net/minecraft/client/renderer/WorldRenderer getDrawMode ()I",
+			"net/minecraft/client/renderer/WorldRenderer setTranslation (DDD)V",
+			"net/minecraft/client/renderer/WorldRenderer endVertex ()V",
+			"net/minecraft/client/renderer/WorldRenderer setNormal (FFF)Lnet/minecraft/client/renderer/WorldRenderer;",
+			"net/minecraft/client/renderer/WorldRenderer setColorRGBA (IIII)Lnet/minecraft/client/renderer/WorldRenderer;",
+			"net/minecraft/client/renderer/WorldRenderer setColorRGBA_F (FFFF)Lnet/minecraft/client/renderer/WorldRenderer;",
+			"net/minecraft/client/renderer/WorldRenderer setBrightness (II)Lnet/minecraft/client/renderer/WorldRenderer;",
+			"net/minecraft/client/renderer/WorldRenderer setTextureUV (DD)Lnet/minecraft/client/renderer/WorldRenderer;",
+			"net/minecraft/client/renderer/WorldRenderer addVertex (DDD)Lnet/minecraft/client/renderer/WorldRenderer;",
+			"net/minecraft/client/renderer/WorldRenderer putBrightness4 (IIII)V",
+			"net/minecraft/client/renderer/WorldRenderer putPosition (DDD)V",
+			"net/minecraft/client/renderer/WorldRenderer putColorRGB_F (FFFI)V",
+			"net/minecraft/client/renderer/WorldRenderer putColorMultiplier (FFFI)V",
+			"net/minecraft/client/renderer/WorldRenderer putBulkData ([I)V",
+			"net/minecraft/client/renderer/WorldRenderer getVertexCount ()I",
+			"net/minecraft/client/renderer/WorldRenderer reset ()V",
+			"net/minecraft/client/renderer/WorldRenderer putColorRGB_F4 (FFF)V",
+			"net/minecraft/client/renderer/WorldRenderer markDirty ()V"
+			},
+			depends={
+			"net/minecraft/client/renderer/WorldRenderer",
+			"net/minecraft/client/renderer/vertex/VertexFormat"
+			})
+	public static boolean processRealmsBufferBuilderClass()
+	{
+		ClassNode bufferBuilder = getClassNode("net/minecraft/realms/RealmsBufferBuilder");
+		ClassNode worldRenderer = getClassNodeFromMapping("net/minecraft/client/renderer/WorldRenderer");
+		ClassNode vertexFormat = getClassNodeFromMapping("net/minecraft/client/renderer/vertex/VertexFormat");
+		if (!MeddleUtil.notNull(bufferBuilder, worldRenderer, vertexFormat)) return false;	
+		
+		MethodNode method = null;
+		
+		// public void sortQuads(float param0, float param1, float param2)
+		method = getMethodNode(bufferBuilder, "- sortQuads (FFF)V");
+		if (method != null) {
+			List<MethodInsnNode> list = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+			for (MethodInsnNode mn : list) {
+				if (mn.owner.equals(worldRenderer.name) && mn.desc.equals("(FFF)V")) {
+					addMethodMapping("net/minecraft/client/renderer/WorldRenderer sortQuads (FFF)V", worldRenderer.name + " " + mn.name + " " + mn.desc);
+					break;
+				}
+			}
+		}		
+		
+		//  public void putColor4(int param0)
+		method = getMethodNode(bufferBuilder, "- fixupQuadColor (I)V");
+		if (method != null) {
+			List<MethodInsnNode> list = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+			for (MethodInsnNode mn : list) {
+				if (mn.owner.equals(worldRenderer.name) && mn.desc.equals("(I)V")) {
+					addMethodMapping("net/minecraft/client/renderer/WorldRenderer putColor4 (I)V", worldRenderer.name + " " + mn.name + " " + mn.desc);
+					break;
+				}
+			}
+		}		
+		
+		// public ByteBuffer getByteBuffer() 
+		method = getMethodNode(bufferBuilder, "- getBuffer ()Ljava/nio/ByteBuffer;");
+		if (method != null) {
+			List<MethodInsnNode> list = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+			for (MethodInsnNode mn : list) {
+				if (mn.owner.equals(worldRenderer.name) && mn.desc.equals("()Ljava/nio/ByteBuffer;")) {
+					addMethodMapping("net/minecraft/client/renderer/WorldRenderer getByteBuffer ()Ljava/nio/ByteBuffer;", worldRenderer.name + " " + mn.name + " " + mn.desc);
+					break;
+				}
+			}
+		}		
+		
+		// public void postNormal(float param0, float param1, float param2)
+		method = getMethodNode(bufferBuilder, "- postNormal (FFF)V");
+		if (method != null) {
+			List<MethodInsnNode> list = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+			for (MethodInsnNode mn : list) {
+				if (mn.owner.equals(worldRenderer.name) && mn.desc.equals("(FFF)V")) {
+					addMethodMapping("net/minecraft/client/renderer/WorldRenderer postNormal (FFF)V", worldRenderer.name + " " + mn.name + " " + mn.desc);
+					break;
+				}
+			}
+		}		
+		
+		// public int getDrawMode()
+		method = getMethodNode(bufferBuilder, "- getDrawMode ()I");
+		if (method != null) {
+			List<MethodInsnNode> list = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+			for (MethodInsnNode mn : list) {
+				if (mn.owner.equals(worldRenderer.name) && mn.desc.equals("()I")) {
+					addMethodMapping("net/minecraft/client/renderer/WorldRenderer getDrawMode ()I", worldRenderer.name + " " + mn.name + " " + mn.desc);
+					break;
+				}
+			}
+		}		
+		
+		// public void setTranslation(double param0, double param1, double param2)
+		method = getMethodNode(bufferBuilder, "- offset (DDD)V");
+		if (method != null) {
+			List<MethodInsnNode> list = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+			for (MethodInsnNode mn : list) {
+				if (mn.owner.equals(worldRenderer.name) && mn.desc.equals("(DDD)V")) {
+					addMethodMapping("net/minecraft/client/renderer/WorldRenderer setTranslation (DDD)V", worldRenderer.name + " " + mn.name + " " + mn.desc);
+					break;
+				}
+			}
+		}	
+		
+		// public void endVertex()
+		method = getMethodNode(bufferBuilder, "- endVertex ()V"); 
+		if (method != null) {
+			List<MethodInsnNode> list = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+			for (MethodInsnNode mn : list) {
+				if (mn.owner.equals(worldRenderer.name) && mn.desc.equals("()V")) {
+					addMethodMapping("net/minecraft/client/renderer/WorldRenderer endVertex ()V", worldRenderer.name + " " + mn.name + " " + mn.desc);
+					break;
+				}
+			}
+		}	
+		
+		// public WorldRenderer setNormal(float param0, float param1, float param2)
+		method = getMethodNode(bufferBuilder, "- normal (FFF)Lnet/minecraft/realms/RealmsBufferBuilder;");	
+		if (method != null) {
+			List<MethodInsnNode> list = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+			for (MethodInsnNode mn : list) {
+				if (mn.owner.equals(worldRenderer.name) && mn.desc.equals("(FFF)L" + worldRenderer.name + ";")) {
+					addMethodMapping("net/minecraft/client/renderer/WorldRenderer setNormal (FFF)Lnet/minecraft/client/renderer/WorldRenderer;", worldRenderer.name + " " + mn.name + " " + mn.desc);
+					break;
+				}
+			}
+		}	
+		
+		// public WorldRenderer setColorRGBA(int param0, int param1, int param2, int param3)	
+		method = getMethodNode(bufferBuilder, "- color (IIII)Lnet/minecraft/realms/RealmsBufferBuilder;");
+		if (method != null) {
+			List<MethodInsnNode> list = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+			for (MethodInsnNode mn : list) {
+				if (mn.owner.equals(worldRenderer.name) && mn.desc.equals("(IIII)L" + worldRenderer.name + ";")) {
+					addMethodMapping("net/minecraft/client/renderer/WorldRenderer setColorRGBA (IIII)Lnet/minecraft/client/renderer/WorldRenderer;", worldRenderer.name + " " + mn.name + " " + mn.desc);
+					break;
+				}
+			}
+		}	
+		
+		// public WorldRenderer setColorRGBA_F(float param0, float param1, float param2, float param3)
+		method = getMethodNode(bufferBuilder, "- color (FFFF)Lnet/minecraft/realms/RealmsBufferBuilder;");
+		if (method != null) {
+			List<MethodInsnNode> list = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+			for (MethodInsnNode mn : list) {
+				if (mn.owner.equals(worldRenderer.name) && mn.desc.equals("(FFFF)L" + worldRenderer.name + ";")) {
+					addMethodMapping("net/minecraft/client/renderer/WorldRenderer setColorRGBA_F (FFFF)Lnet/minecraft/client/renderer/WorldRenderer;", worldRenderer.name + " " + mn.name + " " + mn.desc);
+					break;
+				}
+			}
+		}	
+		
+		// public WorldRenderer setBrightness(int param0, int param1)
+		method = getMethodNode(bufferBuilder, "- tex2 (II)Lnet/minecraft/realms/RealmsBufferBuilder;");
+		if (method != null) {
+			List<MethodInsnNode> list = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+			for (MethodInsnNode mn : list) {
+				if (mn.owner.equals(worldRenderer.name) && mn.desc.equals("(II)L" + worldRenderer.name + ";")) {
+					addMethodMapping("net/minecraft/client/renderer/WorldRenderer setBrightness (II)Lnet/minecraft/client/renderer/WorldRenderer;", worldRenderer.name + " " + mn.name + " " + mn.desc);
+					break;
+				}
+			}
+		}	
+		
+		//  public WorldRenderer setTextureUV(double param0, double param1)
+		method = getMethodNode(bufferBuilder, "- tex (DD)Lnet/minecraft/realms/RealmsBufferBuilder;");
+		if (method != null) {
+			List<MethodInsnNode> list = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+			for (MethodInsnNode mn : list) {
+				if (mn.owner.equals(worldRenderer.name) && mn.desc.equals("(DD)L" + worldRenderer.name + ";")) {
+					addMethodMapping("net/minecraft/client/renderer/WorldRenderer setTextureUV (DD)Lnet/minecraft/client/renderer/WorldRenderer;", worldRenderer.name + " " + mn.name + " " + mn.desc);
+					break;
+				}
+			}
+		}	
+		
+		// public WorldRenderer addVertex(double param0, double param1, double param2)
+		method = getMethodNode(bufferBuilder, "- vertex (DDD)Lnet/minecraft/realms/RealmsBufferBuilder;");
+		if (method != null) {
+			List<MethodInsnNode> list = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+			for (MethodInsnNode mn : list) {
+				if (mn.owner.equals(worldRenderer.name) && mn.desc.equals("(DDD)L" + worldRenderer.name + ";")) {
+					addMethodMapping("net/minecraft/client/renderer/WorldRenderer addVertex (DDD)Lnet/minecraft/client/renderer/WorldRenderer;", worldRenderer.name + " " + mn.name + " " + mn.desc);
+					break;
+				}
+			}
+		}	
+		
+		// public void putBrightness4(int param0, int param1, int param2, int param3)		
+		method = getMethodNode(bufferBuilder, "- faceTex2 (IIII)V");
+		if (method != null) {
+			List<MethodInsnNode> list = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+			for (MethodInsnNode mn : list) {
+				if (mn.owner.equals(worldRenderer.name) && mn.desc.equals("(IIII)V")) {
+					addMethodMapping("net/minecraft/client/renderer/WorldRenderer putBrightness4 (IIII)V", worldRenderer.name + " " + mn.name + " " + mn.desc);
+					break;
+				}
+			}
+		}	
+		
+		// public void putPosition(double param0, double param1, double param2)
+		method = getMethodNode(bufferBuilder, "- postProcessFacePosition (DDD)V");		
+		if (method != null) {
+			List<MethodInsnNode> list = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+			for (MethodInsnNode mn : list) {
+				if (mn.owner.equals(worldRenderer.name) && mn.desc.equals("(DDD)V")) {
+					addMethodMapping("net/minecraft/client/renderer/WorldRenderer putPosition (DDD)V", worldRenderer.name + " " + mn.name + " " + mn.desc);
+					break;
+				}
+			}
+		}	
+		
+		// public void putColorRGB_F(float param0, float param1, float param2, int param3)
+		method = getMethodNode(bufferBuilder, "- fixupVertexColor (FFFI)V");	
+		if (method != null) {
+			List<MethodInsnNode> list = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+			for (MethodInsnNode mn : list) {
+				if (mn.owner.equals(worldRenderer.name) && mn.desc.equals("(FFFI)V")) {
+					addMethodMapping("net/minecraft/client/renderer/WorldRenderer putColorRGB_F (FFFI)V", worldRenderer.name + " " + mn.name + " " + mn.desc);
+					break;
+				}
+			}
+		}	
+		
+		// public void putColorMultiplier(float param0, float param1, float param2, int param3)
+		method = getMethodNode(bufferBuilder, "- faceTint (FFFI)V");	
+		if (method != null) {
+			List<MethodInsnNode> list = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+			for (MethodInsnNode mn : list) {
+				if (mn.owner.equals(worldRenderer.name) && mn.desc.equals("(FFFI)V")) {
+					addMethodMapping("net/minecraft/client/renderer/WorldRenderer putColorMultiplier (FFFI)V", worldRenderer.name + " " + mn.name + " " + mn.desc);
+					break;
+				}
+			}
+		}	
+		
+		//  public void putBulkData(int[] param0)
+		method = getMethodNode(bufferBuilder, "- putBulkData ([I)V");
+		if (method != null) {
+			List<MethodInsnNode> list = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+			for (MethodInsnNode mn : list) {
+				if (mn.owner.equals(worldRenderer.name) && mn.desc.equals("([I)V")) {
+					addMethodMapping("net/minecraft/client/renderer/WorldRenderer putBulkData ([I)V", worldRenderer.name + " " + mn.name + " " + mn.desc);
+					break;
+				}
+			}
+		}	
+		
+		// public int getVertexCount()
+		method = getMethodNode(bufferBuilder, "- getVertexCount ()I");
+		if (method != null) {
+			List<MethodInsnNode> list = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+			for (MethodInsnNode mn : list) {
+				if (mn.owner.equals(worldRenderer.name) && mn.desc.equals("()I")) {
+					addMethodMapping("net/minecraft/client/renderer/WorldRenderer getVertexCount ()I", worldRenderer.name + " " + mn.name + " " + mn.desc);
+					break;
+				}
+			}
+		}	
+		
+		// public void reset()
+		method = getMethodNode(bufferBuilder, "- clear ()V");	
+		if (method != null) {
+			List<MethodInsnNode> list = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+			for (MethodInsnNode mn : list) {
+				if (mn.owner.equals(worldRenderer.name) && mn.desc.equals("()V")) {
+					addMethodMapping("net/minecraft/client/renderer/WorldRenderer reset ()V", worldRenderer.name + " " + mn.name + " " + mn.desc);
+					break;
+				}
+			}
+		}	
+		
+		// public void putColorRGB_F4(float param0, float param1, float param2)
+		method = getMethodNode(bufferBuilder, "- fixupQuadColor (FFF)V");
+		if (method != null) {
+			List<MethodInsnNode> list = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+			for (MethodInsnNode mn : list) {
+				if (mn.owner.equals(worldRenderer.name) && mn.desc.equals("(FFF)V")) {
+					addMethodMapping("net/minecraft/client/renderer/WorldRenderer putColorRGB_F4 (FFF)V", worldRenderer.name + " " + mn.name + " " + mn.desc);
+					break;
+				}
+			}
+		}	
+		
+		// public void markDirty()
+		method = getMethodNode(bufferBuilder, "- noColor ()V");
+		if (method != null) {
+			List<MethodInsnNode> list = DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+			for (MethodInsnNode mn : list) {
+				if (mn.owner.equals(worldRenderer.name) && mn.desc.equals("()V")) {
+					addMethodMapping("net/minecraft/client/renderer/WorldRenderer markDirty ()V", worldRenderer.name + " " + mn.name + " " + mn.desc);
+					break;
+				}
+			}
+		}	
+		
+		// TODO
+		// restoreState (WorldRenderer.State param0)V
+		// public RealmsVertexFormat getVertexFormat()
+		 
+		
+		return true;
+	}
+	
+	
+	@Mapping(provides={
+			"net/minecraft/util/EnumWorldBlockLayer"
+			},
+			providesMethods={
+			"net/minecraft/client/renderer/RenderGlobal renderBlockLayer (Lnet/minecraft/util/EnumWorldBlockLayer;)V"
+			},
+			depends={
+			"net/minecraft/client/renderer/RenderGlobal",
+			"net/minecraft/client/renderer/vertex/VertexFormat"
+			})
+	public static boolean processRenderGlobalClass()
+	{
+		ClassNode renderGlobal = getClassNodeFromMapping("net/minecraft/client/renderer/RenderGlobal");
+		ClassNode vertexFormat = getClassNodeFromMapping("net/minecraft/client/renderer/vertex/VertexFormat");
+		if (!MeddleUtil.notNull(renderGlobal, vertexFormat)) return false;		
+		
+		String renderBlockLayer_name = null;
+		String enumWorldBlockLayer_name = null;
+		MethodNode renderBlockLayer = null;
+		
+		// private void renderBlockLayer(EnumWorldBlockLayer param0)
+		// net/minecraft/util/EnumWorldBlockLayer
+		Set<String> matches = new HashSet<>();
+		for (MethodNode method : renderGlobal.methods) {
+			Type t = Type.getMethodType(method.desc);
+			if (t.getReturnType().getSort() != Type.VOID) continue;
+			Type[] args = t.getArgumentTypes();
+			if (args.length != 1 || args[0].getSort() != Type.OBJECT) continue;
+			matches.add(args[0].getClassName());
+		}
+		for (String className : matches) {
+			if (DynamicMappings.searchConstantPoolForStrings(className, "Solid", "Mipped Cutout", "Cutout", "Translucent")) {
+				addClassMapping("net/minecraft/util/EnumWorldBlockLayer", className);
+				enumWorldBlockLayer_name = className;
+				break;
+			}
+		}
+		List<MethodNode> methods = DynamicMappings.getMatchingMethods(renderGlobal, null, "(L" + enumWorldBlockLayer_name + ";)V");
+		if (methods.size() == 1) {
+			renderBlockLayer = methods.get(0);
+			addMethodMapping("net/minecraft/client/renderer/RenderGlobal renderBlockLayer (Lnet/minecraft/util/EnumWorldBlockLayer;)V",
+					renderGlobal.name + " " + methods.get(0).name + " "+ methods.get(0).desc);
+		}
+		
+		
+		
+		return true;
+	}
+	
+	
+	
+	
+	public static MethodNode getMethodNode(ClassNode cn, String obfMapping)
+	{
+		return DynamicMappings.getMethodNode(cn, obfMapping);
+	}
 	
 
 	public static void generateClassMappings()
