@@ -359,6 +359,18 @@ public class DynamicMappings
 
 		return list;
 	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public static <T> T getNextInsnNodeOfType(AbstractInsnNode startInsn, Class<T> classType)
+	{		
+		for (AbstractInsnNode insn = startInsn; insn != null; insn = insn.getNext()) {
+			if (insn.getClass() == classType) return (T) insn;
+		}
+
+		return null;
+	}
+	
 
 
 	// Still here in case anything still references it
@@ -2397,6 +2409,64 @@ public class DynamicMappings
 	}
 	
 	
+	
+	
+	@Mapping(provides={			
+			},
+			providesFields={
+			"net/minecraft/block/BlockPane NORTH Lnet/minecraft/block/properties/PropertyBool;",
+			"net/minecraft/block/BlockPane SOUTH Lnet/minecraft/block/properties/PropertyBool;",
+			"net/minecraft/block/BlockPane WEST Lnet/minecraft/block/properties/PropertyBool;",
+			"net/minecraft/block/BlockPane EAST Lnet/minecraft/block/properties/PropertyBool;"
+			},
+			providesMethods={	
+			},
+			depends={
+			"net/minecraft/block/BlockPane",
+			"net/minecraft/block/properties/PropertyBool"
+			})
+	public static boolean processBlockPaneClass()
+	{
+		ClassNode pane = getClassNodeFromMapping("net/minecraft/block/BlockPane");
+		ClassNode propBool = getClassNodeFromMapping("net/minecraft/block/properties/PropertyBool");
+		if (!MeddleUtil.notNull(pane, propBool)) return false;
+		
+		MethodNode clinit = getMethodNode(pane, "- <clinit> ()V");
+		if (clinit == null) return false;
+		String lastString = null;
+		String north = null;
+		String south = null;
+		String east = null;
+		String west = null;
+		
+		for (AbstractInsnNode insn = clinit.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+			String s = getLdcString(insn);
+			if (s != null) { lastString = s; continue; }
+			if (lastString == null) continue;
+			
+			FieldInsnNode fn = getNextInsnNodeOfType(insn, FieldInsnNode.class);
+			if (fn == null || fn.getOpcode() != Opcodes.PUTSTATIC) continue;
+			if (lastString != null && fn.owner.equals(pane.name) && fn.desc.equals("L" + propBool.name + ";")) {
+				if (lastString.equals("north") && north == null) north = fn.name;
+				else if (lastString.equals("south") && south == null) south = fn.name;
+				else if (lastString.equals("east") && east == null) east = fn.name;
+				else if (lastString.equals("west") && west == null) west = fn.name;				
+				lastString = null;
+				insn = fn;
+			}		
+		}
+		
+		if (MeddleUtil.notNull(north, south, east, west)) {
+			addFieldMapping("net/minecraft/block/BlockPane NORTH Lnet/minecraft/block/properties/PropertyBool;", pane.name + " " + north + " L" + propBool.name + ";");
+			addFieldMapping("net/minecraft/block/BlockPane SOUTH Lnet/minecraft/block/properties/PropertyBool;", pane.name + " " + south + " L" + propBool.name + ";");
+			addFieldMapping("net/minecraft/block/BlockPane WEST Lnet/minecraft/block/properties/PropertyBool;", pane.name + " " + west + " L" + propBool.name + ";");
+			addFieldMapping("net/minecraft/block/BlockPane EAST Lnet/minecraft/block/properties/PropertyBool;", pane.name + " " + east + " L" + propBool.name + ";");
+		}
+		
+		return true;
+	}
+	
+	
 	@Mapping(provides={
 			"net/minecraft/block/BlockLiquid"
 			},
@@ -3768,14 +3838,16 @@ public class DynamicMappings
 			"net/minecraft/block/Block getBlockFromName (Ljava/lang/String;)Lnet/minecraft/block/Block;",
 			"net/minecraft/block/Block setBlockBounds (Lnet/minecraft/util/AxisAlignedBB;)V",
 			"net/minecraft/block/Block getBlockBounds (Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/util/AxisAlignedBB;",
-			"net/minecraft/block/Block onNeighborBlockChange (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/Block;)V"
+			"net/minecraft/block/Block onNeighborBlockChange (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/Block;)V",
+			"net/minecraft/block/Block setBlockBoundsBasedOnState (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)V"
 			},
 			depends={
 			"net/minecraft/block/Block",
 			"net/minecraft/item/Item",
 			"net/minecraft/block/state/IBlockState",
 			"net/minecraft/util/BlockPos",
-			"net/minecraft/world/World"
+			"net/minecraft/world/World",
+			"net/minecraft/world/IBlockAccess"
 			})
 	public static boolean processBlockClass2()
 	{
@@ -3784,7 +3856,8 @@ public class DynamicMappings
 		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
 		ClassNode blockPos = getClassNodeFromMapping("net/minecraft/util/BlockPos");
 		ClassNode world = getClassNodeFromMapping("net/minecraft/world/World");
-		if (!MeddleUtil.notNull(block, item, iBlockState, blockPos, world)) return false;
+		ClassNode iBlockAccess = getClassNodeFromMapping("net/minecraft/world/IBlockAccess");
+		if (!MeddleUtil.notNull(block, item, iBlockState, blockPos, world, iBlockAccess)) return false;
 		
 		List<MethodNode> methods;
 		
@@ -3888,6 +3961,13 @@ public class DynamicMappings
 					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
+		
+		// public void setBlockBoundsBasedOnState(IBlockAccess param0, BlockPos param1)
+		methods = getMatchingMethods(block, null, assembleDescriptor("(", iBlockAccess, blockPos, ")V"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block setBlockBoundsBasedOnState (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)V",
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
 		
 		
 		return true;
@@ -6534,6 +6614,104 @@ public class DynamicMappings
 
 
 	
+	@Mapping(providesFields={
+			"net/minecraft/util/AxisAlignedBB minX D",
+			"net/minecraft/util/AxisAlignedBB minY D",
+			"net/minecraft/util/AxisAlignedBB minZ D",
+			"net/minecraft/util/AxisAlignedBB maxX D",
+			"net/minecraft/util/AxisAlignedBB maxY D",
+			"net/minecraft/util/AxisAlignedBB maxZ D"
+			},
+			providesMethods={
+			},
+			depends={
+			"net/minecraft/util/AxisAlignedBB"
+			})
+	public static boolean processAxisAlignedBBClass()
+	{
+		ClassNode aabb = getClassNodeFromMapping("net/minecraft/util/AxisAlignedBB");
+		if (!MeddleUtil.notNull(aabb)) return false;	
+		
+		MethodNode toString = DynamicMappings.getMethodNode(aabb, "- toString ()Ljava/lang/String;");
+		if (toString == null) return false;
+		List<FieldInsnNode> fieldInsns = DynamicMappings.getAllInsnNodesOfType(toString.instructions.getFirst(), FieldInsnNode.class);
+		if (fieldInsns.size() == 6) {
+			String[] fieldNames = {"minX", "minY", "minZ", "maxX", "maxY", "maxZ"};
+			for (int n = 0; n < 6; n++) {
+				FieldInsnNode fn = fieldInsns.get(n);
+				if (fn.owner.equals(aabb.name)) {
+					addFieldMapping("net/minecraft/util/AxisAlignedBB " + fieldNames[n] + " D",
+							fn.owner + " " + fn.name + " " + fn.desc);
+				}
+			}
+		}
+		
+		return true;
+	}
+	
+	
+	@Mapping(providesMethods={
+			"net/minecraft/util/RegistryNamespaced getIDForObject (Ljava/lang/Object;)I",
+			"net/minecraft/util/RegistryNamespaced getObjectById (I)Ljava/lang/Object;",
+			"net/minecraft/util/RegistryNamespaced containsKey (Ljava/lang/Object;)Z",
+			"net/minecraft/util/RegistryNamespaced register (ILjava/lang/Object;Ljava/lang/Object;)V",
+			"net/minecraft/util/RegistryNamespaced getObject (Ljava/lang/Object;)Ljava/lang/Object;",
+			"net/minecraft/util/RegistryNamespaced getNameForObject (Ljava/lang/Object;)Ljava/lang/Object;"
+			},
+			depends={
+			"net/minecraft/util/RegistryNamespaced"
+			})
+	public static boolean processRegistryNamespacedClass()
+	{
+		ClassNode registry = getClassNodeFromMapping("net/minecraft/util/RegistryNamespaced");
+		if (!MeddleUtil.notNull(registry)) return false;
+		
+		// public int getIDForObject(Object p_148757_1_)
+		List<MethodNode> methods = getMatchingMethods(registry, null, "(Ljava/lang/Object;)I");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/util/RegistryNamespaced getIDForObject (Ljava/lang/Object;)I",
+					registry.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		// public Object getObjectById(int id)
+		methods = getMatchingMethods(registry, null, "(I)Ljava/lang/Object;");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/util/RegistryNamespaced getObjectById (I)Ljava/lang/Object;",
+					registry.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		// public boolean containsKey(Object p_148741_1_)
+		methods = getMatchingMethods(registry, null, "(Ljava/lang/Object;)Z");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/util/RegistryNamespaced containsKey (Ljava/lang/Object;)Z",
+					registry.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		// public void register(int id, Object p_177775_2_, Object p_177775_3_)		
+		methods = getMatchingMethods(registry, null, "(ILjava/lang/Object;Ljava/lang/Object;)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/util/RegistryNamespaced register (ILjava/lang/Object;Ljava/lang/Object;)V",
+					registry.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		// public Object getObject(Object p_82594_1_)
+		// public Object getNameForObject(Object p_177774_1_)
+		methods = getMatchingMethods(registry, null, "(Ljava/lang/Object;)Ljava/lang/Object;");
+		if (methods.size() == 2) {
+			MethodNode m1 = methods.get(0);
+			MethodNode m2 = methods.get(1);
+			
+			if (matchOpcodeSequence(m1.instructions.getFirst(), Opcodes.ALOAD, Opcodes.ALOAD, Opcodes.INVOKESPECIAL, Opcodes.ARETURN) &&
+				matchOpcodeSequence(m2.instructions.getFirst(), Opcodes.ALOAD, Opcodes.GETFIELD, Opcodes.ALOAD, Opcodes.INVOKEINTERFACE, Opcodes.ARETURN)) 
+			{				
+				addMethodMapping("net/minecraft/util/RegistryNamespaced getObject (Ljava/lang/Object;)Ljava/lang/Object;", registry.name + " " + m1.name + " " + m1.desc);
+				addMethodMapping("net/minecraft/util/RegistryNamespaced getNameForObject (Ljava/lang/Object;)Ljava/lang/Object;", registry.name + " " + m2.name + " " + m2.desc);				
+			}
+		}
+		
+		
+		return true;
+	}
 	
 	
     

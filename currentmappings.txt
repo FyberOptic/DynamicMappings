@@ -1,4 +1,3 @@
-processBlockDynamicLiquidClass didn't provide mapping for method net/minecraft/block/Block getRenderType ()I
 Minecraft version: 15w37a
 Minecraft jar type: client
 
@@ -56,6 +55,8 @@ net/minecraft/client/renderer/RenderGlobal -> bkw
 net/minecraft/client/renderer/RenderHelper -> azv
 net/minecraft/client/renderer/WorldRenderer -> bki
 net/minecraft/client/renderer/entity/RenderItem -> bpd
+net/minecraft/client/renderer/texture/TextureAtlasSprite -> bsh
+net/minecraft/client/renderer/texture/TextureMap -> bsg
 net/minecraft/client/renderer/vertex/VertexFormat -> bsr
 net/minecraft/client/resources/model/ModelResourceLocation -> bus
 net/minecraft/client/settings/GameSettings -> baa
@@ -166,6 +167,10 @@ net/minecraft/block/BlockDoor$EnumDoorHalf LOWER Lnet/minecraft/block/BlockDoor$
 net/minecraft/block/BlockDoor$EnumDoorHalf UPPER Lnet/minecraft/block/BlockDoor$EnumDoorHalf; -> ajs$a a Lajs$a;
 net/minecraft/block/BlockDoor$EnumHingePosition LEFT Lnet/minecraft/block/BlockDoor$EnumHingePosition; -> ajs$b a Lajs$b;
 net/minecraft/block/BlockDoor$EnumHingePosition RIGHT Lnet/minecraft/block/BlockDoor$EnumHingePosition; -> ajs$b b Lajs$b;
+net/minecraft/block/BlockPane EAST Lnet/minecraft/block/properties/PropertyBool; -> anx H Laqh;
+net/minecraft/block/BlockPane NORTH Lnet/minecraft/block/properties/PropertyBool; -> anx b Laqh;
+net/minecraft/block/BlockPane SOUTH Lnet/minecraft/block/properties/PropertyBool; -> anx I Laqh;
+net/minecraft/block/BlockPane WEST Lnet/minecraft/block/properties/PropertyBool; -> anx J Laqh;
 net/minecraft/client/Minecraft gameSettings Lnet/minecraft/client/entity/EntityPlayerSP; -> azx t Lbaa;
 net/minecraft/client/Minecraft thePlayer Lnet/minecraft/client/entity/EntityPlayerSP; -> azx h Lbkc;
 net/minecraft/client/Minecraft theWorld Lnet/minecraft/client/multiplayer/WorldClient; -> azx f Lbid;
@@ -177,6 +182,17 @@ net/minecraft/client/gui/GuiScreen mc Lnet/minecraft/client/Minecraft; -> bcn j 
 net/minecraft/client/gui/GuiScreen width I -> bcn l I
 net/minecraft/client/gui/inventory/GuiContainer guiLeft I -> bdf i I
 net/minecraft/client/gui/inventory/GuiContainer guiTop I -> bdf r I
+net/minecraft/client/renderer/texture/TextureAtlasSprite framesTextureData Ljava/util/List; -> bsh a Ljava/util/List;
+net/minecraft/client/renderer/texture/TextureAtlasSprite height I -> bsh g I
+net/minecraft/client/renderer/texture/TextureAtlasSprite iconName Ljava/lang/String; -> bsh j Ljava/lang/String;
+net/minecraft/client/renderer/texture/TextureAtlasSprite maxU F -> bsh m F
+net/minecraft/client/renderer/texture/TextureAtlasSprite maxV F -> bsh o F
+net/minecraft/client/renderer/texture/TextureAtlasSprite minU F -> bsh l F
+net/minecraft/client/renderer/texture/TextureAtlasSprite minV F -> bsh n F
+net/minecraft/client/renderer/texture/TextureAtlasSprite originX I -> bsh d I
+net/minecraft/client/renderer/texture/TextureAtlasSprite originY I -> bsh e I
+net/minecraft/client/renderer/texture/TextureAtlasSprite rotated Z -> bsh c Z
+net/minecraft/client/renderer/texture/TextureAtlasSprite width I -> bsh f I
 net/minecraft/client/settings/KeyBinding keyCategory Ljava/lang/String; -> azu f Ljava/lang/String;
 net/minecraft/client/settings/KeyBinding keyCode I -> azu g I
 net/minecraft/client/settings/KeyBinding keyCodeDefault I -> azu e I
@@ -231,6 +247,12 @@ net/minecraft/tileentity/TileEntity blockType Lnet/minecraft/block/Block; -> aoq
 net/minecraft/tileentity/TileEntity pos Lnet/minecraft/util/BlockPos; -> aoq c Lcj;
 net/minecraft/tileentity/TileEntity tileEntityInvalid Z -> aoq d Z
 net/minecraft/tileentity/TileEntity worldObj Lnet/minecraft/world/World; -> aoq b Lagr;
+net/minecraft/util/AxisAlignedBB maxX D -> ayz d D
+net/minecraft/util/AxisAlignedBB maxY D -> ayz e D
+net/minecraft/util/AxisAlignedBB maxZ D -> ayz f D
+net/minecraft/util/AxisAlignedBB minX D -> ayz a D
+net/minecraft/util/AxisAlignedBB minY D -> ayz b D
+net/minecraft/util/AxisAlignedBB minZ D -> ayz c D
 net/minecraft/util/EnumFacing DOWN Lnet/minecraft/util/EnumFacing; -> cq a Lcq;
 net/minecraft/util/EnumFacing EAST Lnet/minecraft/util/EnumFacing; -> cq f Lcq;
 net/minecraft/util/EnumFacing NORTH Lnet/minecraft/util/EnumFacing; -> cq c Lcq;
@@ -258,6 +280,7 @@ net/minecraft/block/Block getDefaultState ()Lnet/minecraft/block/state/IBlockSta
 net/minecraft/block/Block getIdFromBlock (Lnet/minecraft/block/Block;)I -> aiq a (Laiq;)I
 net/minecraft/block/Block getLocalizedName ()Ljava/lang/String; -> aiq c ()Ljava/lang/String;
 net/minecraft/block/Block getMetaFromState (Lnet/minecraft/block/state/IBlockState;)I -> aiq f (Lapw;)I
+net/minecraft/block/Block getMixedBrightnessForBlock (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)I -> aiq b (Lapw;Lagv;Lcj;)I
 net/minecraft/block/Block getStateById (I)Lnet/minecraft/block/state/IBlockState; -> aiq c (I)Lapw;
 net/minecraft/block/Block getStateFromMeta (I)Lnet/minecraft/block/state/IBlockState; -> aiq a (I)Lapw;
 net/minecraft/block/Block getStateId (Lnet/minecraft/block/state/IBlockState;)I -> aiq l (Lapw;)I
@@ -272,6 +295,7 @@ net/minecraft/block/Block registerBlock (ILjava/lang/String;Lnet/minecraft/block
 net/minecraft/block/Block registerBlock (ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/block/Block;)V -> aiq a (ILkf;Laiq;)V
 net/minecraft/block/Block registerBlocks ()V -> aiq y ()V
 net/minecraft/block/Block setBlockBounds (Lnet/minecraft/util/AxisAlignedBB;)V -> aiq a (Layz;)V
+net/minecraft/block/Block setBlockBoundsBasedOnState (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)V -> aiq a (Lagv;Lcj;)V
 net/minecraft/block/Block setDefaultState (Lnet/minecraft/block/state/IBlockState;)V -> aiq z (Lapw;)V
 net/minecraft/block/Block setUnlocalizedName (Ljava/lang/String;)Lnet/minecraft/block/Block; -> aiq c (Ljava/lang/String;)Laiq;
 net/minecraft/block/Block spawnAsEntity (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/item/ItemStack;)V -> aiq a (Lagr;Lcj;Lacr;)V
@@ -295,6 +319,7 @@ net/minecraft/client/Minecraft displayGuiScreen (Lnet/minecraft/client/gui/GuiSc
 net/minecraft/client/Minecraft getIntegratedServer ()Lnet/minecraft/server/integrated/IntegratedServer; -> azx E ()Lbvm;
 net/minecraft/client/Minecraft getMinecraft ()Lnet/minecraft/client/Minecraft; -> azx y ()Lazx;
 net/minecraft/client/Minecraft getRenderItem ()Lnet/minecraft/client/renderer/entity/RenderItem; -> azx ac ()Lbpd;
+net/minecraft/client/Minecraft getTextureMapBlocks ()Lnet/minecraft/client/renderer/texture/TextureMap; -> azx Q ()Lbsg;
 net/minecraft/client/Minecraft launchIntegratedServer (Ljava/lang/String;Ljava/lang/String;Lnet/minecraft/world/WorldSettings;)V -> azx a (Ljava/lang/String;Ljava/lang/String;Lagu;)V
 net/minecraft/client/Minecraft refreshResources ()V -> azx e ()V
 net/minecraft/client/Minecraft startGame ()V -> azx ak ()V
@@ -353,6 +378,14 @@ net/minecraft/client/renderer/WorldRenderer setTranslation (DDD)V -> bki c (DDD)
 net/minecraft/client/renderer/WorldRenderer sortQuads (FFF)V -> bki a (FFF)V
 net/minecraft/client/renderer/WorldRenderer startDrawing (ILnet/minecraft/client/renderer/vertex/VertexFormat;)V -> bki a (ILbsr;)V
 net/minecraft/client/renderer/entity/RenderItem getItemModelMesher ()Lnet/minecraft/client/renderer/ItemModelMesher; -> bpd a ()Lbkt;
+net/minecraft/client/renderer/texture/TextureAtlasSprite getIconName ()Ljava/lang/String; -> bsh i ()Ljava/lang/String;
+net/minecraft/client/renderer/texture/TextureAtlasSprite getInterpolatedU (D)F -> bsh a (D)F
+net/minecraft/client/renderer/texture/TextureAtlasSprite getInterpolatedV (D)F -> bsh b (D)F
+net/minecraft/client/renderer/texture/TextureAtlasSprite getMaxU ()F -> bsh f ()F
+net/minecraft/client/renderer/texture/TextureAtlasSprite getMaxV ()F -> bsh h ()F
+net/minecraft/client/renderer/texture/TextureAtlasSprite getMinU ()F -> bsh e ()F
+net/minecraft/client/renderer/texture/TextureAtlasSprite getMinV ()F -> bsh g ()F
+net/minecraft/client/renderer/texture/TextureMap getAtlasSprite (Ljava/lang/String;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite; -> bsg a (Ljava/lang/String;)Lbsh;
 net/minecraft/client/settings/KeyBinding getKeybinds ()Ljava/util/Set; -> azu d ()Ljava/util/Set;
 net/minecraft/client/settings/KeyBinding isKeyDown ()Z -> azu e ()Z
 net/minecraft/client/settings/KeyBinding isPressed ()Z -> azu g ()Z
@@ -522,6 +555,12 @@ net/minecraft/util/BlockPos west ()Lnet/minecraft/util/BlockPos; -> cj e ()Lcj;
 net/minecraft/util/BlockPos west (I)Lnet/minecraft/util/BlockPos; -> cj f (I)Lcj;
 net/minecraft/util/IStringSerializable getName ()Ljava/lang/String; -> oh l ()Ljava/lang/String;
 net/minecraft/util/ObjectIntIdentityMap put (Ljava/lang/Object;I)V -> ct a (Ljava/lang/Object;I)V
+net/minecraft/util/RegistryNamespaced containsKey (Ljava/lang/Object;)Z -> cx d (Ljava/lang/Object;)Z
+net/minecraft/util/RegistryNamespaced getIDForObject (Ljava/lang/Object;)I -> cx a (Ljava/lang/Object;)I
+net/minecraft/util/RegistryNamespaced getNameForObject (Ljava/lang/Object;)Ljava/lang/Object; -> cx b (Ljava/lang/Object;)Ljava/lang/Object;
+net/minecraft/util/RegistryNamespaced getObject (Ljava/lang/Object;)Ljava/lang/Object; -> cx c (Ljava/lang/Object;)Ljava/lang/Object;
+net/minecraft/util/RegistryNamespaced getObjectById (I)Ljava/lang/Object; -> cx a (I)Ljava/lang/Object;
+net/minecraft/util/RegistryNamespaced register (ILjava/lang/Object;Ljava/lang/Object;)V -> cx a (ILjava/lang/Object;Ljava/lang/Object;)V
 net/minecraft/util/Vec3i getX ()I -> df o ()I
 net/minecraft/util/Vec3i getY ()I -> df p ()I
 net/minecraft/util/Vec3i getZ ()I -> df q ()I

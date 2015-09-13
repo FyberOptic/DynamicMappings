@@ -18,6 +18,7 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FieldNode;
+import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
@@ -139,19 +140,22 @@ public class DynamicClientMappings
 			"net/minecraft/client/Minecraft getRenderItem ()Lnet/minecraft/client/renderer/entity/RenderItem;",
 			"net/minecraft/client/Minecraft refreshResources ()V",
 			"net/minecraft/client/Minecraft launchIntegratedServer (Ljava/lang/String;Ljava/lang/String;Lnet/minecraft/world/WorldSettings;)V",
-			"net/minecraft/client/Minecraft getIntegratedServer ()Lnet/minecraft/server/integrated/IntegratedServer;"
+			"net/minecraft/client/Minecraft getIntegratedServer ()Lnet/minecraft/server/integrated/IntegratedServer;",
+			"net/minecraft/client/Minecraft getTextureMapBlocks ()Lnet/minecraft/client/renderer/texture/TextureMap;"
 			},
 			depends={
 			"net/minecraft/client/Minecraft",
 			"net/minecraft/client/renderer/entity/RenderItem",
-			"net/minecraft/world/World"
+			"net/minecraft/world/World",
+			"net/minecraft/client/renderer/texture/TextureMap"
 			})
 	public static boolean processMinecraftClass()
 	{
 		ClassNode minecraft = getClassNodeFromMapping("net/minecraft/client/Minecraft");
 		ClassNode renderItem = getClassNodeFromMapping("net/minecraft/client/renderer/entity/RenderItem");
 		ClassNode world = getClassNodeFromMapping("net/minecraft/world/World");
-		if (minecraft == null || renderItem == null || world == null) return false;
+		ClassNode textureMap = getClassNodeFromMapping("net/minecraft/client/renderer/texture/TextureMap");
+		if (!MeddleUtil.notNull(minecraft, renderItem, world, textureMap)) return false;
 		
 		
 		List<FieldNode> fields;
@@ -162,7 +166,7 @@ public class DynamicClientMappings
 			Type t = Type.getType(field.desc);			
 			fieldClasses.add(t.getClassName());
 		}
-		
+			
 		
 		
 		// public static Minecraft getMinecraft()
@@ -272,6 +276,14 @@ public class DynamicClientMappings
 		}
 		
 		
+		// public TextureMap getTextureMapBlocks()
+		methods = DynamicMappings.getMatchingMethods(minecraft, null, "()L" + textureMap.name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/Minecraft getTextureMapBlocks ()Lnet/minecraft/client/renderer/texture/TextureMap;",
+					minecraft.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
 		return true;
 	}
 
@@ -377,7 +389,8 @@ public class DynamicClientMappings
 			"net/minecraft/client/gui/GuiIngame",
 			"net/minecraft/client/multiplayer/GuiConnecting",
 			"net/minecraft/client/renderer/RenderGlobal",
-			"net/minecraft/client/renderer/BlockRendererDispatcher"
+			"net/minecraft/client/renderer/BlockRendererDispatcher",
+			"net/minecraft/client/renderer/texture/TextureMap"
 			},
 			depends="net/minecraft/client/Minecraft")
 	public static boolean getGuiMainMenuClass()
@@ -453,8 +466,14 @@ public class DynamicClientMappings
 
 		String renderGlobal = null;
 		String blockRendererDispatcher = null;
+		String textureMap = null;
 		
 		for (String className : startupClasses) {
+			if (textureMap == null && DynamicMappings.searchConstantPoolForStrings(className, "missingno", "textures/atlas/blocks.png")) {
+				textureMap = className;
+				continue;
+			}
+			
 			if (renderGlobal == null && DynamicMappings.searchConstantPoolForStrings(className, "textures/environment/moon_phases.png", "Exception while adding particle", "random.click")) {
 				renderGlobal = className;
 				continue;
@@ -464,6 +483,10 @@ public class DynamicClientMappings
 				blockRendererDispatcher = className;
 				continue;
 			}
+		}
+		
+		if (textureMap != null) {
+			addClassMapping("net/minecraft/client/renderer/texture/TextureMap", textureMap);
 		}
 		
 		if (blockRendererDispatcher != null)
@@ -1780,7 +1803,7 @@ public class DynamicClientMappings
 	
 	
 	@Mapping(providesMethods={
-			"net/minecraft/block/Block getRenderType ()I"
+			/*"net/minecraft/block/Block getRenderType ()I"*/
 			},
 			depends={
 			"net/minecraft/block/BlockLiquid",
@@ -1792,11 +1815,14 @@ public class DynamicClientMappings
 		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
 		if (!MeddleUtil.notNull(liquid, block)) return false;
 		
+		
+		// TODO - This changed in 15w37a, stopped being needed for MeddleAPI
 		// public int getRenderType()
+		/*
 		List<MethodNode> methods = DynamicMappings.getMatchingMethods(liquid, null, "()I");
 		if (methods.size() == 1) {
 			addMethodMapping("net/minecraft/block/Block getRenderType ()I", block.name + " " + methods.get(0).name + " ()I");
-		}
+		}*/
 		
 		
 		return true;
@@ -2272,6 +2298,351 @@ public class DynamicClientMappings
 		
 		return true;
 	}
+	
+	@Mapping(provides={
+			"net/minecraft/client/renderer/texture/TextureAtlasSprite"
+			},
+			providesMethods={
+			"net/minecraft/client/renderer/texture/TextureMap getAtlasSprite (Ljava/lang/String;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;"
+			},
+			depends={
+			"net/minecraft/client/renderer/texture/TextureMap"
+			})
+	public static boolean processTextureMapClass()
+	{
+		ClassNode textureMap = getClassNodeFromMapping("net/minecraft/client/renderer/texture/TextureMap");
+		if (!MeddleUtil.notNull(textureMap)) return false;
+		
+		List<MethodNode> methods = new ArrayList<>();
+		String textureAtlasSprite_name = null;
+		
+		// public TextureAtlasSprite getAtlasSprite(String iconName)
+		// net/minecraft/client/renderer/texture/TextureAtlasSprite
+		for (MethodNode method : textureMap.methods) {
+			if (!method.desc.startsWith("(Ljava/lang/String;)L")) continue;
+			Type t = Type.getMethodType(method.desc);
+			String className = t.getReturnType().getClassName();
+			if (textureAtlasSprite_name == null && DynamicMappings.searchConstantPoolForStrings(className, "TextureAtlasSprite{name=\'", "Generating mipmaps for frame", "broken aspect ratio and not an animation")) {
+				addClassMapping("net/minecraft/client/renderer/texture/TextureAtlasSprite", className);
+				methods.add(method);
+				continue;
+			}
+			else if (textureAtlasSprite_name != null && className.equals(textureAtlasSprite_name)) {
+				methods.add(method);
+				continue;
+			}			
+		}
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/renderer/texture/TextureMap getAtlasSprite (Ljava/lang/String;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;",
+					textureMap.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		return true;
+	}
+	
+
+	
+	
+	@Mapping(provides={			
+			},
+			providesFields={
+			"net/minecraft/client/renderer/texture/TextureAtlasSprite iconName Ljava/lang/String;",
+			"net/minecraft/client/renderer/texture/TextureAtlasSprite framesTextureData Ljava/util/List;",
+			"net/minecraft/client/renderer/texture/TextureAtlasSprite rotated Z",
+			"net/minecraft/client/renderer/texture/TextureAtlasSprite originX I",
+			"net/minecraft/client/renderer/texture/TextureAtlasSprite originY I",
+			"net/minecraft/client/renderer/texture/TextureAtlasSprite height I",
+			"net/minecraft/client/renderer/texture/TextureAtlasSprite width I",
+			"net/minecraft/client/renderer/texture/TextureAtlasSprite minU F",
+			"net/minecraft/client/renderer/texture/TextureAtlasSprite maxU F",
+			"net/minecraft/client/renderer/texture/TextureAtlasSprite minV F",
+			"net/minecraft/client/renderer/texture/TextureAtlasSprite maxV F"		
+			},
+			providesMethods={			
+			"net/minecraft/client/renderer/texture/TextureAtlasSprite getIconName ()Ljava/lang/String;",
+			"net/minecraft/client/renderer/texture/TextureAtlasSprite getMinU ()F",
+			"net/minecraft/client/renderer/texture/TextureAtlasSprite getMinV ()F",
+			"net/minecraft/client/renderer/texture/TextureAtlasSprite getMaxU ()F",
+			"net/minecraft/client/renderer/texture/TextureAtlasSprite getMaxV ()F",
+			"net/minecraft/client/renderer/texture/TextureAtlasSprite getInterpolatedU (D)F",
+			"net/minecraft/client/renderer/texture/TextureAtlasSprite getInterpolatedV (D)F"
+			},
+			depends={
+			"net/minecraft/client/renderer/texture/TextureAtlasSprite"
+			})
+	public static boolean processTextureAtlasSpriteClass()
+	{
+		ClassNode sprite = getClassNodeFromMapping("net/minecraft/client/renderer/texture/TextureAtlasSprite");
+		if (!MeddleUtil.notNull(sprite)) return false;
+		
+		MethodNode toString = DynamicMappings.getMethodNode(sprite, "- toString ()Ljava/lang/String;");
+		if (toString == null) return false;		
+		
+		String iconName = null;
+		String framesTextureData = null;
+		String rotated = null;
+		String originX = null;
+		String originY = null;
+		String height = null;
+		String width = null;
+		String minU = null;
+		String maxU = null;
+		String minV = null;
+		String maxV = null;
+		
+		for (AbstractInsnNode insn = toString.instructions.getFirst(); insn != null; insn = insn.getNext()) 
+		{			
+			if (iconName == null && DynamicMappings.isLdcWithString(insn, "TextureAtlasSprite{name=\'")) {
+				FieldInsnNode fn = DynamicMappings.getNextInsnNodeOfType(insn, FieldInsnNode.class);
+				if (fn == null || !fn.owner.equals(sprite.name) || !fn.desc.equals("Ljava/lang/String;")) continue;
+				iconName = fn.name;
+				insn = fn;
+				continue;
+			}
+			if (framesTextureData == null && DynamicMappings.isLdcWithString(insn, ", frameCount=")) {
+				FieldInsnNode fn = DynamicMappings.getNextInsnNodeOfType(insn, FieldInsnNode.class);
+				if (fn == null || !fn.owner.equals(sprite.name) || !fn.desc.equals("Ljava/util/List;")) continue;
+				framesTextureData = fn.name;
+				insn = fn;
+				continue;
+			}
+			if (rotated == null && DynamicMappings.isLdcWithString(insn, ", rotated=")) {
+				FieldInsnNode fn = DynamicMappings.getNextInsnNodeOfType(insn, FieldInsnNode.class);
+				if (fn == null || !fn.owner.equals(sprite.name) || !fn.desc.equals("Z")) continue;
+				rotated = fn.name;
+				insn = fn;
+				continue;
+			}
+			if (originX == null && DynamicMappings.isLdcWithString(insn, ", x=")) {
+				FieldInsnNode fn = DynamicMappings.getNextInsnNodeOfType(insn, FieldInsnNode.class);
+				if (fn == null || !fn.owner.equals(sprite.name) || !fn.desc.equals("I")) continue;
+				originX = fn.name;
+				insn = fn;
+				continue;
+			}
+			if (originY == null && DynamicMappings.isLdcWithString(insn, ", y=")) {
+				FieldInsnNode fn = DynamicMappings.getNextInsnNodeOfType(insn, FieldInsnNode.class);
+				if (fn == null || !fn.owner.equals(sprite.name) || !fn.desc.equals("I")) continue;
+				originY = fn.name;
+				insn = fn;
+				continue;
+			}
+			if (height == null && DynamicMappings.isLdcWithString(insn, ", height=")) {
+				FieldInsnNode fn = DynamicMappings.getNextInsnNodeOfType(insn, FieldInsnNode.class);
+				if (fn == null || !fn.owner.equals(sprite.name) || !fn.desc.equals("I")) continue;
+				height = fn.name;
+				insn = fn;
+				continue;
+			}
+			if (width == null && DynamicMappings.isLdcWithString(insn, ", width=")) {
+				FieldInsnNode fn = DynamicMappings.getNextInsnNodeOfType(insn, FieldInsnNode.class);
+				if (fn == null || !fn.owner.equals(sprite.name) || !fn.desc.equals("I")) continue;
+				width = fn.name;
+				insn = fn;
+				continue;
+			}
+			if (minU == null && DynamicMappings.isLdcWithString(insn, ", u0=")) {
+				FieldInsnNode fn = DynamicMappings.getNextInsnNodeOfType(insn, FieldInsnNode.class);
+				if (fn == null || !fn.owner.equals(sprite.name) || !fn.desc.equals("F")) continue;
+				minU = fn.name;
+				insn = fn;
+				continue;
+			}
+			if (maxU == null && DynamicMappings.isLdcWithString(insn, ", u1=")) {
+				FieldInsnNode fn = DynamicMappings.getNextInsnNodeOfType(insn, FieldInsnNode.class);
+				if (fn == null || !fn.owner.equals(sprite.name) || !fn.desc.equals("F")) continue;
+				maxU = fn.name;
+				insn = fn;
+				continue;
+			}
+			if (minV == null && DynamicMappings.isLdcWithString(insn, ", v0=")) {
+				FieldInsnNode fn = DynamicMappings.getNextInsnNodeOfType(insn, FieldInsnNode.class);
+				if (fn == null || !fn.owner.equals(sprite.name) || !fn.desc.equals("F")) continue;
+				minV = fn.name;
+				insn = fn;
+				continue;
+			}
+			if (maxV == null && DynamicMappings.isLdcWithString(insn, ", v1=")) {
+				FieldInsnNode fn = DynamicMappings.getNextInsnNodeOfType(insn, FieldInsnNode.class);
+				if (fn == null || !fn.owner.equals(sprite.name) || !fn.desc.equals("F")) continue;
+				maxV = fn.name;
+				insn = fn;
+				continue;
+			}
+		}
+		
+		if (iconName != null) {	
+			addFieldMapping("net/minecraft/client/renderer/texture/TextureAtlasSprite iconName Ljava/lang/String;",
+					sprite.name + " " + iconName + " Ljava/lang/String;");
+		}
+		
+		if (framesTextureData != null) {
+			addFieldMapping("net/minecraft/client/renderer/texture/TextureAtlasSprite framesTextureData Ljava/util/List;",
+					sprite.name + " " + framesTextureData + " Ljava/util/List;");
+		}
+		
+		if (rotated != null) {	
+			addFieldMapping("net/minecraft/client/renderer/texture/TextureAtlasSprite rotated Z",
+					sprite.name + " " + rotated + " Z");
+		}
+		
+		if (originX != null) {
+			addFieldMapping("net/minecraft/client/renderer/texture/TextureAtlasSprite originX I",
+					sprite.name + " " + originX + " I");
+		}
+		
+		if (originY != null) {
+			addFieldMapping("net/minecraft/client/renderer/texture/TextureAtlasSprite originY I",
+					sprite.name + " " + originY + " I");
+		}
+		
+		if (height != null) {
+			addFieldMapping("net/minecraft/client/renderer/texture/TextureAtlasSprite height I",
+					sprite.name + " " + height + " I");
+		}
+		
+		if (width != null) {
+			addFieldMapping("net/minecraft/client/renderer/texture/TextureAtlasSprite width I",
+					sprite.name + " " + width + " I");
+		}
+		
+		if (minU != null) {
+			addFieldMapping("net/minecraft/client/renderer/texture/TextureAtlasSprite minU F",
+					sprite.name + " " + minU + " F");
+		}
+		
+		if (maxU != null) {
+			addFieldMapping("net/minecraft/client/renderer/texture/TextureAtlasSprite maxU F",
+					sprite.name + " " + maxU + " F");
+		}
+		
+		if (minV != null) {
+			addFieldMapping("net/minecraft/client/renderer/texture/TextureAtlasSprite minV F",
+					sprite.name + " " + minV + " F");
+		}
+		
+		if (maxV != null) {
+			addFieldMapping("net/minecraft/client/renderer/texture/TextureAtlasSprite maxV F",
+					sprite.name + " " + maxV + " F");
+		}
+		
+		
+		MethodNode method;
+		
+		// public String getIconName()
+		if ((method = findGetterMethod(sprite, iconName, "Ljava/lang/String;")) != null) {
+			addMethodMapping("net/minecraft/client/renderer/texture/TextureAtlasSprite getIconName ()Ljava/lang/String;", 
+					sprite.name + " " + method.name + " " + method.desc);
+		}
+		
+		// public float getMinU()
+		if ((method = findGetterMethod(sprite, minU, "F")) != null) {
+			addMethodMapping("net/minecraft/client/renderer/texture/TextureAtlasSprite getMinU ()F", 
+					sprite.name + " " + method.name + " " + method.desc);
+		}
+		
+		// public float getMinV()
+		if ((method = findGetterMethod(sprite, minV, "F")) != null) {
+			addMethodMapping("net/minecraft/client/renderer/texture/TextureAtlasSprite getMinV ()F", 
+					sprite.name + " " + method.name + " " + method.desc);
+		}
+		
+		// public float getMaxU()
+		if ((method = findGetterMethod(sprite, maxU, "F")) != null) {
+			addMethodMapping("net/minecraft/client/renderer/texture/TextureAtlasSprite getMaxU ()F", 
+					sprite.name + " " + method.name + " " + method.desc);
+		}
+				
+		// public float getMaxV()
+		if ((method = findGetterMethod(sprite, maxV, "F")) != null) {
+			addMethodMapping("net/minecraft/client/renderer/texture/TextureAtlasSprite getMaxV ()F", 
+					sprite.name + " " + method.name + " " + method.desc);
+		}
+		
+		// TODO - Other getters
+		
+		
+		// public float getInterpolatedU(double u)
+		// public float getInterpolatedV(double v)		
+		List<MethodNode> methods = DynamicMappings.getMatchingMethods(sprite, null, "(D)F");
+		if (methods.size() == 2) {
+			FieldInsnNode fn1 = DynamicMappings.getNextInsnNodeOfType(methods.get(0).instructions.getFirst(), FieldInsnNode.class);
+			FieldInsnNode fn2 = DynamicMappings.getNextInsnNodeOfType(methods.get(1).instructions.getFirst(), FieldInsnNode.class);
+			if (fn1.owner.equals(sprite.name) && fn2.owner.equals(sprite.name)) {
+				MethodNode getInterpolatedU = null;
+				MethodNode getInterpolatedV = null;
+				if (fn1.name.equals(maxU) && fn2.name.equals(maxV)) { getInterpolatedU = methods.get(0); getInterpolatedV = methods.get(1); }
+				else if (fn1.name.equals(maxV) && fn2.name.equals(maxU)) { getInterpolatedU = methods.get(1); getInterpolatedV = methods.get(0); }
+				
+				if (getInterpolatedU != null && getInterpolatedV != null) {
+					addMethodMapping("net/minecraft/client/renderer/texture/TextureAtlasSprite getInterpolatedU (D)F", sprite.name + " " + getInterpolatedU.name + " (D)F");
+					addMethodMapping("net/minecraft/client/renderer/texture/TextureAtlasSprite getInterpolatedV (D)F", sprite.name + " " + getInterpolatedV.name + " (D)F");
+				}
+			}
+		}
+
+		
+		return true;
+	}
+	
+	
+	
+	@Mapping(providesMethods={
+			"net/minecraft/block/Block getMixedBrightnessForBlock (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)I"
+			},
+			depends={
+			"net/minecraft/block/Block",
+			"net/minecraft/world/IBlockAccess",
+			"net/minecraft/util/BlockPos",
+			"net/minecraft/block/state/IBlockState"
+			})
+	public static boolean processBlockClass()
+	{
+		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
+		ClassNode iBlockAccess = getClassNodeFromMapping("net/minecraft/world/IBlockAccess");
+		ClassNode blockPos = getClassNodeFromMapping("net/minecraft/util/BlockPos");
+		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
+		if (!MeddleUtil.notNull(block, iBlockAccess, blockPos)) return false;
+		
+		// public int getMixedBrightnessForBlock(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+		List<MethodNode> methods = DynamicMappings.getMatchingMethods(block, null, DynamicMappings.assembleDescriptor("(", iBlockState, iBlockAccess, blockPos, ")I"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block getMixedBrightnessForBlock (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)I",
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		return true;		
+	}
+	
+	
+	
+	
+	
+	
+	public static MethodNode findGetterMethod(ClassNode cn, String fieldName, String fieldDesc)
+	{
+		int returnOpcode = Opcodes.ARETURN;		
+		if (fieldDesc.equals("I")) returnOpcode = Opcodes.IRETURN;
+		else if (fieldDesc.equals("F")) returnOpcode = Opcodes.FRETURN;
+		else if (fieldDesc.equals("D")) returnOpcode = Opcodes.DRETURN;
+		else if (fieldDesc.equals("J")) returnOpcode = Opcodes.LRETURN;	
+		
+		List<MethodNode> methods = new ArrayList<>();
+		
+		for (MethodNode method : cn.methods) {			
+			AbstractInsnNode[] list = DynamicMappings.getOpcodeSequenceArray(method.instructions.getFirst(), Opcodes.ALOAD, Opcodes.GETFIELD, returnOpcode);
+			if (list == null) continue;
+			FieldInsnNode fn = (FieldInsnNode)list[1];
+			if (fn.owner.equals(cn.name) && fn.name.equals(fieldName)) methods.add(method);
+		}
+		
+		if (methods.size() == 1) return methods.get(0);
+		else return null;
+	}
+	
+	
 	
 	
 	
