@@ -3829,17 +3829,17 @@ public class DynamicMappings
 			"net/minecraft/util/AxisAlignedBB"
 			},
 			providesFields={
-			"net/minecraft/block/Block blockBounds Lnet/minecraft/util/AxisAlignedBB;"
+			////"net/minecraft/block/Block blockBounds Lnet/minecraft/util/AxisAlignedBB;"
 			},
 			providesMethods={
 			"net/minecraft/block/Block getStateId (Lnet/minecraft/block/state/IBlockState;)I",
 			"net/minecraft/block/Block getBlockById (I)Lnet/minecraft/block/Block;",
 			"net/minecraft/block/Block getBlockFromItem (Lnet/minecraft/item/Item;)Lnet/minecraft/block/Block;",
 			"net/minecraft/block/Block getBlockFromName (Ljava/lang/String;)Lnet/minecraft/block/Block;",
-			"net/minecraft/block/Block setBlockBounds (Lnet/minecraft/util/AxisAlignedBB;)V",
-			"net/minecraft/block/Block getBlockBounds (Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/util/AxisAlignedBB;",
+			//"net/minecraft/block/Block setBlockBounds (Lnet/minecraft/util/AxisAlignedBB;)V",
+			//"net/minecraft/block/Block getBlockBounds (Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/util/AxisAlignedBB;",
 			"net/minecraft/block/Block onNeighborBlockChange (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/Block;)V",
-			"net/minecraft/block/Block setBlockBoundsBasedOnState (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)V"
+			//"net/minecraft/block/Block setBlockBoundsBasedOnState (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)V"
 			},
 			depends={
 			"net/minecraft/block/Block",
@@ -3869,7 +3869,7 @@ public class DynamicMappings
 		List<FieldNode> fields = getMatchingFields(block, null, null);		
 		for (Iterator<FieldNode> it = fields.iterator(); it.hasNext(); ) {
 			FieldNode fn = it.next();
-			if ((fn.access & Opcodes.ACC_STATIC) > 0 || !fn.desc.startsWith("L")) { it.remove(); continue; }			
+			if (!fn.desc.startsWith("L")) { it.remove(); continue; }			
 			Type t = Type.getType(fn.desc);
 			
 			if (axisAlignedBB_name == null && searchConstantPoolForStrings(t.getClassName(), "box[")) {
@@ -3878,7 +3878,7 @@ public class DynamicMappings
 				for (FieldNode cnfn : cn.fields) { if (cnfn.desc.equals("D")) doubles++; }
 				if (cn.fields.size() == 6 && doubles == 6) {
 					axisAlignedBB_name = t.getClassName();
-					addClassMapping("net/minecraft/util/AxisAlignedBB", axisAlignedBB_name);					
+					addClassMapping("net/minecraft/util/AxisAlignedBB", axisAlignedBB_name);	
 				}
 			}
 			
@@ -3938,8 +3938,8 @@ public class DynamicMappings
 		
 		// protected final void setBlockBounds(float, float, float, float, float, float)
 		// CHANGED in 15w37a
-		// public void setBlockBounds(AxisAlignedBB param0)
-		methods = getMatchingMethods(block, null, "(L" + axisAlignedBB_name + ";)V");
+		// public void setBlockBounds(AxisAlignedBB param0)		
+		methods = getMatchingMethods(block, null, "(L" + axisAlignedBB_name + ";)V");		
 		if (methods.size() == 1) {
 			addMethodMapping("net/minecraft/block/Block setBlockBounds (Lnet/minecraft/util/AxisAlignedBB;)V", 
 					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
