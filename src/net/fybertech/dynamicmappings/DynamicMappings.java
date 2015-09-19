@@ -545,6 +545,9 @@ public class DynamicMappings
 		}
 	}
 
+	
+	
+	public static boolean simulatedMappings = false;
 
 	// Parses a class for dynamic mappings.
 	// Methods must be static and implement the Mapping annotation.
@@ -577,11 +580,18 @@ public class DynamicMappings
 					if (!methodMappings.keySet().contains(depend)) hasDepends = false;
 				}
 				if (!hasDepends) continue;
-
-				try {
-					mm.method.invoke(null);
-				} catch (Exception e) {
-					e.printStackTrace();
+				
+				if (!simulatedMappings) {
+					try {
+						mm.method.invoke(null);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+				else {
+					for (String s : mm.provides) classMappings.put(s, "---");
+					for (String s : mm.providesFields) fieldMappings.put(s, "--- --- ---");
+					for (String s : mm.providesMethods) methodMappings.put(s, "--- --- ---");
 				}
 
 				for (String provider : mm.provides)
@@ -704,7 +714,7 @@ public class DynamicMappings
 	public static void generateClassMappings()
 	{		
 		DynamicMappings.registerMappingsClass(DynamicMappings.class);
-		if (MeddleUtil.isClientJar()) DynamicClientMappings.generateClassMappings();
+		if (simulatedMappings || MeddleUtil.isClientJar()) DynamicClientMappings.generateClassMappings();
 		
 	}
 
@@ -752,11 +762,34 @@ public class DynamicMappings
 	
 
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	//////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////	
 	//////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	

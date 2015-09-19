@@ -2655,7 +2655,7 @@ public class DynamicClientMappings
 
 	public static void generateClassMappings()
 	{
-		if (!MeddleUtil.isClientJar()) return;
+		if (!DynamicMappings.simulatedMappings && !MeddleUtil.isClientJar()) return;
 		
 		DynamicMappings.registerMappingsClass(DynamicClientMappings.class);		
 	}
