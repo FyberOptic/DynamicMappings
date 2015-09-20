@@ -1,4 +1,4 @@
-package net.fybertech.dynamicmappings;
+package net.fybertech.dynamicmappings.mappings;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.fybertech.dynamicmappings.DynamicMappings;
+import net.fybertech.dynamicmappings.Mapping;
+import net.fybertech.dynamicmappings.MappingsClass;
 import net.fybertech.meddle.Meddle;
 import net.fybertech.meddle.MeddleUtil;
 
@@ -25,37 +28,12 @@ import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 
-
-public class DynamicClientMappings
+@MappingsClass(clientSide=true)
+public class ClientMappings extends MappingsBase
 {
-	
-	public static void addClassMapping(String className, ClassNode cn) {
-		DynamicMappings.addClassMapping(className, cn);
-	}
-	
-	public static void addClassMapping(String className, String cn) {
-		DynamicMappings.addClassMapping(className, cn);
-	}
-	
-	public static void addMethodMapping(String deobf, String obf) {
-		DynamicMappings.addMethodMapping(deobf, obf);
-	}
-	
-	public static void addFieldMapping(String deobf, String obf) {
-		DynamicMappings.addFieldMapping(deobf, obf);
-	}
-	
-	public static ClassNode getClassNode(String className) {
-		return DynamicMappings.getClassNode(className);
-	}
-	
-	public static ClassNode getClassNodeFromMapping(String mapping) {
-		return DynamicMappings.getClassNodeFromMapping(mapping);
-	}
-	
 
 	@Mapping(provides="net/minecraft/client/main/Main")
-	public static boolean getMainClass()
+	public boolean getMainClass()
 	{
 		ClassNode main = getClassNode("net/minecraft/client/main/Main");
 		if (main == null) return false;
@@ -68,7 +46,7 @@ public class DynamicClientMappings
 			"net/minecraft/client/Minecraft",
 			"net/minecraft/client/main/GameConfiguration"},			
 			depends="net/minecraft/client/main/Main")
-	public static boolean getMinecraftClass()
+	public boolean getMinecraftClass()
 	{
 		ClassNode main = getClassNodeFromMapping("net/minecraft/client/main/Main");
 		if (main == null) return false;
@@ -149,7 +127,7 @@ public class DynamicClientMappings
 			"net/minecraft/world/World",
 			"net/minecraft/client/renderer/texture/TextureMap"
 			})
-	public static boolean processMinecraftClass()
+	public boolean processMinecraftClass()
 	{
 		ClassNode minecraft = getClassNodeFromMapping("net/minecraft/client/Minecraft");
 		ClassNode renderItem = getClassNodeFromMapping("net/minecraft/client/renderer/entity/RenderItem");
@@ -297,7 +275,7 @@ public class DynamicClientMappings
 			"net/minecraft/client/renderer/entity/RenderItem",
 			"net/minecraft/client/renderer/ItemModelMesher"
 			})
-	public static boolean parseRenderItemClass()
+	public boolean parseRenderItemClass()
 	{
 		ClassNode renderItem = getClassNodeFromMapping("net/minecraft/client/renderer/entity/RenderItem");
 		ClassNode modelMesher = getClassNodeFromMapping("net/minecraft/client/renderer/ItemModelMesher");
@@ -316,7 +294,7 @@ public class DynamicClientMappings
 	
 
 	@Mapping(provides="net/minecraft/client/renderer/entity/RenderItem", depends="net/minecraft/client/Minecraft")
-	public static boolean getRenderItemClass()
+	public boolean getRenderItemClass()
 	{
 		ClassNode minecraft = getClassNodeFromMapping("net/minecraft/client/Minecraft");
 		if (minecraft == null) return false;
@@ -343,7 +321,7 @@ public class DynamicClientMappings
 
 
 	@Mapping(provides="net/minecraft/client/renderer/ItemModelMesher", depends="net/minecraft/client/renderer/entity/RenderItem")
-	public static boolean getItemModelMesherClass() 
+	public boolean getItemModelMesherClass() 
 	{
 		ClassNode renderItem = getClassNodeFromMapping("net/minecraft/client/renderer/entity/RenderItem");
 		if (renderItem == null) return false;
@@ -393,7 +371,7 @@ public class DynamicClientMappings
 			"net/minecraft/client/renderer/texture/TextureMap"
 			},
 			depends="net/minecraft/client/Minecraft")
-	public static boolean getGuiMainMenuClass()
+	public boolean getGuiMainMenuClass()
 	{
 		ClassNode minecraft = getClassNodeFromMapping("net/minecraft/client/Minecraft");
 		if (minecraft == null) return false;
@@ -512,7 +490,7 @@ public class DynamicClientMappings
 			 depends={
 			"net/minecraft/item/Item",
 			"net/minecraft/client/renderer/ItemModelMesher"})
-	public static boolean getModelResourceLocationClass()
+	public boolean getModelResourceLocationClass()
 	{
 		ClassNode item = getClassNodeFromMapping("net/minecraft/item/Item");
 		ClassNode itemModelMesher = getClassNodeFromMapping("net/minecraft/client/renderer/ItemModelMesher");
@@ -539,7 +517,7 @@ public class DynamicClientMappings
 			"net/minecraft/item/Item",
 			"net/minecraft/item/ItemStack"
 			})
-	public static boolean getItemClassMethods()
+	public boolean getItemClassMethods()
 	{
 		ClassNode item = getClassNodeFromMapping("net/minecraft/item/Item");
 		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
@@ -566,7 +544,7 @@ public class DynamicClientMappings
 			"net/minecraft/client/renderer/ItemModelMesher",
 			"net/minecraft/client/resources/model/ModelResourceLocation"
 			})
-	public static boolean parseItemModelMesherClass()
+	public boolean parseItemModelMesherClass()
 	{
 		ClassNode item = getClassNodeFromMapping("net/minecraft/item/Item");
 		ClassNode modelMesher = getClassNodeFromMapping("net/minecraft/client/renderer/ItemModelMesher");
@@ -591,7 +569,7 @@ public class DynamicClientMappings
 			depends={
 			"net/minecraft/client/gui/GuiMainMenu"
 			})	
-	public static boolean findGuiStuff()
+	public boolean findGuiStuff()
 	{
 		ClassNode guiMainMenu = getClassNodeFromMapping("net/minecraft/client/gui/GuiMainMenu");
 		if (guiMainMenu == null || guiMainMenu.superName == null) return false;		
@@ -646,7 +624,7 @@ public class DynamicClientMappings
 			"net/minecraft/client/Minecraft",
 			"net/minecraft/client/renderer/entity/RenderItem"
 			})			
-	public static boolean processGuiScreenClass()
+	public boolean processGuiScreenClass()
 	{
 		ClassNode guiScreen = getClassNodeFromMapping("net/minecraft/client/gui/GuiScreen");
 		ClassNode minecraft = getClassNodeFromMapping("net/minecraft/client/Minecraft");
@@ -824,7 +802,7 @@ public class DynamicClientMappings
 			"net/minecraft/client/Minecraft",
 			"net/minecraft/client/gui/FontRenderer"
 			})			
-	public static boolean processGuiMainMenuClass()
+	public boolean processGuiMainMenuClass()
 	{
 		ClassNode guiMainMenu = getClassNodeFromMapping("net/minecraft/client/gui/GuiMainMenu");
 		ClassNode guiScreen = getClassNodeFromMapping("net/minecraft/client/gui/GuiScreen");
@@ -882,7 +860,7 @@ public class DynamicClientMappings
 			"net/minecraft/block/state/BlockState",
 			"net/minecraft/block/properties/IProperty"
 			})
-	public static boolean processBlockStateClass()
+	public boolean processBlockStateClass()
 	{
 		ClassNode blockState = getClassNodeFromMapping("net/minecraft/block/state/BlockState");
 		ClassNode iProperty = getClassNodeFromMapping("net/minecraft/block/properties/IProperty");
@@ -912,7 +890,7 @@ public class DynamicClientMappings
 			"net/minecraft/client/Minecraft",
 			"net/minecraft/entity/player/EntityPlayer"
 			})		
-	public static boolean getEntityPlayerSPClass()
+	public boolean getEntityPlayerSPClass()
 	{
 		ClassNode minecraft = getClassNodeFromMapping("net/minecraft/client/Minecraft");
 		ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
@@ -961,7 +939,7 @@ public class DynamicClientMappings
 			"net/minecraft/client/entity/EntityPlayerSP",
 			"net/minecraft/world/IInteractionObject"
 			})		
-	public static boolean processEntityPlayerSPClass()
+	public boolean processEntityPlayerSPClass()
 	{		
 		ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
 		ClassNode entityPlayerSP = getClassNodeFromMapping("net/minecraft/client/entity/EntityPlayerSP");
@@ -986,7 +964,7 @@ public class DynamicClientMappings
 			"net/minecraft/client/gui/GuiScreen",
 			"net/minecraft/client/entity/EntityPlayerSP"
 			})
-	public static boolean getGuiChestClass()
+	public boolean getGuiChestClass()
 	{
 		ClassNode guiScreen = getClassNodeFromMapping("net/minecraft/client/gui/GuiScreen");
 		ClassNode entityPlayerSP = getClassNodeFromMapping("net/minecraft/client/entity/EntityPlayerSP");		
@@ -1064,7 +1042,7 @@ public class DynamicClientMappings
 			"net/minecraft/item/ItemStack",
 			"net/minecraft/client/gui/GuiScreen"
 			})	
-	public static boolean processGuiContainerClass()
+	public boolean processGuiContainerClass()
 	{
 		ClassNode guiContainer = getClassNodeFromMapping("net/minecraft/client/gui/inventory/GuiContainer");
 		ClassNode slot = getClassNodeFromMapping("net/minecraft/inventory/Slot");
@@ -1245,7 +1223,7 @@ public class DynamicClientMappings
 	
 	@Mapping(provides="net/minecraft/client/network/NetHandlerPlayClient",
 			 depends="net/minecraft/client/entity/EntityPlayerSP")
-	public static boolean getNetHandlerPlayClientClass()
+	public boolean getNetHandlerPlayClientClass()
 	{
 		ClassNode playerSP = getClassNodeFromMapping("net/minecraft/client/entity/EntityPlayerSP");		
 		if (playerSP == null) return false;
@@ -1273,7 +1251,7 @@ public class DynamicClientMappings
 			"net/minecraft/client/network/NetHandlerPlayClient",
 			"net/minecraft/network/play/server/S2DPacketOpenWindow"
 			})
-	public static boolean processNetHandlerPlayClientClass()
+	public boolean processNetHandlerPlayClientClass()
 	{
 		ClassNode clientHandler = getClassNodeFromMapping("net/minecraft/client/network/NetHandlerPlayClient");
 		ClassNode openWindow = getClassNodeFromMapping("net/minecraft/network/play/server/S2DPacketOpenWindow");
@@ -1306,7 +1284,7 @@ public class DynamicClientMappings
 			"net/minecraft/network/play/server/S2DPacketOpenWindow",
 			"net/minecraft/util/IChatComponent"
 			})
-	public static boolean processS2DPacketOpenWindowClass()
+	public boolean processS2DPacketOpenWindowClass()
 	{
 		ClassNode packet = getClassNodeFromMapping("net/minecraft/network/play/server/S2DPacketOpenWindow");
 		ClassNode iChatComponent = getClassNodeFromMapping("net/minecraft/util/IChatComponent");
@@ -1431,7 +1409,7 @@ public class DynamicClientMappings
 			"net/minecraft/client/settings/GameSettings",
 			"net/minecraft/client/Minecraft"
 			})
-	public static boolean getKeybindingClass()
+	public boolean getKeybindingClass()
 	{
 		ClassNode gameSettings = getClassNodeFromMapping("net/minecraft/client/settings/GameSettings");
 		ClassNode minecraft = getClassNodeFromMapping("net/minecraft/client/Minecraft");
@@ -1489,7 +1467,7 @@ public class DynamicClientMappings
 			depends={
 			"net/minecraft/client/settings/KeyBinding"
 			})
-	public static boolean processKeybindingClass()
+	public boolean processKeybindingClass()
 	{
 		ClassNode keyBinding = getClassNodeFromMapping("net/minecraft/client/settings/KeyBinding");
 		if (keyBinding == null) return false;
@@ -1701,7 +1679,7 @@ public class DynamicClientMappings
 			"net/minecraft/client/gui/inventory/GuiContainer",
 			"net/minecraft/util/Vec3"
 			})
-	public static boolean getRenderHelperClass()
+	public boolean getRenderHelperClass()
 	{
 		ClassNode guiContainer = getClassNodeFromMapping("net/minecraft/client/gui/inventory/GuiContainer");
 		ClassNode vec3 = getClassNodeFromMapping("net/minecraft/util/Vec3");
@@ -1741,7 +1719,7 @@ public class DynamicClientMappings
 			depends={
 			"net/minecraft/client/renderer/RenderHelper"
 			})
-	public static boolean processRenderHelperClass()
+	public boolean processRenderHelperClass()
 	{
 		ClassNode renderHelper = getClassNodeFromMapping("net/minecraft/client/renderer/RenderHelper");		
 		if (renderHelper == null) return false;
@@ -1809,7 +1787,7 @@ public class DynamicClientMappings
 			"net/minecraft/block/BlockLiquid",
 			"net/minecraft/block/Block"
 			})
-	public static boolean processBlockDynamicLiquidClass()
+	public boolean processBlockDynamicLiquidClass()
 	{
 		ClassNode liquid = getClassNodeFromMapping("net/minecraft/block/BlockLiquid");
 		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
@@ -1842,7 +1820,7 @@ public class DynamicClientMappings
 			"net/minecraft/util/BlockPos",
 			"net/minecraft/world/IBlockAccess"
 			})
-	public static boolean processBlockRendererDispatcherClass()
+	public boolean processBlockRendererDispatcherClass()
 	{
 		ClassNode blockRenderer = getClassNodeFromMapping("net/minecraft/client/renderer/BlockRendererDispatcher");
 		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
@@ -1891,7 +1869,7 @@ public class DynamicClientMappings
 			depends={
 			"net/minecraft/client/renderer/WorldRenderer"
 			})
-	public static boolean processWorldRendererClass()
+	public boolean processWorldRendererClass()
 	{
 		ClassNode worldRenderer = getClassNodeFromMapping("net/minecraft/client/renderer/WorldRenderer");
 		if (!MeddleUtil.notNull(worldRenderer)) return false;
@@ -1968,7 +1946,7 @@ public class DynamicClientMappings
 			"net/minecraft/client/renderer/WorldRenderer",
 			"net/minecraft/client/renderer/vertex/VertexFormat"
 			})
-	public static boolean processRealmsBufferBuilderClass()
+	public boolean processRealmsBufferBuilderClass()
 	{
 		ClassNode bufferBuilder = getClassNode("net/minecraft/realms/RealmsBufferBuilder");
 		ClassNode worldRenderer = getClassNodeFromMapping("net/minecraft/client/renderer/WorldRenderer");
@@ -2260,7 +2238,7 @@ public class DynamicClientMappings
 			"net/minecraft/client/renderer/RenderGlobal",
 			"net/minecraft/client/renderer/vertex/VertexFormat"
 			})
-	public static boolean processRenderGlobalClass()
+	public boolean processRenderGlobalClass()
 	{
 		ClassNode renderGlobal = getClassNodeFromMapping("net/minecraft/client/renderer/RenderGlobal");
 		ClassNode vertexFormat = getClassNodeFromMapping("net/minecraft/client/renderer/vertex/VertexFormat");
@@ -2308,7 +2286,7 @@ public class DynamicClientMappings
 			depends={
 			"net/minecraft/client/renderer/texture/TextureMap"
 			})
-	public static boolean processTextureMapClass()
+	public boolean processTextureMapClass()
 	{
 		ClassNode textureMap = getClassNodeFromMapping("net/minecraft/client/renderer/texture/TextureMap");
 		if (!MeddleUtil.notNull(textureMap)) return false;
@@ -2371,7 +2349,7 @@ public class DynamicClientMappings
 			depends={
 			"net/minecraft/client/renderer/texture/TextureAtlasSprite"
 			})
-	public static boolean processTextureAtlasSpriteClass()
+	public boolean processTextureAtlasSpriteClass()
 	{
 		ClassNode sprite = getClassNodeFromMapping("net/minecraft/client/renderer/texture/TextureAtlasSprite");
 		if (!MeddleUtil.notNull(sprite)) return false;
@@ -2597,7 +2575,7 @@ public class DynamicClientMappings
 			"net/minecraft/util/BlockPos",
 			"net/minecraft/block/state/IBlockState"
 			})
-	public static boolean processBlockClass()
+	public boolean processBlockClass()
 	{
 		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
 		ClassNode iBlockAccess = getClassNodeFromMapping("net/minecraft/world/IBlockAccess");
@@ -2644,23 +2622,7 @@ public class DynamicClientMappings
 	
 	
 	
-	
-	
-	
-	public static MethodNode getMethodNode(ClassNode cn, String obfMapping)
-	{
-		return DynamicMappings.getMethodNode(cn, obfMapping);
-	}
-	
-
-	public static void generateClassMappings()
-	{
-		if (!DynamicMappings.simulatedMappings && !MeddleUtil.isClientJar()) return;
 		
-		DynamicMappings.registerMappingsClass(DynamicClientMappings.class);		
-	}
-
-
 
 	public static void main(String[] args)
 	{
