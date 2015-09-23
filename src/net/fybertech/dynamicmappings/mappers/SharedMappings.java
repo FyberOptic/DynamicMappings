@@ -1,4 +1,4 @@
-package net.fybertech.dynamicmappings.mappings;
+package net.fybertech.dynamicmappings.mappers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1581,14 +1581,19 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/entity/monster/EntityEnderman carriableBlocks Ljava/util/Set;"
 			}, 
 			providesMethods={
+			"net/minecraft/entity/Entity setPositionAndUpdate (DDD)V"
 			}, 
 			depends={
-			"net/minecraft/entity/monster/EntityEnderman"
+			"net/minecraft/entity/monster/EntityEnderman",
+			"net/minecraft/entity/EntityLivingBase",
+			"net/minecraft/entity/Entity"
 			})
 	public boolean processEntityEndermanClass()
 	{
 		ClassNode entityEnderman = getClassNodeFromMapping("net/minecraft/entity/monster/EntityEnderman");
-		if (entityEnderman == null) return false;
+		ClassNode entityLivingBase = getClassNodeFromMapping("net/minecraft/entity/EntityLivingBase");
+		ClassNode entity = getClassNodeFromMapping("net/minecraft/entity/Entity");
+		if (!MeddleUtil.notNull(entityEnderman, entityLivingBase, entity)) return false;
 		
 		List<FieldNode> fields = getMatchingFields(entityEnderman, null, "Ljava/util/Set;");
 		if (fields.size() == 1) {
@@ -1596,6 +1601,22 @@ public class SharedMappings extends MappingsBase {
 					entityEnderman.name + " " + fields.get(0).name + " " + fields.get(0).desc);
 		}
 				
+		
+		List<MethodNode> methods = getMatchingMethods(entityEnderman, null, "(L" + entityLivingBase.name + ";DDD)Z");
+		if (methods.size() == 1) {
+			Set<String> methodNames = new HashSet<>();
+			for (AbstractInsnNode insn = methods.get(0).instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				if (insn.getOpcode() != Opcodes.INVOKEVIRTUAL) continue;
+				MethodInsnNode mn = (MethodInsnNode)insn;
+				if (mn.owner.equals(entityLivingBase.name) && mn.desc.equals("(DDD)V")) methodNames.add(mn.name);
+			}
+			// Entity.setPositionAndUpdate(DDD)V
+			if (methodNames.size() == 1) {
+				String name = methodNames.iterator().next();
+				addMethodMapping("net/minecraft/entity/Entity setPositionAndUpdate (DDD)V", entity.name + " " + name + " (DDD)V");
+			}
+		}
+		
 		
 		// TODO
 		/*for (FieldNode field : entityEnderman.fields) {
@@ -2521,7 +2542,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/item/ItemSword",
 			"net/minecraft/item/ItemSoup",
 			"net/minecraft/item/ItemBanner",
-			"net/minecraft/item/ItemDye"
+			"net/minecraft/item/ItemDye",
+			"net/minecraft/item/ItemBow"
 			},
 			providesMethods={
 			"net/minecraft/item/Item registerItems ()V"
@@ -2577,11 +2599,145 @@ public class SharedMappings extends MappingsBase {
 		if (className != null && searchConstantPoolForStrings(className, ".")) { // TODO - better detection method
 			addClassMapping("net/minecraft/item/ItemDye", className);
 		}
+		
+		className = itemClassMap.get("bow");
+		if (className != null && searchConstantPoolForStrings(className, "pull", "random.bow")) {
+			addClassMapping("net/minecraft/item/ItemBow", className);
+		}
 
 
 		return true;
 	}
 
+	
+	
+	@Mapping(providesMethods={
+			"net/minecraft/item/Item onPlayerStoppedUsing (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;I)V",
+			"net/minecraft/item/Item getMaxItemUseDuration (Lnet/minecraft/item/ItemStack;)I",
+			"net/minecraft/item/Item getItemEnchantability ()I",
+			"net/minecraft/item/Item getItemUseAction (Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/EnumAction;",
+			"net/minecraft/entity/EntityLivingBase setItemInUse (Lnet/minecraft/util/MainOrOffHand;)V"
+			},
+			provides={
+			"net/minecraft/item/EnumAction"
+			},
+			dependsMethods={
+			"net/minecraft/item/Item onItemRightClick (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;)Lnet/minecraft/util/ObjectActionHolder;",
+			},
+			depends={
+			"net/minecraft/item/Item",
+			"net/minecraft/item/ItemBow",
+			"net/minecraft/item/ItemStack",
+			"net/minecraft/world/World",
+			"net/minecraft/entity/player/EntityPlayer",
+			"net/minecraft/entity/EntityLivingBase",
+			"net/minecraft/util/MainOrOffHand"
+			})
+	public boolean processItemBowClass()
+	{		
+		ClassNode item = getClassNodeFromMapping("net/minecraft/item/Item");
+		ClassNode itemBow = getClassNodeFromMapping("net/minecraft/item/ItemBow");
+		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
+		ClassNode world = getClassNodeFromMapping("net/minecraft/world/World");
+		ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
+		ClassNode entityLivingBase = getClassNodeFromMapping("net/minecraft/entity/EntityLivingBase");
+		ClassNode hand = getClassNodeFromMapping("net/minecraft/util/MainOrOffHand");
+		if (!MeddleUtil.notNull(item, itemBow, itemStack, world, entityPlayer, entityLivingBase, hand)) return false;
+		
+		// public void onPlayerStoppedUsing(ItemStack stack, World worldIn, EntityLivingBase playerIn, int timeLeft)
+		List<MethodNode> methods = getMatchingMethods(itemBow, null, assembleDescriptor("(", itemStack, world, entityLivingBase, "I)V"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/item/Item onPlayerStoppedUsing (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;I)V",
+					item.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		// public int getMaxItemUseDuration(ItemStack param0)
+		methods = getMatchingMethods(itemBow, null, assembleDescriptor("(", itemStack, ")I"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/item/Item getMaxItemUseDuration (Lnet/minecraft/item/ItemStack;)I",
+					item.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		// public EnumAction getItemUseAction(ItemStack param0)
+		methods.clear();
+		for (MethodNode method : itemBow.methods) {
+			if (method.desc.startsWith("(L" + itemStack.name + ";)L")) methods.add(method);
+		}
+		if (methods.size() == 1) {
+			MethodNode method = methods.get(0);
+			Type t = Type.getMethodType(method.desc).getReturnType();
+			if (searchConstantPoolForStrings(t.getClassName(), "EAT", "DRINK", "BLOCK")) {
+				addClassMapping("net/minecraft/item/EnumAction", t.getClassName());
+				addMethodMapping("net/minecraft/item/Item getItemUseAction (Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/EnumAction;",
+						item.name + " " + method.name + " " + method.desc);
+			}
+		}
+		
+		// public int getItemEnchantability()
+		methods = getMatchingMethods(itemBow, null, "()I");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/item/Item getItemEnchantability ()I",
+					item.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		MethodNode method = getMethodNodeFromMapping(itemBow, "net/minecraft/item/Item onItemRightClick (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;)Lnet/minecraft/util/ObjectActionHolder;");
+		if (method != null) {
+			List<MethodInsnNode> methodNodes = new ArrayList<>();
+			for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				if (insn.getOpcode() != Opcodes.INVOKEVIRTUAL) continue;
+				MethodInsnNode mn = (MethodInsnNode)insn;
+				if (mn.owner.equals(entityPlayer.name) && mn.desc.equals("(L" + hand.name + ";)V")) methodNodes.add(mn);
+			}
+			if (methodNodes.size() == 1) {
+				addMethodMapping("net/minecraft/entity/EntityLivingBase setItemInUse (Lnet/minecraft/util/MainOrOffHand;)V",
+						entityLivingBase.name + " " + methodNodes.get(0).name + " " + methodNodes.get(0).desc);
+			}
+		}
+		
+		return true;
+	}
+	
+	
+	@Mapping(providesFields={
+			"net/minecraft/item/EnumAction NONE Lnet/minecraft/item/EnumAction;",
+			"net/minecraft/item/EnumAction EAT Lnet/minecraft/item/EnumAction;",
+			"net/minecraft/item/EnumAction DRINK Lnet/minecraft/item/EnumAction;",
+			"net/minecraft/item/EnumAction BLOCK Lnet/minecraft/item/EnumAction;",
+			"net/minecraft/item/EnumAction BOW Lnet/minecraft/item/EnumAction;"
+			},
+			depends={
+			"net/minecraft/item/EnumAction"
+			})
+	public boolean processEnumActionClass()
+	{
+		ClassNode enumAction = getClassNodeFromMapping("net/minecraft/item/EnumAction");
+		if (enumAction == null) return false;
+		
+		List<String> strings = new ArrayList<>();
+		List<String> fields = new ArrayList<>();
+		
+		MethodNode init = getMethodNode(enumAction, "--- <clinit> ()V");
+		if (init == null) return false;
+		for (AbstractInsnNode insn = init.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+			String s = getLdcString(insn);
+			if (s != null) { strings.add(s); continue; }
+			
+			if (insn.getOpcode() == Opcodes.PUTSTATIC) {
+				FieldInsnNode fn = (FieldInsnNode)insn;
+				if (fn.owner.equals(enumAction.name) && fn.desc.equals("L" + enumAction.name + ";")) fields.add(fn.name);
+			}
+		}		
+
+		if (strings.size() == 5 && fields.size() == 5) {
+			for (int n = 0; n < 5; n++) {
+				addFieldMapping("net/minecraft/item/EnumAction " + strings.get(n) + " Lnet/minecraft/item/EnumAction;", enumAction.name + " " + fields.get(n) + " L" + enumAction.name + ";");
+			}
+		}
+		
+		return true;
+	}
+	
+	
 	
 	@Mapping(providesMethods={
 			"net/minecraft/item/Item setHasSubtypes (Z)Lnet/minecraft/item/Item;"
@@ -3438,7 +3594,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/item/Item registerItemBlock (Lnet/minecraft/block/Block;Lnet/minecraft/item/Item;)V",
 			"net/minecraft/item/Item registerItemBlock (Lnet/minecraft/block/Block;)V",
 			"net/minecraft/item/Item onItemRightClick (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;)Lnet/minecraft/util/ObjectActionHolder;",
-			"net/minecraft/item/Item onItemUse (Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/ItemUseResult;"
+			"net/minecraft/item/Item onItemUse (Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/ItemUseResult;",
+			"net/minecraft/item/Item onItemUseFinish (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/item/ItemStack;"
 			},
 			providesFields={
 			"net/minecraft/item/Item maxStackSize I"
@@ -3687,7 +3844,12 @@ public class SharedMappings extends MappingsBase {
 		}
 
 
-		
+		// public ItemStack onItemUseFinish(ItemStack stack, World worldIn, EntityLivingBase playerIn)
+		methods = getMatchingMethods(item, null, assembleDescriptor("(", itemStack, world, entityLivingBase, ")", itemStack));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/item/Item onItemUseFinish (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/item/ItemStack;",
+					item.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
 
 
 		return true;
@@ -5987,3 +6149,4 @@ public class SharedMappings extends MappingsBase {
 
 	
 }
+

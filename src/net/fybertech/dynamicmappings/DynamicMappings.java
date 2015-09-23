@@ -38,8 +38,8 @@ import org.objectweb.asm.tree.TableSwitchInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
-import net.fybertech.dynamicmappings.mappings.ClientMappings;
-import net.fybertech.dynamicmappings.mappings.SharedMappings;
+import net.fybertech.dynamicmappings.mappers.ClientMappings;
+import net.fybertech.dynamicmappings.mappers.SharedMappings;
 import net.fybertech.meddle.MeddleUtil;
 
 
@@ -47,33 +47,56 @@ public class DynamicMappings
 {	
 	public static final Logger LOGGER = LogManager.getLogger("Meddle");
 
-	// The deobfuscated -> obfuscated name.
+	/** Deobfuscated class -> obfuscated class */
 	public static final Map<String, String> classMappings = new HashMap<String, String>();
-	// The obfuscated -> deobfuscated name.
+	/** Obfuscated class -> deobfuscated class */
 	public static final Map<String, String> reverseClassMappings = new HashMap<String, String>();
 
+	/** Deobfuscated field -> obfuscated field */
 	public static final Map<String, String> fieldMappings = new HashMap<String, String>();
+	/** Obfuscated field -> deobfuscated field */
 	public static final Map<String, String> reverseFieldMappings = new HashMap<String, String>();
 
+	/** Deobfuscated method -> obfuscated method */
 	public static final Map<String, String> methodMappings = new HashMap<String, String>();
+	/** Obfuscated method -> deobfuscated method */
 	public static final Map<String, String> reverseMethodMappings = new HashMap<String, String>();
 
-	// Used by getClassNode to avoid reloading the classes over and over
+	/** Only used when simulatedMappings is enabled, to help with ModMappings */
+	public static final Set<String> clientMappingsSet = new HashSet<>();
+	/** Only used when simulatedMappings is enabled, to help with ModMappings */
+	public static final Set<String> serverMappingsSet = new HashSet<>();
+	
+	/** Used by getClassNode to avoid reloading the classes over and over */
 	private static Map<String, ClassNode> cachedClassNodes = new HashMap<String, ClassNode>();
 
-	// If set to true, fake mappings populate the maps.
-	// Used when determining all possible mappings without needing a Minecraft jar.
+	
+	/**
+	 * If set to true, fake mappings populate the map objects above, ignoring whether
+	 * they can actually be located in the Minecraft code.
+	 * 
+	 * Used by ModMappings when determining all possible mappings provided without 
+	 * needing a Minecraft jar to scan (since ModMappings needs a deobfuscated one, 
+	 * which DynamicMappings can't process properly.)
+	 */	
 	public static boolean simulatedMappings = false;
 	
 	
 	
+	/**
+	 * Called to initialize all mappings.
+	 */
 	public static void generateClassMappings()
 	{		
 		DynamicMappings.registerMappingsClass(SharedMappings.class);
 		DynamicMappings.registerMappingsClass(ClientMappings.class);
 	}
 	
+	
 
+	/**
+	 * Stores relevant information about a mapper method in one structure.
+	 */
 	private static class MappingMethod
 	{
 		final Method method;
@@ -98,12 +121,18 @@ public class DynamicMappings
 		}
 	}
 	
-
-	// Parses a class for dynamic mappings.
-	// Methods must implement the @Mapping annotation.
-	// 
-	// Class may optionally use @MappingsClass annotation if it includes client
-	// or sever-side mappings.
+	
+	
+	/**
+	 * Parses a class for dynamic mappings.
+	 * Methods adding mappings should use the @Mapping annotation.
+	 * 
+	 * The class may optionally use @MappingsClass annotation if it includes 
+	 * client or sever-side mappings.
+	 * 
+	 * @param mappingsClass - The class to process for mapper methods.
+	 * @return True if all mappings were successfully discovered.
+	 */	
 	public static boolean registerMappingsClass(Class<? extends Object> mappingsClass)
 	{
 		List<MappingMethod> mappingMethods = new ArrayList<MappingMethod>();	
@@ -119,16 +148,16 @@ public class DynamicMappings
 		
 		
 		if (!simulatedMappings && clientSide && !MeddleUtil.isClientJar()) {
-			LOGGER.info("[DynamicMappings] Ignoring client-side class " + mappingsClass.getName());
+			System.out.println("[DynamicMappings] Ignoring client-side class " + mappingsClass.getName());
 			return false;
 		}
 		
 		if (!simulatedMappings && serverSide && MeddleUtil.isClientJar()) {
-			LOGGER.info("[DynamicMappings] Ignoring server-side class " + mappingsClass.getName());
+			System.out.println("[DynamicMappings] Ignoring server-side class " + mappingsClass.getName());
 			return false;
 		}
 		
-		LOGGER.info("[DynamicMappings] Processing class " + mappingsClass.getName());
+		System.out.println("[DynamicMappings] Processing class " + mappingsClass.getName());
 		
 		
 		for (Method method : mappingsClass.getMethods())
@@ -145,10 +174,8 @@ public class DynamicMappings
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		
-		
 
+		
 		while (true)
 		{
 			int startSize = mappingMethods.size();
@@ -178,9 +205,21 @@ public class DynamicMappings
 					}
 				}
 				else {
-					for (String s : mm.provides) classMappings.put(s, "---");
-					for (String s : mm.providesFields) fieldMappings.put(s, "--- --- ---");
-					for (String s : mm.providesMethods) methodMappings.put(s, "--- --- ---");
+					for (String s : mm.provides) {
+						classMappings.put(s, "---");
+						if (clientSide) clientMappingsSet.add(s);
+						if (serverSide) serverMappingsSet.add(s);
+					}
+					for (String s : mm.providesFields) {
+						fieldMappings.put(s, "--- --- ---");
+						if (clientSide) clientMappingsSet.add(s);
+						if (serverSide) serverMappingsSet.add(s);
+					}
+					for (String s : mm.providesMethods) {
+						methodMappings.put(s, "--- --- ---");
+						if (clientSide) clientMappingsSet.add(s);
+						if (serverSide) serverMappingsSet.add(s);
+					}
 				}
 
 				for (String provider : mm.provides)
@@ -221,13 +260,13 @@ public class DynamicMappings
 	}
 
 
-	// Used for debugging purposes
+	/** Used for debugging purposes, and to print out a full list */
 	public static void main(String[] args)
 	{
+		// If true, prints out the mappings
 		boolean showMappings = false;
 		
-		generateClassMappings();
-		
+		generateClassMappings();		
 
 		System.out.println("Minecraft version: " + MeddleUtil.findMinecraftVersion());
 		System.out.println("Minecraft jar type: " + (MeddleUtil.isClientJar() ? "client" : "server"));
@@ -264,12 +303,16 @@ public class DynamicMappings
 	
 	
 	
-	
-	// Load a ClassNode from class name.  This is for loading the original
-	// obfuscated classes.
-	//
-	// Note: *Do not* edit classes you get from this.  They're cached and used by
-	// anyone doing analysis of vanilla class files.
+	/**
+	 * Load a ClassNode by its name.  This is for loading the original obfuscated 
+	 * classes.
+	 * 
+	 * Note: *Do not* edit classes you get from this.  They're cached and used by
+	 * anyone doing analysis of vanilla class files.
+	 * 
+	 * @param className - The normal (probably obfuscated) name of the class to load.
+	 * @return The ClassNode requested, or null if it doesn't exist.
+	 */	
 	public static ClassNode getClassNode(String className)
 	{
 		if (className == null) return null;
@@ -295,8 +338,14 @@ public class DynamicMappings
 	}
 
 		
-
-	// Get constant pool string that an LDC is loading
+	/**
+	 * Get constant pool string that an LDC instruction is 
+	 * loading.
+	 * 
+	 * @param node The instruction node to check.
+	 * @return Returns the string if the LDC is accessing a String
+	 * constant pool item, else null.
+	 */
 	public static String getLdcString(AbstractInsnNode node)
 	{
 		if (!(node instanceof LdcInsnNode)) return null;
@@ -306,7 +355,14 @@ public class DynamicMappings
 	}
 
 
-	// Get constant pool class that an LDC is referencing
+	/**
+	 * Get constant pool class that an LDC instruction is 
+	 * referencing.
+	 * 
+	 * @param node - The instruction node to check.
+	 * @return Returns the class name if the LDC is accessing a 
+	 * Class constant pool item, else null.
+	 */
 	public static String getLdcClass(AbstractInsnNode node)
 	{
 		if (!(node instanceof LdcInsnNode)) return null;
@@ -316,7 +372,14 @@ public class DynamicMappings
 	}
 
 
-	// Check if LDC is loading the specified string
+	/**
+	 * Check if an LDC instruction is loading the specified string.
+	 * 
+	 * @param node The instruction node to check
+	 * @param string The string to compare to.
+	 * @return Returns true if the instruction is an LDC, is accessing
+	 * a String constant pool item, and the string matches the input string.
+	 */
 	public static boolean isLdcWithString(AbstractInsnNode node, String string)
 	{
 		String s = getLdcString(node);
@@ -324,7 +387,14 @@ public class DynamicMappings
 	}
 
 
-	// Check if LDC is loading specified int
+	/**
+	 * Check if an LDC instruction is loading specified int value.
+	 * 
+	 * @param node The instruction node to check.
+	 * @param val The integer to compare to.
+	 * @return Returns true if the instruction is an LDC, is accessing
+	 * a Integer constant pool item, and its value matches the input value.
+	 */
 	public static boolean isLdcWithInteger(AbstractInsnNode node, int val)
 	{
 		if (!(node instanceof LdcInsnNode)) return false;
@@ -333,7 +403,15 @@ public class DynamicMappings
 		return ((Integer)ldc.cst) == val;
 	}
 	
-	// Check if LDC is loading specified int
+	
+	/**
+	 * Check if an LDC instruction is loading specified float value.
+	 * 
+	 * @param node The instruction node to check.
+	 * @param val The integer to compare to.
+	 * @return Returns true if the instruction is an LDC, is accessing
+	 * a Float constant pool item, and its value matches the input value.
+	 */
 	public static boolean isLdcWithFloat(AbstractInsnNode node, float val)
 	{
 		if (!(node instanceof LdcInsnNode)) return false;
@@ -343,7 +421,13 @@ public class DynamicMappings
 	}
 
 
-	// Get the description of the specified field from the class
+	/**
+	 * Get the description of the specified field from a class.
+	 * 
+	 * @param cn - The class to search.
+	 * @param fieldName - The name of the field.
+	 * @return The description of the field, or null if not found.
+	 */
 	public static String getFieldDesc(ClassNode cn, String fieldName)
 	{
 		for (FieldNode field : cn.fields)
@@ -354,7 +438,13 @@ public class DynamicMappings
 	}
 
 
-	// Get the specified field node from the class
+	/**
+	 * Get the specified field node from the class.
+	 * 
+	 * @param cn - The class to search
+	 * @param fieldName - The name of the field to find.
+	 * @return The FieldNode if present, else null.
+	 */
 	public static FieldNode getFieldByName(ClassNode cn, String fieldName)
 	{
 		for (FieldNode field : cn.fields)
@@ -365,13 +455,20 @@ public class DynamicMappings
 	}
 
 
-	// Search a class's constant pool for the list of strings.
-	// NOTE: Strings are trimmed!  Take into account when matching.
+	/**
+	 * Searches a class's constant pool for the specified list of strings.
+	 * 
+	 * NOTE: Constant pool strings are trimmed of whitespace!  Take into 
+	 * account when matching.
+	 * 
+	 * @param className - The name of the class to search.
+	 * @param matchStrings - The list of strings to find.
+	 * @return True if all strings were found.
+	 */
 	public static boolean searchConstantPoolForStrings(String className, String... matchStrings)
 	{
 		if (className == null) return false;
 		className = className.replace(".", "/");
-		//InputStream stream = Launch.classLoader.getResourceAsStream(className + ".class");
 		InputStream stream = DynamicMappings.class.getClassLoader().getResourceAsStream(className + ".class");
 		if (stream == null) return false;
 
@@ -402,7 +499,14 @@ public class DynamicMappings
 	}
 
 	
-	// Checks if the specified class name is referenced in the class's constant pool
+	/**
+	 * Searches a class's constant pool for the specified list of class 
+	 * references.
+	 * 	
+	 * @param className - The name of the class to search.
+	 * @param matchStrings - The list of class names to find.
+	 * @return True if all class names were found.
+	 */
 	public static boolean searchConstantPoolForClasses(String className, String... matchStrings)
 	{
 		className = className.replace(".", "/");
@@ -436,13 +540,17 @@ public class DynamicMappings
 	}
 
 
-	// Returns a list of the String types from the class's constant pool
+	/**
+	 * Returns a list of the 'String' types from the class's constant pool.
+	 * 
+	 * @param className - Name of class to search.
+	 * @return The list of constant pool strings.
+	 */
 	public static List<String> getConstantPoolStrings(String className)
 	{
 		List<String> strings = new ArrayList<String>();
 
 		className = className.replace(".", "/");
-		//InputStream stream = Launch.classLoader.getResourceAsStream(className + ".class");
 		InputStream stream = DynamicMappings.class.getClassLoader().getResourceAsStream(className + ".class");
 		if (stream == null) return null;
 
@@ -469,8 +577,15 @@ public class DynamicMappings
 	}
 
 
-	// Confirm the parameter types of a method.
-	// Uses org.objectweb.asm.Type for values.
+	/**
+	 * Confirm the parameter types of a method's description.
+	 * 
+	 * Uses org.objectweb.asm.Type for values.
+	 * 
+	 * @param method - MethodNode to check.
+	 * @param types - Sequence of method parameter types.
+	 * @return True if the method description matches specified types.
+	 */
 	public static boolean checkMethodParameters(MethodNode method, int ... types)
 	{
 		Type t = Type.getMethodType(method.desc);
@@ -486,8 +601,14 @@ public class DynamicMappings
 	}
 
 
-	// Finds all methods matching the specified name and/or description.
-	// Both are optional.
+	/**
+	 * Finds all methods matching the specified name and/or description.
+	 * 
+	 * @param cn - ClassNode to search.
+	 * @param name - Optional name of method(s) to find.
+	 * @param desc - Optional description of method(s) to find.
+	 * @return List of matching methods.
+	 */
 	public static List<MethodNode> getMatchingMethods(ClassNode cn, String name, String desc)
 	{
 		List<MethodNode> output = new ArrayList<MethodNode>();
@@ -500,9 +621,15 @@ public class DynamicMappings
 		return output;
 	}
 
-
-	// Finds all fields matching the specified name and/or description.
-	// Both are optional.
+	
+	/**
+	 * Finds all fields matching the specified name and/or description.
+	 * 
+	 * @param cn - ClassNode to search.
+	 * @param name - Optional name of field(s) to find.
+	 * @param desc - Optional description of field(s) to find.
+	 * @return List of matching fields.
+	 */
 	public static List<FieldNode> getMatchingFields(ClassNode cn, String name, String desc)
 	{
 		List<FieldNode> output = new ArrayList<FieldNode>();
@@ -516,15 +643,28 @@ public class DynamicMappings
 	}
 
 
-	// Gets a ClassNode of the deobfuscated class name specified
+	/**
+	 * Gets a ClassNode after translating the specified deobfuscated class name to 
+	 * the obfuscated name.
+	 * 
+	 * @param deobfClass - Class name to translate and get.
+	 * @return The ClassNode, or null if it doesn't exist.
+	 */
 	public static ClassNode getClassNodeFromMapping(String deobfClass)
 	{
 		return getClassNode(getClassMapping(deobfClass));
 	}
 
 
-	// Checks if the sequence of opcodes exists.
-	// Ignores synthetic opcodes added by ASM, such as labels.
+	/**
+	 * Checks if the sequence of opcodes exists, starting at the specified 
+	 * instruction.  This ignores synthetic opcodes added by ASM, such as 
+	 * labels.
+	 * 
+	 * @param insn - Instruction node to start at.
+	 * @param opcodes - Sequence of opcodes to look for.
+	 * @return True if all opcodes are found and in the specifed order.
+	 */
 	public static boolean matchOpcodeSequence(AbstractInsnNode insn, int...opcodes)
 	{
 		for (int opcode : opcodes) {
@@ -536,9 +676,18 @@ public class DynamicMappings
 
 		return true;
 	}
+	
 
-	// Extracst the opcode sequence as an array
-	// Ignores synthetic opcodes added by ASM, such as labels.
+	/**
+	 * Locates and extracts the specified opcode sequence as an array of
+	 * instruction nodes.  Ignores synthetic opcodes added by ASM, such as 
+	 * labels.
+	 * 
+	 * @param insn - Instruction to start at.
+	 * @param opcodes - Sequence of opcodes to look for.
+	 * @return The list of instruction nodes, if one is found matching the
+	 * specified sequence. 
+	 */
 	public static AbstractInsnNode[] getOpcodeSequenceArray(AbstractInsnNode insn, int...opcodes)
 	{
 		AbstractInsnNode[] outNodes = new AbstractInsnNode[opcodes.length];
@@ -556,6 +705,13 @@ public class DynamicMappings
 	}
 	
 	
+	/**
+	 * Gets a list of all instruction nodes matching the specified class.
+	 * 
+	 * @param startInsn - Instruction node to start at.
+	 * @param classType - Class to compare against.
+	 * @return The list of matching nodes.
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> List<T> getAllInsnNodesOfType(AbstractInsnNode startInsn, Class<T> classType)
 	{				
@@ -569,6 +725,13 @@ public class DynamicMappings
 	}
 	
 	
+	/**
+	 * Gets the next matching instruction node matching the specified class.
+	 * 
+	 * @param startInsn - Instruction node to start at.
+	 * @param classType - Class to compare against.
+	 * @return The first matching instruction node, or null if none.
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T getNextInsnNodeOfType(AbstractInsnNode startInsn, Class<T> classType)
 	{		
@@ -581,22 +744,36 @@ public class DynamicMappings
 	
 
 
-	
-
-	// Gets the obfuscated class name from the deobfuscated input
+	/**
+	 * Gets the obfuscated class name from a deobfuscated input.
+	 * 
+	 * @param deobfClassName - The deobfuscated class name.
+	 * @return The obfuscated class name, or null
+	 */
 	public static String getClassMapping(String deobfClassName)
 	{
 		return classMappings.get(deobfClassName.replace(".",  "/"));
 	}
 	
 
-	// Gets the deobfuscated class name from the obfuscated input
+	/**
+	 * Gets the deobfuscated class name from an obfuscated input.
+	 * 
+	 * @param obfClassName - The obfuscated class name.
+	 * @return The deobfuscated class name, or null
+	 */
 	public static String getReverseClassMapping(String obfClassName)
 	{
 		return reverseClassMappings.get(obfClassName.replace(".",  "/"));
 	}
 
 
+	/**
+	 * Adds a class mapping.
+	 * 
+	 * @param deobfClassName - The deobfuscated class name.
+	 * @param node - The obfuscated ClassNode.
+	 */
 	public static void addClassMapping(String deobfClassName, ClassNode node)
 	{
 		if (deobfClassName == null) return;
@@ -605,6 +782,12 @@ public class DynamicMappings
 	}
 
 	
+	/**
+	 * Adds a class mapping.
+	 * 
+	 * @param deobfClassName - The deobfuscated class name.
+	 * @param obfClassName - The obfuscated class name.
+	 */
 	public static void addClassMapping(String deobfClassName, String obfClassName)
 	{
 		deobfClassName = deobfClassName.replace(".", "/");

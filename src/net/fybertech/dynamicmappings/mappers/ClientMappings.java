@@ -1,4 +1,4 @@
-package net.fybertech.dynamicmappings.mappings;
+package net.fybertech.dynamicmappings.mappers;
 
 import java.util.ArrayList;
 import java.util.Arrays;

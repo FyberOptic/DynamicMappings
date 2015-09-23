@@ -250,6 +250,14 @@ public class ModMappings {
 	}
 	
 	
+	public static int getMappingSide(String mapping)
+	{
+		if (DynamicMappings.clientMappingsSet.contains(mapping)) return 1;
+		if (DynamicMappings.serverMappingsSet.contains(mapping)) return 2;
+		return 3;
+	}
+	
+	
 	public static void main(String[] args) 
 	{
 		//System.out.println(System.getProperty("java.class.path"));
@@ -310,7 +318,7 @@ public class ModMappings {
 		for (String s : classes) {
 			boolean hasMapping = DynamicMappings.classMappings.containsKey(s);
 			//System.out.println("  " + (hasMapping ? "TRUE " :"") + s);
-			if (hasMapping) output.add("C " + s);
+			if (hasMapping) output.add("C " + getMappingSide(s) + " " + s);
 		}
 		
 		//System.out.println("Fields:");
@@ -326,9 +334,10 @@ public class ModMappings {
 			
 			HashSet<FieldHolder> fh = im.fields.get(holder.name + " " + holder.desc);
 			for (FieldHolder f : fh) {
-				boolean hasMapping = DynamicMappings.fieldMappings.containsKey(f.cn.name + " " + f.fn.name + " " + f.fn.desc);
+				String mapping = f.cn.name + " " + f.fn.name + " " + f.fn.desc;
+				boolean hasMapping = DynamicMappings.fieldMappings.containsKey(mapping);
 				//System.out.println("    " + (hasMapping ? "TRUE " :"") + f.cn.name + " " + f.fn.name);
-				if (hasMapping) output.add("F " + f.cn.name + " " + f.fn.name + " " + f.fn.desc);
+				if (hasMapping) output.add("F " + getMappingSide(mapping) + " " + mapping);
 			}
 		}
 		
@@ -348,13 +357,16 @@ public class ModMappings {
 			if (mh == null) continue; // Shouldn't be possible in normal circumstances, but we'll do for safety
 			
 			for (MethodHolder m : mh) {
-				boolean hasMapping = DynamicMappings.methodMappings.containsKey(m.cn.name + " " + m.mn.name + " " + m.mn.desc);
+				String mapping = m.cn.name + " " + m.mn.name + " " + m.mn.desc;
+				boolean hasMapping = DynamicMappings.methodMappings.containsKey(mapping);
 				//System.out.println("    " + (hasMapping ? "TRUE " :"") + m.cn.name + " " + m.mn.name);
-				if (hasMapping) output.add("M " + m.cn.name + " " + m.mn.name + " " + m.mn.desc);
+				if (hasMapping) output.add("M " + getMappingSide(mapping) + " " + mapping);
 			}
 		}
 		
 		if (outputFile != null) {
+			outputFile.toPath().getParent().toFile().mkdirs();
+			
 			PrintWriter pw;
 			try {
 				pw = new PrintWriter(new FileOutputStream(outputFile));
