@@ -460,17 +460,18 @@ public class SharedMappings extends MappingsBase {
 		}
 		
 		
+		// Went from 6 to 7 matching methods in 15w39c
 		methods = getMatchingMethods(blockPos, null, "()L" + blockPos.name + ";");
-		if (methods.size() == 6) {
-			for (int methodNum = 0; methodNum < 6; methodNum++) {
-				AbstractInsnNode insn = findNextOpcodeNum(methods.get(methodNum).instructions.getFirst(), Opcodes.INVOKEVIRTUAL);
+		if (methods.size() >= 6) {
+			for (MethodNode method : methods) {
+				AbstractInsnNode insn = findNextOpcodeNum(method.instructions.getFirst(), Opcodes.INVOKEVIRTUAL);
 				if (insn == null) continue;
 				MethodInsnNode mn = (MethodInsnNode)insn;
 				if (!mn.owner.equals(blockPos.name) || !mn.desc.equals("(I)L" + blockPos.name + ";")) continue;
 				for (int dirNum = 0; dirNum < 6; dirNum++) {
 					if (offsetMethods[dirNum].name.equals(mn.name)) {
 						addMethodMapping("net/minecraft/util/BlockPos " + dirs[dirNum] + " ()Lnet/minecraft/util/BlockPos;",
-								blockPos.name + " " + methods.get(methodNum).name + " " + methods.get(methodNum).desc);
+								blockPos.name + " " + method.name + " " + method.desc);
 					}
 				}
 			}
@@ -3895,7 +3896,7 @@ public class SharedMappings extends MappingsBase {
 			},
 			providesMethods={
 			"net/minecraft/world/World setBlockState (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z",
-			"net/minecraft/world/World markBlockForUpdate (Lnet/minecraft/util/BlockPos;)V",
+			// TODO - "net/minecraft/world/World markBlockForUpdate (Lnet/minecraft/util/BlockPos;)V",
 			"net/minecraft/world/World markBlockRangeForRenderUpdate (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/BlockPos;)V",
 			"net/minecraft/world/World playAuxSFXAtEntity (Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/BlockPos;I)V",
 			"net/minecraft/world/World addBlockEvent (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;II)V",
