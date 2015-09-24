@@ -1,4 +1,4 @@
-Minecraft version: 15w38a
+Minecraft version: 15w39c
 Minecraft jar type: client
 
 CLASSES:
@@ -91,10 +91,12 @@ net/minecraft/inventory/ICrafting -> aag
 net/minecraft/inventory/IInventory -> pt
 net/minecraft/inventory/InventoryBasic -> qg
 net/minecraft/inventory/Slot -> aaz
+net/minecraft/item/EnumAction -> aef
 net/minecraft/item/EnumDyeColor -> aca
 net/minecraft/item/Item -> act
 net/minecraft/item/ItemBanner -> abg
 net/minecraft/item/ItemBlock -> abi
+net/minecraft/item/ItemBow -> abn
 net/minecraft/item/ItemDye -> acb
 net/minecraft/item/ItemSoup -> abo
 net/minecraft/item/ItemStack -> acv
@@ -218,7 +220,10 @@ net/minecraft/init/Blocks dirt Lnet/minecraft/block/Block; -> aiv d Laiu;
 net/minecraft/init/Blocks glass_pane Lnet/minecraft/block/Block; -> aiv bj Laiu;
 net/minecraft/init/Blocks hopper Lnet/minecraft/block/BlockHopper; -> aiv cp Lalf;
 net/minecraft/init/Blocks obsidian Lnet/minecraft/block/Block; -> aiv Z Laiu;
+net/minecraft/init/Blocks stone Lnet/minecraft/block/Block; -> aiv b Laiu;
+net/minecraft/init/Items ender_pearl Lnet/minecraft/item/Item; -> acx bw Lact;
 net/minecraft/init/Items leather Lnet/minecraft/item/Item; -> acx aH Lact;
+net/minecraft/init/Items redstone Lnet/minecraft/item/Item; -> acx aE Lact;
 net/minecraft/inventory/Container inventorySlots Ljava/util/List; -> aab c Ljava/util/List;
 net/minecraft/inventory/Container windowId I -> aab d I
 net/minecraft/inventory/InventoryBasic hasCustomName Z -> qg e Z
@@ -230,6 +235,11 @@ net/minecraft/inventory/Slot slotIndex I -> aaz a I
 net/minecraft/inventory/Slot slotNumber I -> aaz e I
 net/minecraft/inventory/Slot xDisplayPosition I -> aaz f I
 net/minecraft/inventory/Slot yDisplayPosition I -> aaz g I
+net/minecraft/item/EnumAction BLOCK Lnet/minecraft/item/EnumAction; -> aef d Laef;
+net/minecraft/item/EnumAction BOW Lnet/minecraft/item/EnumAction; -> aef e Laef;
+net/minecraft/item/EnumAction DRINK Lnet/minecraft/item/EnumAction; -> aef c Laef;
+net/minecraft/item/EnumAction EAT Lnet/minecraft/item/EnumAction; -> aef b Laef;
+net/minecraft/item/EnumAction NONE Lnet/minecraft/item/EnumAction; -> aef a Laef;
 net/minecraft/item/Item maxDamage I -> act o I
 net/minecraft/item/Item maxStackSize I -> act i I
 net/minecraft/item/Item unlocalizedName Ljava/lang/String; -> act q Ljava/lang/String;
@@ -261,6 +271,9 @@ net/minecraft/util/EnumFacing WEST Lnet/minecraft/util/EnumFacing; -> cq e Lcq;
 net/minecraft/util/ItemUseResult FAIL Lnet/minecraft/util/ItemUseResult; -> qa c Lqa;
 net/minecraft/util/ItemUseResult PASS Lnet/minecraft/util/ItemUseResult; -> qa b Lqa;
 net/minecraft/util/ItemUseResult SUCCESS Lnet/minecraft/util/ItemUseResult; -> qa a Lqa;
+net/minecraft/util/Vec3 xCoord D -> azf a D
+net/minecraft/util/Vec3 yCoord D -> azf b D
+net/minecraft/util/Vec3 zCoord D -> azf c D
 net/minecraft/util/Vec3i x I -> df a I
 net/minecraft/util/Vec3i y I -> df c I
 net/minecraft/util/Vec3i z I -> df d I
@@ -412,6 +425,8 @@ net/minecraft/command/ICommandSender sendCommandFeedback ()Z -> m v_ ()Z
 net/minecraft/command/ICommandSender setCommandStat (Lnet/minecraft/command/CommandResultStats$Type;)V -> m a (Ln$a;I)V
 net/minecraft/entity/Entity getFlag (I)Z -> rc g (I)Z
 net/minecraft/entity/Entity isSneaking ()Z -> rc aC ()Z
+net/minecraft/entity/Entity setPositionAndUpdate (DDD)V -> rc a (DDD)V
+net/minecraft/entity/EntityLivingBase setItemInUse (Lnet/minecraft/util/MainOrOffHand;)V -> rl c (Lpy;)V
 net/minecraft/entity/player/EntityPlayer displayGUIChest (Lnet/minecraft/inventory/IInventory;)V -> zb a (Lpt;)V
 net/minecraft/entity/player/EntityPlayer displayGui (Lnet/minecraft/world/IInteractionObject;)V -> zb a (Lpz;)V
 net/minecraft/inventory/Container addSlotToContainer (Lnet/minecraft/inventory/Slot;)Lnet/minecraft/inventory/Slot; -> aab a (Laaz;)Laaz;
@@ -455,15 +470,20 @@ net/minecraft/item/Item getColorFromItemStack (Lnet/minecraft/item/ItemStack;I)I
 net/minecraft/item/Item getIdFromItem (Lnet/minecraft/item/Item;)I -> act b (Lact;)I
 net/minecraft/item/Item getIdFromItem2 (Lnet/minecraft/item/Item;)I -> act a (Lact;)I
 net/minecraft/item/Item getItemById (I)Lnet/minecraft/item/Item; -> act c (I)Lact;
+net/minecraft/item/Item getItemEnchantability ()I -> act c ()I
 net/minecraft/item/Item getItemFromBlock (Lnet/minecraft/block/Block;)Lnet/minecraft/item/Item; -> act a (Laiu;)Lact;
 net/minecraft/item/Item getItemStackDisplayName (Lnet/minecraft/item/ItemStack;)Ljava/lang/String; -> act a (Lacv;)Ljava/lang/String;
+net/minecraft/item/Item getItemUseAction (Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/EnumAction; -> act f (Lacv;)Laef;
 net/minecraft/item/Item getMaxDamage ()I -> act l ()I
+net/minecraft/item/Item getMaxItemUseDuration (Lnet/minecraft/item/ItemStack;)I -> act e (Lacv;)I
 net/minecraft/item/Item getMaxStackSize ()I -> act j ()I
 net/minecraft/item/Item getUnlocalizedName ()Ljava/lang/String; -> act a ()Ljava/lang/String;
 net/minecraft/item/Item getUnlocalizedName (Lnet/minecraft/item/ItemStack;)Ljava/lang/String; -> act e_ (Lacv;)Ljava/lang/String;
 net/minecraft/item/Item getUnlocalizedNameInefficiently (Lnet/minecraft/item/ItemStack;)Ljava/lang/String; -> act j (Lacv;)Ljava/lang/String;
 net/minecraft/item/Item onItemRightClick (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;)Lnet/minecraft/util/ObjectActionHolder; -> act a (Lacv;Lagv;Lzb;Lpy;)Lqb;
 net/minecraft/item/Item onItemUse (Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/ItemUseResult; -> act a (Lacv;Lzb;Lagv;Lcj;Lpy;Lcq;FFF)Lqa;
+net/minecraft/item/Item onItemUseFinish (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/item/ItemStack; -> act a (Lacv;Lagv;Lrl;)Lacv;
+net/minecraft/item/Item onPlayerStoppedUsing (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;I)V -> act a (Lacv;Lagv;Lrl;I)V
 net/minecraft/item/Item registerItem (ILjava/lang/String;Lnet/minecraft/item/Item;)V -> act a (ILjava/lang/String;Lact;)V
 net/minecraft/item/Item registerItem (ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/item/Item;)V -> act a (ILkf;Lact;)V
 net/minecraft/item/Item registerItemBlock (Lnet/minecraft/block/Block;)V -> act c (Laiu;)V
@@ -475,8 +495,11 @@ net/minecraft/item/Item setMaxDamage (I)Lnet/minecraft/item/Item; -> act e (I)La
 net/minecraft/item/Item setMaxStackSize (I)Lnet/minecraft/item/Item; -> act d (I)Lact;
 net/minecraft/item/Item setUnlocalizedName (Ljava/lang/String;)Lnet/minecraft/item/Item; -> act c (Ljava/lang/String;)Lact;
 net/minecraft/item/ItemStack copy ()Lnet/minecraft/item/ItemStack; -> acv k ()Lacv;
+net/minecraft/item/ItemStack damageItem (ILnet/minecraft/entity/EntityLivingBase;)V -> acv a (ILrl;)V
 net/minecraft/item/ItemStack getDisplayName ()Ljava/lang/String; -> acv q ()Ljava/lang/String;
 net/minecraft/item/ItemStack getItem ()Lnet/minecraft/item/Item; -> acv b ()Lact;
+net/minecraft/item/ItemStack getItemDamage ()I -> acv h ()I
+net/minecraft/item/ItemStack getMetadata ()I -> acv i ()I
 net/minecraft/item/ItemStack getTagCompound ()Lnet/minecraft/nbt/NBTTagCompound; -> acv o ()Ldn;
 net/minecraft/item/ItemStack getUnlocalizedName ()Ljava/lang/String; -> acv a ()Ljava/lang/String;
 net/minecraft/item/ItemStack hasTagCompound ()Z -> acv n ()Z
@@ -487,6 +510,7 @@ net/minecraft/item/ItemStack isItemStackDamageable ()Z -> acv e ()Z
 net/minecraft/item/ItemStack isItemStackEqual (Lnet/minecraft/item/ItemStack;)Z -> acv e (Lacv;)Z
 net/minecraft/item/ItemStack loadItemStackFromNBT (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/item/ItemStack; -> acv a (Ldn;)Lacv;
 net/minecraft/item/ItemStack readFromNBT (Lnet/minecraft/nbt/NBTTagCompound;)V -> acv c (Ldn;)V
+net/minecraft/item/ItemStack setItemDamage (I)V -> acv b (I)V
 net/minecraft/item/ItemStack setTagCompound (Lnet/minecraft/nbt/NBTTagCompound;)V -> acv d (Ldn;)V
 net/minecraft/item/ItemStack setTagInfo (Ljava/lang/String;Lnet/minecraft/nbt/NBTBase;)V -> acv a (Ljava/lang/String;Leb;)V
 net/minecraft/item/ItemStack splitStack (I)Lnet/minecraft/item/ItemStack; -> acv a (I)Lacv;
@@ -502,6 +526,7 @@ net/minecraft/nbt/NBTTagCompound getString (Ljava/lang/String;)Ljava/lang/String
 net/minecraft/nbt/NBTTagCompound getTagList (Ljava/lang/String;I)Lnet/minecraft/nbt/NBTTagList; -> dn c (Ljava/lang/String;I)Ldu;
 net/minecraft/nbt/NBTTagCompound getTagType (Ljava/lang/String;)B -> dn d (Ljava/lang/String;)B
 net/minecraft/nbt/NBTTagCompound hasKey (Ljava/lang/String;I)Z -> dn b (Ljava/lang/String;I)Z
+net/minecraft/nbt/NBTTagCompound removeTag (Ljava/lang/String;)V -> dn q (Ljava/lang/String;)V
 net/minecraft/nbt/NBTTagCompound setByte (Ljava/lang/String;B)V -> dn a (Ljava/lang/String;B)V
 net/minecraft/nbt/NBTTagCompound setInteger (Ljava/lang/String;I)V -> dn a (Ljava/lang/String;I)V
 net/minecraft/nbt/NBTTagCompound setString (Ljava/lang/String;Ljava/lang/String;)V -> dn a (Ljava/lang/String;Ljava/lang/String;)V
@@ -521,7 +546,7 @@ net/minecraft/server/MinecraftServer createNewCommandManager ()Lnet/minecraft/co
 net/minecraft/server/MinecraftServer getCommandManager ()Lnet/minecraft/command/ICommandManager; -> net/minecraft/server/MinecraftServer N ()Ll;
 net/minecraft/tileentity/TileEntity addInfoToCrashReport (Lnet/minecraft/crash/CrashReportCategory;)V -> aou a (Lc;)V
 net/minecraft/tileentity/TileEntity addMapping (Ljava/lang/Class;Ljava/lang/String;)V -> aou a (Ljava/lang/Class;Ljava/lang/String;)V
-net/minecraft/tileentity/TileEntity createAndLoadEntity (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/tileentity/TileEntity; -> aou c (Ldn;)Laou;
+net/minecraft/tileentity/TileEntity createAndLoadEntity (Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/tileentity/TileEntity; -> aou b (Lnet/minecraft/server/MinecraftServer;Ldn;)Laou;
 net/minecraft/tileentity/TileEntity getBlockMetadata ()I -> aou u ()I
 net/minecraft/tileentity/TileEntity getBlockType ()Lnet/minecraft/block/Block; -> aou w ()Laiu;
 net/minecraft/tileentity/TileEntity getDescriptionPacket ()Lnet/minecraft/network/Packet; -> aou A_ ()Lff;
@@ -529,13 +554,13 @@ net/minecraft/tileentity/TileEntity getPos ()Lnet/minecraft/util/BlockPos; -> ao
 net/minecraft/tileentity/TileEntity getWorld ()Lnet/minecraft/world/World; -> aou A ()Lagv;
 net/minecraft/tileentity/TileEntity invalidate ()V -> aou y ()V
 net/minecraft/tileentity/TileEntity markDirty ()V -> aou r_ ()V
-net/minecraft/tileentity/TileEntity readFromNBT (Lnet/minecraft/nbt/NBTTagCompound;)V -> aou a (Ldn;)V
+net/minecraft/tileentity/TileEntity readFromNBT (Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/nbt/NBTTagCompound;)V -> aou a (Lnet/minecraft/server/MinecraftServer;Ldn;)V
 net/minecraft/tileentity/TileEntity receiveClientEvent (II)Z -> aou c (II)Z
 net/minecraft/tileentity/TileEntity setPos (Lnet/minecraft/util/BlockPos;)V -> aou a (Lcj;)V
 net/minecraft/tileentity/TileEntity setWorldObj (Lnet/minecraft/world/World;)V -> aou a (Lagv;)V
 net/minecraft/tileentity/TileEntity updateContainingBlockInfo ()V -> aou E ()V
 net/minecraft/tileentity/TileEntity validate ()V -> aou z ()V
-net/minecraft/tileentity/TileEntity writeToNBT (Lnet/minecraft/nbt/NBTTagCompound;)V -> aou b (Ldn;)V
+net/minecraft/tileentity/TileEntity writeToNBT (Lnet/minecraft/nbt/NBTTagCompound;)V -> aou a (Ldn;)V
 net/minecraft/util/BlockPos down ()Lnet/minecraft/util/BlockPos; -> cj b ()Lcj;
 net/minecraft/util/BlockPos down (I)Lnet/minecraft/util/BlockPos; -> cj c (I)Lcj;
 net/minecraft/util/BlockPos east ()Lnet/minecraft/util/BlockPos; -> cj f ()Lcj;
@@ -557,12 +582,12 @@ net/minecraft/util/RegistryNamespaced getNameForObject (Ljava/lang/Object;)Ljava
 net/minecraft/util/RegistryNamespaced getObject (Ljava/lang/Object;)Ljava/lang/Object; -> cx c (Ljava/lang/Object;)Ljava/lang/Object;
 net/minecraft/util/RegistryNamespaced getObjectById (I)Ljava/lang/Object; -> cx a (I)Ljava/lang/Object;
 net/minecraft/util/RegistryNamespaced register (ILjava/lang/Object;Ljava/lang/Object;)V -> cx a (ILjava/lang/Object;Ljava/lang/Object;)V
-net/minecraft/util/Vec3i getX ()I -> df o ()I
-net/minecraft/util/Vec3i getY ()I -> df p ()I
-net/minecraft/util/Vec3i getZ ()I -> df q ()I
-net/minecraft/world/IBlockAccess getBlockState (Lnet/minecraft/util/BlockPos;)Lnet/minecraft/block/state/IBlockState; -> agz p (Lcj;)Laqa;
+net/minecraft/util/Vec3i getX ()I -> df p ()I
+net/minecraft/util/Vec3i getY ()I -> df q ()I
+net/minecraft/util/Vec3i getZ ()I -> df r ()I
+net/minecraft/world/IBlockAccess getBlockState (Lnet/minecraft/util/BlockPos;)Lnet/minecraft/block/state/IBlockState; -> agz o (Lcj;)Laqa;
 net/minecraft/world/IBlockAccess getStrongPower (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)I -> agz a (Lcj;Lcq;)I
-net/minecraft/world/IBlockAccess getTileEntity (Lnet/minecraft/util/BlockPos;)Lnet/minecraft/tileentity/TileEntity; -> agz s (Lcj;)Laou;
+net/minecraft/world/IBlockAccess getTileEntity (Lnet/minecraft/util/BlockPos;)Lnet/minecraft/tileentity/TileEntity; -> agz r (Lcj;)Laou;
 net/minecraft/world/IBlockAccess isAirBlock (Lnet/minecraft/util/BlockPos;)Z -> agz d (Lcj;)Z
 net/minecraft/world/IInteractionObject createContainer (Lnet/minecraft/entity/player/InventoryPlayer;Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/inventory/Container; -> pz a (Lza;Lzb;)Laab;
 net/minecraft/world/IInteractionObject getGuiID ()Ljava/lang/String; -> pz k ()Ljava/lang/String;
@@ -570,9 +595,9 @@ net/minecraft/world/IWorldNameable getDisplayName ()Lnet/minecraft/util/IChatCom
 net/minecraft/world/IWorldNameable getName ()Ljava/lang/String; -> qf h_ ()Ljava/lang/String;
 net/minecraft/world/IWorldNameable hasCustomName ()Z -> qf n_ ()Z
 net/minecraft/world/World addBlockEvent (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;II)V -> agv c (Lcj;Laiu;II)V
-net/minecraft/world/World markBlockForUpdate (Lnet/minecraft/util/BlockPos;)V -> agv h (Lcj;)V
 net/minecraft/world/World markBlockRangeForRenderUpdate (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/BlockPos;)V -> agv b (Lcj;Lcj;)V
 net/minecraft/world/World markChunkDirty (Lnet/minecraft/util/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V -> agv b (Lcj;Laou;)V
 net/minecraft/world/World playAuxSFXAtEntity (Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/BlockPos;I)V -> agv a (Lzb;ILcj;I)V
+net/minecraft/world/World playSoundEffect (DDDLjava/lang/String;FF)V -> agv a (DDDLjava/lang/String;FF)V
 net/minecraft/world/World setBlockState (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z -> agv a (Lcj;Laqa;I)Z
 net/minecraft/world/World setTileEntity (Lnet/minecraft/util/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V -> agv a (Lcj;Laou;)V

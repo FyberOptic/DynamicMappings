@@ -542,6 +542,32 @@ public class SharedMappings extends MappingsBase {
 	}
 	
 	
+	@Mapping(providesFields={
+			"net/minecraft/util/Vec3 xCoord D",
+			"net/minecraft/util/Vec3 yCoord D",
+			"net/minecraft/util/Vec3 zCoord D"
+			},
+			providesMethods={
+			},
+			depends={
+			"net/minecraft/util/Vec3"
+			})
+	public boolean processVec3Class()
+	{
+		ClassNode vec3 = getClassNodeFromMapping("net/minecraft/util/Vec3");
+		if (!MeddleUtil.notNull(vec3)) return false;
+		
+		List<FieldNode> fields = getMatchingFields(vec3, null, "D");
+		if (fields.size() == 3) {
+			addFieldMapping("net/minecraft/util/Vec3 xCoord D", vec3.name + " " + fields.get(0).name + " D");
+			addFieldMapping("net/minecraft/util/Vec3 yCoord D", vec3.name + " " + fields.get(1).name + " D");
+			addFieldMapping("net/minecraft/util/Vec3 zCoord D", vec3.name + " " + fields.get(2).name + " D");
+		}
+		
+		return true;
+	}
+	
+	
 
 	@Mapping(provides={
 			"net/minecraft/entity/item/EntityItem",
@@ -613,7 +639,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/init/Blocks dirt Lnet/minecraft/block/Block;",
 			"net/minecraft/init/Blocks obsidian Lnet/minecraft/block/Block;",
 			"net/minecraft/init/Blocks hopper Lnet/minecraft/block/BlockHopper;",
-			"net/minecraft/init/Blocks glass_pane Lnet/minecraft/block/Block;"
+			"net/minecraft/init/Blocks glass_pane Lnet/minecraft/block/Block;",
+			"net/minecraft/init/Blocks stone Lnet/minecraft/block/Block;"
 			},
 			depends={
 			"net/minecraft/init/Blocks",
@@ -707,6 +734,12 @@ public class SharedMappings extends MappingsBase {
 		field = blocksFields.get("obsidian");
 		if (field != null) {
 			addFieldMapping("net/minecraft/init/Blocks obsidian Lnet/minecraft/block/Block;",
+					field.owner + " " + field.name + " " + field.desc);
+		}
+		
+		field = blocksFields.get("stone");
+		if (field != null) {
+			addFieldMapping("net/minecraft/init/Blocks stone Lnet/minecraft/block/Block;",
 					field.owner + " " + field.name + " " + field.desc);
 		}
 
@@ -2741,19 +2774,25 @@ public class SharedMappings extends MappingsBase {
 	
 	
 	@Mapping(providesMethods={
-			"net/minecraft/item/Item setHasSubtypes (Z)Lnet/minecraft/item/Item;"
+			"net/minecraft/item/Item setHasSubtypes (Z)Lnet/minecraft/item/Item;",
+			"net/minecraft/item/ItemStack getMetadata ()I"
 			},
 			providesFields={
 			},
+			dependsMethods={
+			"net/minecraft/item/Item getUnlocalizedName (Lnet/minecraft/item/ItemStack;)Ljava/lang/String;"
+			},
 			depends={
 			"net/minecraft/item/Item",
-			"net/minecraft/item/ItemDye"
+			"net/minecraft/item/ItemDye",
+			"net/minecraft/item/ItemStack"
 			})
 	public boolean processItemDyeClass()
 	{
 		ClassNode item = getClassNodeFromMapping("net/minecraft/item/Item");
 		ClassNode itemDye = getClassNodeFromMapping("net/minecraft/item/ItemDye");
-		if (!MeddleUtil.notNull(item, itemDye)) return false;
+		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
+		if (!MeddleUtil.notNull(item, itemDye, itemStack)) return false;
 		
 		// protected Item setHasSubtypes(boolean hasSubtypes)
 		List<MethodNode> methods = getMatchingMethods(itemDye, "<init>", "()V");
@@ -2767,6 +2806,18 @@ public class SharedMappings extends MappingsBase {
 			if (foundnodes.size() == 1) {
 				addMethodMapping("net/minecraft/item/Item setHasSubtypes (Z)Lnet/minecraft/item/Item;",
 						item.name + " " + foundnodes.get(0).name + " " + foundnodes.get(0).desc);
+			}
+		}
+		
+		MethodNode method = getMethodNodeFromMapping(itemDye, "net/minecraft/item/Item getUnlocalizedName (Lnet/minecraft/item/ItemStack;)Ljava/lang/String;");
+		if (method != null) {
+			List<MethodInsnNode> mnodes = getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+			for (Iterator<MethodInsnNode> iterator = mnodes.iterator(); iterator.hasNext();) {
+				MethodInsnNode mn = iterator.next();
+				if (!(mn.owner.equals(itemStack.name) && mn.desc.equals("()I"))) iterator.remove();
+			}
+			if (mnodes.size() == 1) {
+				addMethodMapping("net/minecraft/item/ItemStack getMetadata ()I", itemStack.name + " " + mnodes.get(0).name + " ()I");
 			}
 		}
 		
@@ -3858,6 +3909,7 @@ public class SharedMappings extends MappingsBase {
 
 	
 	
+	
 	@Mapping(providesFields={
 			"net/minecraft/util/EnumFacing DOWN Lnet/minecraft/util/EnumFacing;",
 			"net/minecraft/util/EnumFacing UP Lnet/minecraft/util/EnumFacing;",
@@ -3902,7 +3954,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/world/World addBlockEvent (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;II)V",
 			"net/minecraft/block/Block onBlockEventReceived (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;II)Z",
 			"net/minecraft/world/World setTileEntity (Lnet/minecraft/util/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
-			"net/minecraft/world/World markChunkDirty (Lnet/minecraft/util/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V"
+			"net/minecraft/world/World markChunkDirty (Lnet/minecraft/util/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
+			"net/minecraft/world/World playSoundEffect (DDDLjava/lang/String;FF)V"
 			},
 			depends={
 			"net/minecraft/world/World",
@@ -4035,6 +4088,13 @@ public class SharedMappings extends MappingsBase {
 				addMethodMapping("net/minecraft/world/World markChunkDirty (Lnet/minecraft/util/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
 						world.name + " " + markChunkDirty.name + " " + markChunkDirty.desc);
 			}
+		}
+		
+		// public void playSoundEffect(double x, double y, double z, String soundName, float volume, float pitch)
+		methods = getMatchingMethods(world, null, "(DDDLjava/lang/String;FF)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/world/World playSoundEffect (DDDLjava/lang/String;FF)V",
+					world.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
 		
@@ -4388,7 +4448,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/nbt/NBTTagCompound getString (Ljava/lang/String;)Ljava/lang/String;",
 			"net/minecraft/nbt/NBTTagCompound setString (Ljava/lang/String;Ljava/lang/String;)V",
 			"net/minecraft/nbt/NBTTagCompound getInteger (Ljava/lang/String;)I",
-			"net/minecraft/nbt/NBTTagCompound setInteger (Ljava/lang/String;I)V"
+			"net/minecraft/nbt/NBTTagCompound setInteger (Ljava/lang/String;I)V",
+			"net/minecraft/nbt/NBTTagCompound removeTag (Ljava/lang/String;)V"
 	},
 	providesFields={
 			"net/minecraft/nbt/NBTTagList tagType B"
@@ -4554,6 +4615,14 @@ public class SharedMappings extends MappingsBase {
 		methods = getMatchingMethods(tagCompound, null, "(Ljava/lang/String;I)V");
 		if (methods.size() == 1) {
 			addMethodMapping("net/minecraft/nbt/NBTTagCompound setInteger (Ljava/lang/String;I)V",
+					tagCompound.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public void removeTag(String key)
+		methods = getMatchingMethods(tagCompound, null, "(Ljava/lang/String;)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/nbt/NBTTagCompound removeTag (Ljava/lang/String;)V",
 					tagCompound.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
@@ -5285,6 +5354,70 @@ public class SharedMappings extends MappingsBase {
 
 	
 	
+	@Mapping(providesMethods={
+			"net/minecraft/item/ItemStack getItemDamage ()I",
+			"net/minecraft/item/ItemStack setItemDamage (I)V",
+			"net/minecraft/item/ItemStack damageItem (ILnet/minecraft/entity/EntityLivingBase;)V"
+			},
+			dependsMethods="net/minecraft/item/ItemStack getMetadata ()I",
+			dependsFields="net/minecraft/item/ItemStack itemDamage I",
+			depends={
+			"net/minecraft/item/ItemStack",
+			"net/minecraft/entity/EntityLivingBase"
+			})	
+	public boolean processItemStackClass2()
+	{
+		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
+		ClassNode entityLivingBase = getClassNodeFromMapping("net/minecraft/entity/EntityLivingBase");
+		if (!MeddleUtil.notNull(itemStack, entityLivingBase)) return false;
+		
+		FieldNode itemDamage = getFieldNodeFromMapping(itemStack, "net/minecraft/item/ItemStack itemDamage I");
+		MethodNode getMetadata = getMethodNodeFromMapping(itemStack, "net/minecraft/item/ItemStack getMetadata ()I");
+		if (itemDamage == null || getMetadata == null) return false;
+		
+		
+		// public int getItemDamage()
+		List<MethodNode> methods = getMatchingMethods(itemStack, null, "()I");
+		for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
+			MethodNode method = it.next();
+			if (!matchOpcodeSequence(method.instructions.getFirst(), Opcodes.ALOAD, Opcodes.GETFIELD, Opcodes.IRETURN) || method.name.equals(getMetadata.name)) { 
+				it.remove(); 
+				continue; 
+			}			
+		}
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/item/ItemStack getItemDamage ()I", itemStack.name + " " + methods.get(0).name + " ()I");
+		}
+		
+		
+		// public void setItemDamage(int meta)
+		methods = getMatchingMethods(itemStack, null, "(I)V");
+		for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
+			MethodNode method = it.next();
+			List<FieldInsnNode> nodes = getAllInsnNodesOfType(method.instructions.getFirst(), FieldInsnNode.class);
+			
+			boolean usesItemDamage = false;
+			for (FieldInsnNode fn : nodes) {
+				if (fn.owner.equals(itemStack.name) && fn.name.equals(itemDamage.name)) usesItemDamage = true;
+			}
+			
+			if (!usesItemDamage) it.remove();			
+		}
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/item/ItemStack setItemDamage (I)V", itemStack.name + " " + methods.get(0).name + " (I)V");
+		}
+		
+		
+		// public void damageItem(int amount, EntityLivingBase entityIn)
+		methods = getMatchingMethods(itemStack, null, "(IL" + entityLivingBase.name + ";)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/item/ItemStack damageItem (ILnet/minecraft/entity/EntityLivingBase;)V", 
+					itemStack.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		return true;		
+	}
+	
 	
 	
 
@@ -5459,7 +5592,9 @@ public class SharedMappings extends MappingsBase {
 	
 	
 	@Mapping(providesFields={
-			"net/minecraft/init/Items leather Lnet/minecraft/item/Item;"
+			"net/minecraft/init/Items leather Lnet/minecraft/item/Item;",
+			"net/minecraft/init/Items redstone Lnet/minecraft/item/Item;",
+			"net/minecraft/init/Items ender_pearl Lnet/minecraft/item/Item;"
 			},
 			depends={
 			"net/minecraft/init/Items",
@@ -5505,6 +5640,14 @@ public class SharedMappings extends MappingsBase {
 
 		fieldName = itemsFields.get("leather");
 		if (fieldName != null) addFieldMapping("net/minecraft/init/Items leather Lnet/minecraft/item/Item;", 
+				itemsClass.name + " " + fieldName + " L" + itemClass.name + ";");
+		
+		fieldName = itemsFields.get("redstone");
+		if (fieldName != null) addFieldMapping("net/minecraft/init/Items redstone Lnet/minecraft/item/Item;", 
+				itemsClass.name + " " + fieldName + " L" + itemClass.name + ";");
+		
+		fieldName = itemsFields.get("ender_pearl");
+		if (fieldName != null) addFieldMapping("net/minecraft/init/Items ender_pearl Lnet/minecraft/item/Item;", 
 				itemsClass.name + " " + fieldName + " L" + itemClass.name + ";");
 
 		// TODO - Other items
