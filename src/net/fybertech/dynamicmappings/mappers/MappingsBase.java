@@ -161,4 +161,10 @@ public class MappingsBase
 	{
 		return DynamicMappings.getFieldNodeFromMapping(cn, deobfMapping);
 	}
+	
+	
+	public static boolean classHasInterfaces(ClassNode classNode, String... ifaces)
+	{
+		return DynamicMappings.classHasInterfaces(classNode, ifaces);
+	}
 }

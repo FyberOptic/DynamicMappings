@@ -2238,7 +2238,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/inventory/Slot"
 			},
 			providesFields={
-			"net/minecraft/inventory/Container inventorySlots Ljava/util/List;"
+			"net/minecraft/inventory/Container inventorySlots Ljava/util/List;",
+			"net/minecraft/inventory/Container crafters Ljava/util/List;"
 			},
 			providesMethods={
 			"net/minecraft/inventory/Container addSlotToContainer (Lnet/minecraft/inventory/Slot;)Lnet/minecraft/inventory/Slot;",
@@ -2246,19 +2247,28 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/inventory/Container transferStackInSlot (Lnet/minecraft/entity/player/EntityPlayer;I)Lnet/minecraft/item/ItemStack;",
 			"net/minecraft/inventory/Container onContainerClosed (Lnet/minecraft/entity/player/EntityPlayer;)V",
 			"net/minecraft/inventory/Container getSlot (I)Lnet/minecraft/inventory/Slot;",
-			"net/minecraft/inventory/Container mergeItemStack (Lnet/minecraft/item/ItemStack;IIZ)Z"
+			"net/minecraft/inventory/Container mergeItemStack (Lnet/minecraft/item/ItemStack;IIZ)Z",
+			"net/minecraft/inventory/Container slotClick (IIILnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;",
+			"net/minecraft/inventory/Container putStackInSlot (ILnet/minecraft/item/ItemStack;)V",
+			"net/minecraft/inventory/Container onCraftMatrixChanged (Lnet/minecraft/inventory/IInventory;)V",
+			"net/minecraft/inventory/Container detectAndSendChanges ()V",
+			"net/minecraft/inventory/Container canAddItemToSlot (Lnet/minecraft/inventory/Slot;Lnet/minecraft/item/ItemStack;Z)Z"
 			},
 			depends={
 			"net/minecraft/inventory/Container",
 			"net/minecraft/entity/player/EntityPlayer",
-			"net/minecraft/item/ItemStack"
+			"net/minecraft/item/ItemStack",
+			"net/minecraft/inventory/IInventory",
+			"net/minecraft/inventory/ICrafting"
 			})
 	public boolean processContainerClass()
 	{
 		ClassNode container = getClassNodeFromMapping("net/minecraft/inventory/Container");
 		ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
 		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
-		if (container == null || entityPlayer == null || itemStack == null) return false;
+		ClassNode iInventory = getClassNodeFromMapping("net/minecraft/inventory/IInventory");
+		ClassNode iCrafting = getClassNodeFromMapping("net/minecraft/inventory/ICrafting");
+		if (!MeddleUtil.notNull(container, entityPlayer, itemStack, iInventory, iCrafting)) return false;
 		
 		List<MethodNode> methods = new ArrayList<>();
 		
@@ -2335,6 +2345,120 @@ public class SharedMappings extends MappingsBase {
 					container.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
+		
+		// public ItemStack slotClick(int slotId, int clickedButton, int mode, EntityPlayer playerIn)
+		methods = getMatchingMethods(container, null, "(IIIL" + entityPlayer.name + ";)L" + itemStack.name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/Container slotClick (IIILnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;",
+					container.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		// public void putStackInSlot(int p_75141_1_, ItemStack p_75141_2_)
+		methods = getMatchingMethods(container, null, "(IL" + itemStack.name + ";)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/Container putStackInSlot (ILnet/minecraft/item/ItemStack;)V",
+					container.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}		
+		
+		
+		// public void onCraftMatrixChanged(IInventory inventoryIn)
+		// public void detectAndSendChanges()
+		methods = getMatchingMethods(container, null, "(L" + iInventory.name + ";)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/Container onCraftMatrixChanged (Lnet/minecraft/inventory/IInventory;)V",
+					container.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			
+			List<MethodInsnNode> list = getAllInsnNodesOfType(methods.get(0).instructions.getFirst(), MethodInsnNode.class);
+			if (list.size() == 1) {
+				MethodInsnNode mn = list.get(0);
+				if (mn.owner.equals(container.name) && mn.desc.equals("()V")) {
+					addMethodMapping("net/minecraft/inventory/Container detectAndSendChanges ()V",
+							container.name + " " + mn.name + " ()V");
+				}
+			}
+		}
+		
+		
+		// public static boolean canAddItemToSlot(Slot slotIn, ItemStack stack, boolean stackSizeMatters)
+		methods = getMatchingMethods(container, null, "(L" + slotClass + ";L" + itemStack.name + ";Z)Z");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/Container canAddItemToSlot (Lnet/minecraft/inventory/Slot;Lnet/minecraft/item/ItemStack;Z)Z",
+					container.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// protected List crafters
+		methods = getMatchingMethods(container, null, "(L" + iCrafting.name + ";)V");
+		if (methods.size() > 0) {
+			Set<String> fieldNames = new HashSet<>();
+			for (MethodNode method : methods) {
+				List<FieldInsnNode> list = getAllInsnNodesOfType(method.instructions.getFirst(), FieldInsnNode.class);
+				for (FieldInsnNode fn : list) {
+					if (fn.owner.equals(container.name) && fn.desc.equals("Ljava/util/List;")) fieldNames.add(fn.name);
+				}
+			}
+			if (fieldNames.size() == 1) {
+				String fieldName = fieldNames.toArray(new String[1])[0];
+				addFieldMapping("net/minecraft/inventory/Container crafters Ljava/util/List;",
+						container.name + " " + fieldName + " Ljava/util/List;");
+			}
+		}
+		
+		return true;
+	}
+	
+	
+	
+	@Mapping(providesMethods={
+			"net/minecraft/inventory/ICrafting updateCraftingInventory (Lnet/minecraft/inventory/Container;Ljava/util/List;)V",
+			"net/minecraft/inventory/ICrafting sendSlotContents (Lnet/minecraft/inventory/Container;ILnet/minecraft/item/ItemStack;)V",
+			"net/minecraft/inventory/ICrafting sendProgressBarUpdate (Lnet/minecraft/inventory/Container;II)V",
+			"net/minecraft/inventory/ICrafting func_175173_a (Lnet/minecraft/inventory/Container;Lnet/minecraft/inventory/IInventory;)V"
+			},
+			depends={
+			"net/minecraft/inventory/ICrafting",
+			"net/minecraft/inventory/Container",
+			"net/minecraft/item/ItemStack",
+			"net/minecraft/inventory/IInventory"
+			})
+	public boolean processICraftingClass()
+	{
+		ClassNode iCrafting = getClassNodeFromMapping("net/minecraft/inventory/ICrafting");
+		ClassNode container = getClassNodeFromMapping("net/minecraft/inventory/Container");
+		ClassNode itemStack  = getClassNodeFromMapping("net/minecraft/item/ItemStack");
+		ClassNode iInventory = getClassNodeFromMapping("net/minecraft/inventory/IInventory");
+		if (!MeddleUtil.notNull(iCrafting, container, itemStack, iInventory)) return false;
+		
+		// void updateCraftingInventory(Container containerToSend, List itemsList);
+		List<MethodNode> methods = getMatchingMethods(iCrafting, null, "(L" + container.name + ";Ljava/util/List;)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/ICrafting updateCraftingInventory (Lnet/minecraft/inventory/Container;Ljava/util/List;)V",
+					iCrafting.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// void sendSlotContents(Container containerToSend, int slotInd, ItemStack stack);
+		methods = getMatchingMethods(iCrafting, null, "(L" + container.name + ";IL" + itemStack.name + ";)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/ICrafting sendSlotContents (Lnet/minecraft/inventory/Container;ILnet/minecraft/item/ItemStack;)V",
+					iCrafting.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// void sendProgressBarUpdate(Container containerIn, int varToUpdate, int newValue);
+		methods = getMatchingMethods(iCrafting, null, "(L" + container.name + ";II)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/ICrafting sendProgressBarUpdate (Lnet/minecraft/inventory/Container;II)V",
+					iCrafting.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// void func_175173_a(Container p_175173_1_, IInventory p_175173_2_);
+		methods = getMatchingMethods(iCrafting, null, "(L" + container.name + ";L" + iInventory.name + ";)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/inventory/ICrafting func_175173_a (Lnet/minecraft/inventory/Container;Lnet/minecraft/inventory/IInventory;)V",
+					iCrafting.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
 		
 		return true;
 	}
@@ -5503,12 +5627,16 @@ public class SharedMappings extends MappingsBase {
 	
 	
 	@Mapping(provides={
-			"net/minecraft/item/crafting/ShapedRecipes"
+			"net/minecraft/item/crafting/ShapedRecipes",
+			"net/minecraft/item/crafting/IRecipe",
+			"net/minecraft/item/crafting/ShapelessRecipes"
 			},
 			providesMethods={
 			"net/minecraft/item/crafting/CraftingManager addRecipe (Lnet/minecraft/item/ItemStack;[Ljava/lang/Object;)Lnet/minecraft/item/crafting/ShapedRecipes;",
 			"net/minecraft/item/crafting/CraftingManager addShapelessRecipe (Lnet/minecraft/item/ItemStack;[Ljava/lang/Object;)V",
-			"net/minecraft/item/crafting/CraftingManager getInstance ()Lnet/minecraft/item/crafting/CraftingManager;"
+			"net/minecraft/item/crafting/CraftingManager getInstance ()Lnet/minecraft/item/crafting/CraftingManager;",
+			"net/minecraft/item/crafting/CraftingManager getRecipeList ()Ljava/util/List;",
+			"net/minecraft/item/crafting/CraftingManager addRecipe (Lnet/minecraft/item/crafting/IRecipe;)V"
 			},
 			depends={
 			"net/minecraft/item/crafting/CraftingManager",
@@ -5533,15 +5661,7 @@ public class SharedMappings extends MappingsBase {
 		addClassMapping("net/minecraft/item/crafting/ShapedRecipes", shapedRecipes_className);
 		
 		addMethodMapping("net/minecraft/item/crafting/CraftingManager addRecipe (Lnet/minecraft/item/ItemStack;[Ljava/lang/Object;)Lnet/minecraft/item/crafting/ShapedRecipes;",
-				craftingManager.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-		
-		
-		// public void addShapelessRecipe(ItemStack param0, Object... param1)
-		methods = getMatchingMethods(craftingManager, null, "(L" + itemStack.name + ";[Ljava/lang/Object;)V");
-		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/item/crafting/CraftingManager addShapelessRecipe (Lnet/minecraft/item/ItemStack;[Ljava/lang/Object;)V",
-					craftingManager.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-		}
+				craftingManager.name + " " + methods.get(0).name + " " + methods.get(0).desc);	
 		
 		
 		// public static CraftingManager getInstance()
@@ -5552,10 +5672,229 @@ public class SharedMappings extends MappingsBase {
 		}
 		
 		
+		// public List getRecipeList()
+		methods = getMatchingMethods(craftingManager, null, "()Ljava/util/List;");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/item/crafting/CraftingManager getRecipeList ()Ljava/util/List;",
+					craftingManager.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public void addRecipe(IRecipe recipe)
+		// net/minecraft/item/crafting/IRecipe
+		String iRecipe_name = null;
+		methods.clear();
+		for (MethodNode method : craftingManager.methods) {
+			if (!method.desc.startsWith("(L") || !method.desc.endsWith(";)V")) continue;
+			Type[] args = Type.getMethodType(method.desc).getArgumentTypes();
+			if (args.length != 1) continue;
+			methods.add(method);
+		}
+		if (methods.size() == 1) {
+			MethodNode method = methods.get(0);
+			iRecipe_name = Type.getMethodType(method.desc).getArgumentTypes()[0].getClassName();
+			ClassNode iRecipe = getClassNode(iRecipe_name);
+			if ((iRecipe.access & Opcodes.ACC_INTERFACE) != 0) { // TODO: Better detection couldn't hurt
+				addClassMapping("net/minecraft/item/crafting/IRecipe", iRecipe_name);
+				
+				addMethodMapping("net/minecraft/item/crafting/CraftingManager addRecipe (Lnet/minecraft/item/crafting/IRecipe;)V",
+						craftingManager.name + " " + method.name + " " + method.desc);
+			}
+			else iRecipe_name = null;
+		}
+		
+		
+		// public void addShapelessRecipe(ItemStack param0, Object... param1)
+		// net/minecraft/item/crafting/ShapelessRecipes
+		methods = getMatchingMethods(craftingManager, null, "(L" + itemStack.name + ";[Ljava/lang/Object;)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/item/crafting/CraftingManager addShapelessRecipe (Lnet/minecraft/item/ItemStack;[Ljava/lang/Object;)V",
+					craftingManager.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			
+			if (iRecipe_name != null) {
+				List<TypeInsnNode> nodes = getAllInsnNodesOfType(methods.get(0).instructions.getFirst(), TypeInsnNode.class);
+				for (Iterator<TypeInsnNode> it = nodes.iterator(); it.hasNext();) {
+					TypeInsnNode tn = it.next();
+					if (tn.getOpcode() != Opcodes.NEW || tn.desc.startsWith("java/") || tn.desc.equals(itemStack.name)) {
+						it.remove(); 
+						continue; 
+					}
+					ClassNode cn = getClassNode(tn.desc);
+					if (!classHasInterfaces(cn, iRecipe_name)) { it.remove(); continue; }					
+				}				
+				if (nodes.size() == 1) {
+					addClassMapping("net/minecraft/item/crafting/ShapelessRecipes", nodes.get(0).desc);
+				}				
+			}
+		}
+		
+		
 		return true;
 	}
 	
+	
+	@Mapping(providesFields={
+			"net/minecraft/item/crafting/ShapedRecipes recipeWidth I",
+			"net/minecraft/item/crafting/ShapedRecipes recipeHeight I",
+			"net/minecraft/item/crafting/ShapedRecipes recipeItems [Lnet/minecraft/item/ItemStack;",
+			"net/minecraft/item/crafting/ShapedRecipes recipeOutput Lnet/minecraft/item/ItemStack;",
+			"net/minecraft/item/crafting/ShapedRecipes copyIngredientNBT Z"
+			},
+			depends={
+			"net/minecraft/item/crafting/ShapedRecipes",
+			"net/minecraft/item/ItemStack"
+			})
+	public boolean processShapedRecipesClass()
+	{
+		ClassNode shapedRecipes = getClassNodeFromMapping("net/minecraft/item/crafting/ShapedRecipes");
+		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
+		if (!MeddleUtil.notNull(shapedRecipes, itemStack)) return false;
+		
+		List<FieldNode> fields = getMatchingFields(shapedRecipes, null, "I");
+		if (fields.size() == 2) {
+			addFieldMapping("net/minecraft/item/crafting/ShapedRecipes recipeWidth I", shapedRecipes.name + " " + fields.get(0).name + " I");
+			addFieldMapping("net/minecraft/item/crafting/ShapedRecipes recipeHeight I", shapedRecipes.name + " " + fields.get(1).name + " I");
+		}
+		
+		
+		fields = getMatchingFields(shapedRecipes, null, "[L" + itemStack.name + ";");
+		if (fields.size() == 1) {
+			addFieldMapping("net/minecraft/item/crafting/ShapedRecipes recipeItems [Lnet/minecraft/item/ItemStack;", 
+					shapedRecipes.name + " " + fields.get(0).name + " " + fields.get(0).desc);
+		}
+		
+		
+		fields = getMatchingFields(shapedRecipes, null, "L" + itemStack.name + ";");
+		if (fields.size() == 1) {
+			addFieldMapping("net/minecraft/item/crafting/ShapedRecipes recipeOutput Lnet/minecraft/item/ItemStack;", 
+					shapedRecipes.name + " " + fields.get(0).name + " " + fields.get(0).desc);
+		}
+		
+		
+		fields = getMatchingFields(shapedRecipes, null, "Z");
+		if (fields.size() == 1) {
+			addFieldMapping("net/minecraft/item/crafting/ShapedRecipes copyIngredientNBT Z", 
+					shapedRecipes.name + " " + fields.get(0).name + " " + fields.get(0).desc);
+		}
+		
+		
+		
+		return true;
+	}
+	
+	@Mapping(providesFields={
+			"net/minecraft/item/crafting/ShapelessRecipes recipeOutput Lnet/minecraft/item/ItemStack;",
+			"net/minecraft/item/crafting/ShapelessRecipes recipeItems Ljava/util/List;"
+			},
+			depends={
+			"net/minecraft/item/crafting/ShapelessRecipes",
+			"net/minecraft/item/ItemStack"
+			})
+	public boolean processShapelessRecipesClass()
+	{
+		ClassNode shapelessRecipes = getClassNodeFromMapping("net/minecraft/item/crafting/ShapelessRecipes");
+		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
+		if (!MeddleUtil.notNull(shapelessRecipes, itemStack)) return false;
+		
+		// private final ItemStack recipeOutput;
+		List<FieldNode> fields = getMatchingFields(shapelessRecipes, null, "L" + itemStack.name + ";");
+		if (fields.size() == 1) {
+			addFieldMapping("net/minecraft/item/crafting/ShapelessRecipes recipeOutput Lnet/minecraft/item/ItemStack;",
+					shapelessRecipes.name + " " + fields.get(0).name + " " + fields.get(0).desc);
+		}
+		
+		// private final List recipeItems;
+		fields = getMatchingFields(shapelessRecipes, null, "Ljava/util/List;");
+		if (fields.size() == 1) {
+			addFieldMapping("net/minecraft/item/crafting/ShapelessRecipes recipeItems Ljava/util/List;",
+					shapelessRecipes.name + " " + fields.get(0).name + " " + fields.get(0).desc);
+		}
+		
+		
+		return true;
+	}
+	
+	
 
+	@Mapping(provides={
+			"net/minecraft/inventory/InventoryCrafting"			
+			},
+			providesMethods={
+			"net/minecraft/item/crafting/IRecipe getRecipeSize ()I",
+			"net/minecraft/item/crafting/IRecipe getRecipeOutput ()Lnet/minecraft/item/ItemStack;",
+			"net/minecraft/item/crafting/IRecipe matches (Lnet/minecraft/inventory/InventoryCrafting;Lnet/minecraft/world/World;)Z",
+			"net/minecraft/item/crafting/IRecipe getCraftingResult (Lnet/minecraft/inventory/InventoryCrafting;)Lnet/minecraft/item/ItemStack;",
+			"net/minecraft/item/crafting/IRecipe getRemainingItems (Lnet/minecraft/inventory/InventoryCrafting;)[Lnet/minecraft/item/ItemStack;"
+			},
+			depends={
+			"net/minecraft/item/crafting/IRecipe",
+			"net/minecraft/item/ItemStack",
+			"net/minecraft/world/World"
+			})
+	public boolean processIRecipeClass()
+	{
+		ClassNode iRecipe = getClassNodeFromMapping("net/minecraft/item/crafting/IRecipe");
+		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
+		ClassNode world = getClassNodeFromMapping("net/minecraft/world/World");
+		if (!MeddleUtil.notNull(iRecipe, itemStack, world)) return false;
+
+	    // int getRecipeSize();
+		List<MethodNode> methods = getMatchingMethods(iRecipe, null, "()I");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/item/crafting/IRecipe getRecipeSize ()I", 
+					iRecipe.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		// ItemStack getRecipeOutput();
+		methods = getMatchingMethods(iRecipe, null, "()L" + itemStack.name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/item/crafting/IRecipe getRecipeOutput ()Lnet/minecraft/item/ItemStack;", 
+					iRecipe.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		// boolean matches(InventoryCrafting inv, World worldIn);
+		// net/minecraft/inventory/InventoryCrafting
+		methods.clear();
+		for (MethodNode method : iRecipe.methods) {
+			if (method.desc.startsWith("(L") && method.desc.endsWith(";L" + world.name + ";)Z") 
+					&& Type.getMethodType(method.desc).getArgumentTypes().length == 2) methods.add(method);
+		}
+		String inventoryCrafting_name = null;
+		if (methods.size() == 1) {
+			MethodNode method = methods.get(0);
+			Type t = Type.getMethodType(method.desc);
+			inventoryCrafting_name = t.getArgumentTypes()[0].getClassName();
+			if (searchConstantPoolForStrings(inventoryCrafting_name, "container.crafting")) {
+				addClassMapping("net/minecraft/inventory/InventoryCrafting", inventoryCrafting_name);
+				addMethodMapping("net/minecraft/item/crafting/IRecipe matches (Lnet/minecraft/inventory/InventoryCrafting;Lnet/minecraft/world/World;)Z",
+						iRecipe.name + " " + method.name + " " + method.desc);
+			}
+			else inventoryCrafting_name = null;
+		}
+		
+		if (inventoryCrafting_name == null) return false;
+		
+		
+		// ItemStack getCraftingResult(InventoryCrafting inv);
+		methods = getMatchingMethods(iRecipe, null, "(L" + inventoryCrafting_name + ";)L" + itemStack.name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/item/crafting/IRecipe getCraftingResult (Lnet/minecraft/inventory/InventoryCrafting;)Lnet/minecraft/item/ItemStack;", 
+					iRecipe.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+	    // ItemStack[] getRemainingItems(InventoryCrafting inv);
+		methods = getMatchingMethods(iRecipe, null, "(L" + inventoryCrafting_name + ";)[L" + itemStack.name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/item/crafting/IRecipe getRemainingItems (Lnet/minecraft/inventory/InventoryCrafting;)[Lnet/minecraft/item/ItemStack;", 
+					iRecipe.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		return true;
+	}
+	
+	
 	
 	
 	@Mapping(provides={

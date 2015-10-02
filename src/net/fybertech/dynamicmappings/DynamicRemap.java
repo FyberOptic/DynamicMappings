@@ -299,7 +299,9 @@ public class DynamicRemap
 	
 	
 	static String[] fieldTransformers = new String[] {
-		"net/minecraft/inventory/Slot * I 1"
+		"net/minecraft/inventory/Slot * I 1",
+		"net/minecraft/item/crafting/ShapedRecipes * * 1",
+		"net/minecraft/item/crafting/ShapelessRecipes * * 1"
 	};
 	
 	static String[] methodTransformers = new String[] {
@@ -311,70 +313,7 @@ public class DynamicRemap
 	};
 	
 	
-	// TODO - Make better access transformer system
-	public static void transformClass(ClassNode cn)
-	{		
-		
-		int allAccess = Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED | Opcodes.ACC_PRIVATE;	
-		
-		
-		for (String transformer : fieldTransformers) {
-			String[] split = transformer.split(" ");
-			if (split.length != 4) continue;
-			
-			String className = split[0];
-			String fieldName = split[1];
-			String fieldDesc = split[2];
-			int access = 0;
-			try {
-				access = Integer.parseInt(split[3]);
-			}
-			catch (NumberFormatException e) {}
-			if (access < 1) continue;
-			
-			if (!cn.name.equals(className)) continue;
-			
-			boolean wildcardName = fieldName.equals("*");
-			boolean wildcardDesc = fieldDesc.equals("*");
-			
-			for (FieldNode field : cn.fields) {
-				if (!field.name.equals(fieldName) && !wildcardName) continue;
-				if (!field.desc.equals(fieldDesc) && !wildcardDesc) continue;
-				field.access = (field.access & ~allAccess) | access;
-				System.out.println("Modifying access of " + className + " " + field.name + " " + field.desc);
-			}			
-		}
-		
-		
-		for (String transformer : methodTransformers) {
-			String[] split = transformer.split(" ");
-			if (split.length != 4) continue;
-			
-			String className = split[0];
-			String methodName = split[1];
-			String methodDesc = split[2];
-			int access = 0;
-			try {
-				access = Integer.parseInt(split[3]);
-			}
-			catch (NumberFormatException e) {}
-			if (access < 1) continue;
-			
-			if (!cn.name.equals(className)) continue;
-			
-			boolean wildcardName = methodName.equals("*");
-			boolean wildcardDesc = methodDesc.equals("*");
-			
-			for (MethodNode method : cn.methods) {
-				if (!method.name.equals(methodName) && !wildcardName) continue;
-				if (!method.desc.equals(methodDesc) && !wildcardDesc) continue;
-				method.access = (method.access & ~allAccess) | access;
-				System.out.println("Modifying access of " + className + " " + method.name + " " + method.desc);
-			}			
-		}
-		
-		
-	}
+	
 	
 	
 	public static void main(String[] args)
@@ -382,6 +321,8 @@ public class DynamicRemap
 				
 		DynamicMappings.generateClassMappings();
 
+		AccessUtil accessUtil = new AccessUtil();
+		accessUtil.readAllTransformerConfigs();
 		
 		String blockClass = DynamicMappings.getClassMapping("net/minecraft/block/Block");
 		String itemClass = DynamicMappings.getClassMapping("net/minecraft/item/Item");
@@ -458,7 +399,7 @@ public class DynamicRemap
 			if (name.endsWith(".class")) {
 				name = name.substring(0, name.length() - 6);			
 				ClassNode mapped = remapper.remapClass(name);
-				transformClass(mapped);
+				accessUtil.transformDeobfuscatedClass(mapped);
 				ClassWriter writer = new ClassWriter(0);
 				mapped.accept(writer);
 				name = mapped.name + ".class";

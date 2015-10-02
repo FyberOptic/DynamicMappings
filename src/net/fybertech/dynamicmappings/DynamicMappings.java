@@ -1008,5 +1008,17 @@ public class DynamicMappings
 	}
 	
     
+	public static boolean classHasInterfaces(ClassNode classNode, String... ifaces) 
+	{
+		boolean implementsAll = true;
+		List<String> implemented = classNode.interfaces;
+		
+		for (String iface : ifaces) {
+			if (!implemented.contains(iface)) { implementsAll = false; break; }
+		}
+		
+		return implementsAll;		
+	}
+	
 }
 
