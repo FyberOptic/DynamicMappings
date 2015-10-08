@@ -264,7 +264,7 @@ public class DynamicMappings
 	public static void main(String[] args)
 	{
 		// If true, prints out the mappings
-		boolean showMappings = false;
+		boolean showMappings = true;
 		
 		generateClassMappings();		
 
@@ -491,7 +491,7 @@ public class DynamicMappings
 			String string = (new String(buffer)).trim();
 
 			for (int n2 = 0; n2 < matchStrings.length; n2++) {
-				if (string.equals(matchStrings[n2])) { matches++; break; }
+				if (string.equals(matchStrings[n2].trim())) { matches++; break; }
 			}
 		}
 

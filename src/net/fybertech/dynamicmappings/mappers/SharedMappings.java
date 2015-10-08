@@ -153,6 +153,26 @@ public class SharedMappings extends MappingsBase {
 
 	}
 
+	
+	
+	@Mapping(provides="net/minecraft/block/state/BlockState", depends="net/minecraft/block/Block")
+	public boolean getBlockStateClass()
+	{
+		ClassNode block = getClassNode(getClassMapping("net/minecraft/block/Block"));
+		if (block == null) return false;
+		
+		for (FieldNode fn : block.fields) {			
+			Type t = Type.getType(fn.desc);
+			if (t.getSort() != Type.OBJECT) continue;
+			if (searchConstantPoolForStrings(t.getClassName(), "block", "properties", "Block: ", " has invalidly named property: ")) {
+				addClassMapping("net/minecraft/block/state/BlockState", t.getClassName());
+				return true;
+			}
+		}
+		
+		return false;		
+	}
+	
 
 	@Mapping(provides="net/minecraft/block/state/IBlockState", depends="net/minecraft/block/Block")
 	public boolean getIBlockStateClass()
@@ -160,38 +180,27 @@ public class SharedMappings extends MappingsBase {
 		ClassNode block = getClassNode(getClassMapping("net/minecraft/block/Block"));
 		if (block == null) return false;
 
-		Map<String, Integer> counts = new HashMap<String, Integer>();
-
-		// Count the times a class is used as the third parameter of a method
-		for (MethodNode method : block.methods) {
-			Type t = Type.getMethodType(method.desc);
-			Type[] args = t.getArgumentTypes();
-			if (args.length < 3) continue;
-
-			String name = args[2].getClassName();
-			int count = (counts.containsKey(name) ? counts.get(name) : 0);
-			count++;
-			counts.put(name,  count);
+		List<MethodNode> methods = getMatchingMethods(block, null, null);
+		removeMethodsWithoutFlags(methods, Opcodes.ACC_STATIC);
+		
+		for (MethodNode method : methods) {
+			if (!method.desc.startsWith("(I)L")) continue;
+			Type t = Type.getMethodType(method.desc).getReturnType();		
+			
+			ClassNode cn = getClassNode(t.getClassName());
+			if (((cn.access & Opcodes.ACC_INTERFACE) > 0) && cn.methods.size() == 6) {
+				addClassMapping("net/minecraft/block/state/IBlockState", cn.name);
+				return true;
+			}
 		}
-
-		int max = 0;
-		String maxClass = null;
-
-		// Find the one with the most
-		for (String key : counts.keySet()) {
-			int count = counts.get(key);
-			if (count > max) { max = count; maxClass = key; }
-		}
-
-		// It should be over 15
-		if (max < 10) return false;
-
-		ClassNode classBlockState = getClassNode(maxClass);
-		addClassMapping("net/minecraft/block/state/IBlockState",  classBlockState);
-
-		return true;
+		
+		return false;
 	}
 
+	
+	
+	
+	
 	
 	@Mapping(provides={},
 			providesMethods={
@@ -213,7 +222,7 @@ public class SharedMappings extends MappingsBase {
 		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
 		ClassNode iProperty = getClassNodeFromMapping("net/minecraft/block/properties/IProperty");
 		if (block == null || iBlockState == null || iProperty == null) return false;
-		
+
 		// Collection getPropertyNames();  
 		List<MethodNode> methods = getMatchingMethods(iBlockState, null, "()Ljava/util/Collection;");
 		if (methods.size() == 1) {
@@ -4113,6 +4122,7 @@ public class SharedMappings extends MappingsBase {
 
 		// public boolean setBlockState(BlockPos pos, IBlockState newState, int flags)
 		List<MethodNode> methods = getMatchingMethods(world, null, assembleDescriptor("(", blockPos, iBlockState, "I)Z"));
+		//System.out.println(methods.size());
 		if (methods.size() == 1) {
 			addMethodMapping("net/minecraft/world/World setBlockState (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z",
 					world.name + " " + methods.get(0).name + " " + methods.get(0).desc);
@@ -6299,7 +6309,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/command/ICommandSender getEntityWorld ()Lnet/minecraft/world/World;",
 			"net/minecraft/command/ICommandSender getCommandSenderEntity ()Lnet/minecraft/entity/Entity;",
 			"net/minecraft/command/ICommandSender sendCommandFeedback ()Z",
-			"net/minecraft/command/ICommandSender setCommandStat (Lnet/minecraft/command/CommandResultStats$Type;)V"
+			"net/minecraft/command/ICommandSender setCommandStat (Lnet/minecraft/command/CommandResultStats$Type;I)V"
 			},
 			depends={
 			"net/minecraft/command/ICommandSender",
@@ -6399,7 +6409,7 @@ public class SharedMappings extends MappingsBase {
 				addClassMapping("net/minecraft/command/CommandResultStats", baseName);
 			}			
 			addClassMapping("net/minecraft/command/CommandResultStats$Type", commandResultStatsType_name);
-			addMethodMapping("net/minecraft/command/ICommandSender setCommandStat (Lnet/minecraft/command/CommandResultStats$Type;)V",
+			addMethodMapping("net/minecraft/command/ICommandSender setCommandStat (Lnet/minecraft/command/CommandResultStats$Type;I)V",
 					iCommandSender.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
@@ -6495,9 +6505,10 @@ public class SharedMappings extends MappingsBase {
 				
 				// net/minecraft/network/NetHandlerPlayServer.sendPacket (Lnet/minecraft/network/Packet;)V
 				if (insn.getOpcode() == Opcodes.INVOKEVIRTUAL) {
+					
 					MethodInsnNode mn = (MethodInsnNode)insn;
-					if (mn.desc.equals("(L" + packet.name + ";)V")) {
-						if (searchConstantPoolForStrings(mn.owner, "keepAlive", "Illegal position", "Sending packet")) {
+					if (mn.desc.equals("(L" + packet.name + ";)V")) {						
+						if (searchConstantPoolForStrings(mn.owner, "keepAlive", "Sending packet")) {
 							addClassMapping("net/minecraft/network/NetHandlerPlayServer", mn.owner);
 							addMethodMapping("net/minecraft/network/NetHandlerPlayServer sendPacket (Lnet/minecraft/network/Packet;)V",
 									mn.owner + " " + mn.name + " " + mn.desc);

@@ -155,13 +155,16 @@ public class DynamicRemap
 				e.printStackTrace();
 			}
 					
-			Set<MethodHolder> methods = map.methods.get(name + " " + desc);			
+			Set<MethodHolder> methods = map.methods.get(name + " " + desc);	
 			if (methods == null) return super.mapMethodName(owner, name, desc);		
 			
 			
 			for (MethodHolder holder : methods) {			
 				String key = holder.cn.name + " " + holder.mn.name + " " + holder.mn.desc;
+				if (showMapMethod) System.out.println("Key: " + key);
+				
 				if (methodMappings.containsKey(key)) {
+					if (showMapMethod) System.out.println("    HAS KEY");
 					String mapping = methodMappings.get(key);	
 					//System.out.println(mapping);
 					String[] split = mapping.split(" ");
@@ -221,7 +224,7 @@ public class DynamicRemap
 		
 		@Override
 		public void visitInnerClass(String name, String outerName, String innerName, int access) 
-		{
+		{			
 			// TODO - Might need to handle for nested inner classes
 			if (classMappings.containsKey(name)) {
 				String outer = classMappings.get(outerName);
@@ -268,6 +271,13 @@ public class DynamicRemap
 					else lvn.name = "var" + varCount++;
 				}
 		}		
+		
+		if (showDebug) {
+			System.out.println(cn.name);
+			for (MethodNode method : cn.methods) {
+				System.out.println("  " + method.name + " " + method.desc);
+			}
+		}
 		
 		return cn;
 	}
