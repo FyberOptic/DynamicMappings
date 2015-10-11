@@ -8,9 +8,25 @@ sourceSets {
 	}
 }
 
+repositories {
+    mavenCentral()
+    
+    maven {         
+        url 'https://libraries.minecraft.net/'    
+    }
+    
+    maven {
+        url 'http://www.fybertech.net/maven/'
+    }
+}
+
 dependencies {
-	compile fileTree(dir:'../libs/', excludes:['minecraft/**'])
-	compile rootProject.project(':Meddle')
+	//compile fileTree(dir:'../libs/', excludes:['minecraft/**'])
+	//compile rootProject.project(':Meddle')
+	compile 'net.minecraft:launchwrapper:1.11'
+	compile 'org.ow2.asm:asm-debug-all:5.0.3'
+	compile 'net.sf.jopt-simple:jopt-simple:4.6'
+	compile 'net.fybertech:meddle:1.2.2'	
 }
 
 gradle.projectsEvaluated {

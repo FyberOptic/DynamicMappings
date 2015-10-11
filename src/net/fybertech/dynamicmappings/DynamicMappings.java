@@ -264,7 +264,7 @@ public class DynamicMappings
 	public static void main(String[] args)
 	{
 		// If true, prints out the mappings
-		boolean showMappings = true;
+		boolean showMappings = false;
 		
 		generateClassMappings();		
 
@@ -1018,6 +1018,31 @@ public class DynamicMappings
 		}
 		
 		return implementsAll;		
+	}
+	
+	
+	public static boolean doesInheritFrom(String className, String inheritFrom)
+	{
+		if (className.equals(inheritFrom)) return true;
+		
+		ClassNode cn = getClassNode(className);
+		if (cn == null) return false;	
+		
+		List<String> classes = new ArrayList<>();		
+		classes.add(cn.superName);
+		classes.addAll(cn.interfaces);		
+		
+		// First pass
+		for (String c : classes) {
+			if (c.equals(inheritFrom)) return true;
+		}
+		
+		// Deeper pass
+		for (String c : classes) {
+			if (doesInheritFrom(c, inheritFrom)) return true;
+		}
+		
+		return false;
 	}
 	
 }

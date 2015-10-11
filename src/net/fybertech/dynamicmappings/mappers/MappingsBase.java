@@ -6,6 +6,7 @@ import net.fybertech.dynamicmappings.DynamicMappings;
 
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 
@@ -49,6 +50,11 @@ public class MappingsBase
 	public void addFieldMapping(String deobfFieldDesc, String obfFieldDesc)
 	{
 		DynamicMappings.addFieldMapping(deobfFieldDesc, obfFieldDesc);
+	}
+	
+	public void addFieldMapping(String deobfFieldDesc, FieldInsnNode obfField)
+	{
+		DynamicMappings.addFieldMapping(deobfFieldDesc, obfField.owner + " " + obfField.name + " " + obfField.desc);
 	}
 	
 	public void addMethodMapping(String deobfMethodDesc, String obfMethodDesc)
@@ -161,10 +167,14 @@ public class MappingsBase
 	{
 		return DynamicMappings.getFieldNodeFromMapping(cn, deobfMapping);
 	}
-	
-	
-	public static boolean classHasInterfaces(ClassNode classNode, String... ifaces)
+		
+	public boolean classHasInterfaces(ClassNode classNode, String... ifaces)
 	{
 		return DynamicMappings.classHasInterfaces(classNode, ifaces);
+	}
+	
+	public boolean doesInheritFrom(String className, String inheritFrom)
+	{
+		return DynamicMappings.doesInheritFrom(className, inheritFrom);
 	}
 }
