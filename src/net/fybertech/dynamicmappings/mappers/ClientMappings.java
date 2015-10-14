@@ -617,7 +617,11 @@ public class ClientMappings extends MappingsBase
 			"net/minecraft/client/gui/GuiScreen drawScreen (IIF)V",
 			"net/minecraft/client/gui/GuiScreen keyTyped (CI)V",
 			"net/minecraft/client/gui/GuiScreen mouseClicked (III)V",
-			"net/minecraft/client/gui/GuiScreen mouseReleased (III)V"
+			"net/minecraft/client/gui/GuiScreen mouseReleased (III)V",
+			"net/minecraft/client/gui/GuiScreen onResize (Lnet/minecraft/client/Minecraft;II)V",
+			"net/minecraft/client/gui/GuiScreen actionPerformed (Lnet/minecraft/client/gui/GuiButton;)V",
+			"net/minecraft/client/gui/GuiScreen drawDefaultBackground ()V",
+			"net/minecraft/client/gui/GuiScreen drawWorldBackground (I)V"
 			},
 			depends={
 			"net/minecraft/client/gui/GuiScreen",
@@ -749,6 +753,7 @@ public class ClientMappings extends MappingsBase
 					guiScreen.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
+		String guiButton = null;
 		
 		// protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException
 		// protected void mouseReleased(int mouseX, int mouseY, int state)
@@ -762,6 +767,7 @@ public class ClientMappings extends MappingsBase
 						TypeInsnNode tn = (TypeInsnNode)insn;
 						if (DynamicMappings.searchConstantPoolForStrings(tn.desc, "textures/gui/widgets.png", "gui.button.press")) {
 							addClassMapping("net/minecraft/client/gui/GuiButton", tn.desc);
+							guiButton = tn.desc;
 						}
 						continue;
 					}					
@@ -780,10 +786,180 @@ public class ClientMappings extends MappingsBase
 			}
 		}
 		
+		// public void onResize(Minecraft mcIn, int p_175273_2_, int p_175273_3_)
+		methods = getMatchingMethods(guiScreen, null, "(L" + minecraft.name + ";II)V");
+		if (methods.size() == 2) {
+			for (Iterator<MethodNode> it  = methods.iterator(); it.hasNext();) {				
+				if (it.next().name.equals(setWorldAndResolutionName)) it.remove();
+			}
+			if (methods.size() == 1) {
+				addMethodMapping("net/minecraft/client/gui/GuiScreen onResize (Lnet/minecraft/client/Minecraft;II)V",
+						guiScreen.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			}
+		}
+		
+		
+		// protected void actionPerformed(GuiButton button) throws IOException
+		methods = getMatchingMethods(guiScreen, null, "(L" + guiButton + ";)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/gui/GuiScreen actionPerformed (Lnet/minecraft/client/gui/GuiButton;)V",
+					guiScreen.name + " " + methods.get(0).name + " " + methods.get(0).desc);			
+		}
+		
+		
+		// public void drawDefaultBackground()
+		methods = getMatchingMethods(guiScreen, null, "()V");
+		for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
+			MethodNode method = it.next();
+			if (!matchOpcodeSequence(method.instructions.getFirst(), Opcodes.ALOAD, Opcodes.ICONST_0, Opcodes.INVOKEVIRTUAL, Opcodes.RETURN))
+				it.remove();
+		}
+		MethodNode drawWorldBackground = null;
+		if (methods.size() == 1) {
+			List<MethodInsnNode> nodes = getAllInsnNodesOfType(methods.get(0).instructions.getFirst(), MethodInsnNode.class);
+			MethodInsnNode mn = nodes.get(0);
+			// public void drawWorldBackground(int tint)
+			if (mn.owner.equals(guiScreen.name) && mn.desc.equals("(I)V")) {
+				MethodNode tempMethodNode = getMethodNode(guiScreen, mn.owner + " " + mn.name + " " + mn.desc);
+				if (tempMethodNode != null) {
+					boolean firstMatch = false;
+					boolean secondMatch = false;
+					for (AbstractInsnNode insn = tempMethodNode.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+						if (!firstMatch && isLdcWithInteger(insn, 0xC0101010)) firstMatch = true;
+						if (!secondMatch && isLdcWithInteger(insn, 0xD0101010)) secondMatch = true;
+					}
+					
+					if (firstMatch && secondMatch) {
+						addMethodMapping("net/minecraft/client/gui/GuiScreen drawDefaultBackground ()V", 
+								guiScreen.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+						addMethodMapping("net/minecraft/client/gui/GuiScreen drawWorldBackground (I)V", 
+								guiScreen.name + " " + tempMethodNode.name + " " + tempMethodNode.desc);
+						drawWorldBackground = tempMethodNode;
+					}
+				}				
+			}
+		}
+				
 		return true;
 	}
 	
 	
+	@Mapping(provides={
+			"net/minecraft/client/gui/GuiOptions",
+			"net/minecraft/client/gui/GuiLanguage",
+			"net/minecraft/client/gui/GuiSelectWorld",
+			"net/minecraft/client/gui/GuiMultiplayer",
+			"net/minecraft/client/gui/GuiYesNo"
+			},
+			dependsMethods="net/minecraft/client/gui/GuiScreen actionPerformed (Lnet/minecraft/client/gui/GuiButton;)V",
+			depends={
+			"net/minecraft/client/gui/GuiScreen",
+			"net/minecraft/client/gui/GuiMainMenu"
+			})
+	public boolean discoverGuiClasses()
+	{		
+		ClassNode guiScreen = getClassNodeFromMapping("net/minecraft/client/gui/GuiScreen");
+		ClassNode guiMainMenu = getClassNodeFromMapping("net/minecraft/client/gui/GuiMainMenu");
+		if (guiScreen == null || guiMainMenu == null) return false;
+		
+		MethodNode actionPerformed = getMethodNodeFromMapping(guiMainMenu, "net/minecraft/client/gui/GuiScreen actionPerformed (Lnet/minecraft/client/gui/GuiButton;)V");
+		if (actionPerformed == null) return false;
+		
+		ClassNode guiOptions = null;
+		ClassNode guiLanguage = null;
+		ClassNode guiSelectWorld = null;		
+		ClassNode guiMultiplayer = null;
+		ClassNode guiYesNo = null;
+		
+		List<TypeInsnNode> nodes = getAllInsnNodesOfType(actionPerformed.instructions.getFirst(), TypeInsnNode.class);
+		for (TypeInsnNode node : nodes) {
+			if (node.desc.startsWith("java")) continue;
+			ClassNode cn = getClassNode(node.desc);
+			if (cn == null) continue;
+			if (!cn.superName.equals(guiScreen.name)) continue;
+			
+			if (guiOptions == null && searchConstantPoolForStrings(node.desc, "Options", "options.title", "options.video")) {
+				addClassMapping("net/minecraft/client/gui/GuiOptions", node.desc);
+				guiOptions = cn;
+			}
+			if (guiLanguage == null && searchConstantPoolForStrings(node.desc, "options.language", "options.languageWarning")) {
+				addClassMapping("net/minecraft/client/gui/GuiLanguage", node.desc);
+				guiLanguage = cn;
+			}
+			if (guiSelectWorld == null && searchConstantPoolForStrings(node.desc, "Select world", "selectWorld.title")) {
+				addClassMapping("net/minecraft/client/gui/GuiSelectWorld", node.desc);
+				guiSelectWorld = cn;
+			}
+			if (guiMultiplayer == null && searchConstantPoolForStrings(node.desc, "Unable to start LAN server detection: ", "selectServer.edit")) {
+				addClassMapping("net/minecraft/client/gui/GuiMultiplayer", node.desc);
+				guiMultiplayer = cn;
+			}
+			if (guiYesNo == null && searchConstantPoolForStrings(node.desc, "gui.yes", "gui.no")) {
+				addClassMapping("net/minecraft/client/gui/GuiYesNo", node.desc);
+				guiYesNo = cn;
+			}
+		}		
+		
+		return true;
+	}
+	
+	
+
+	
+	@Mapping(providesFields={
+			"net/minecraft/client/gui/GuiButton id I",
+			"net/minecraft/client/gui/GuiButton xPosition I",
+			"net/minecraft/client/gui/GuiButton yPosition I",
+			"net/minecraft/client/gui/GuiButton width I",
+			"net/minecraft/client/gui/GuiButton height I",
+			"net/minecraft/client/gui/GuiButton displayString Ljava/lang/String;"
+			},
+			depends={
+			"net/minecraft/client/gui/GuiButton"
+			})
+	public boolean processGuiButtonClass()
+	{
+		ClassNode guiButton = getClassNodeFromMapping("net/minecraft/client/gui/GuiButton");
+		if (guiButton == null) return false;
+		
+		// public GuiButton(int buttonId, int x, int y, int widthIn, int heightIn, String buttonText)
+		List<MethodNode> methods = getMatchingMethods(guiButton, "<init>", "(IIIIILjava/lang/String;)V");
+		if (methods.size() == 1) {
+			
+			Map<Integer, String> fieldMap = new HashMap<>();
+			
+			for (AbstractInsnNode insn = getNextRealOpcode(methods.get(0).instructions.getFirst()); insn != null; insn = getNextRealOpcode(insn.getNext())) {
+				@SuppressWarnings("unchecked")
+				AbstractInsnNode[] nodes = getInsnNodeSequenceArray(insn, VarInsnNode.class, VarInsnNode.class, FieldInsnNode.class); 
+				if (nodes == null) continue;				
+				insn = nodes[2];
+				
+				FieldInsnNode fn = (FieldInsnNode)nodes[2];
+				if (fn.owner.equals(guiButton.name)) fieldMap.put(((VarInsnNode)nodes[1]).var, fn.name);				
+			}
+			
+			if (fieldMap.size() == 6) {
+				for (int n = 1; n <= 6; n++) {
+					switch (n) {
+						case 1 : addFieldMapping("net/minecraft/client/gui/GuiButton id I", guiButton.name + " " + fieldMap.get(n) + " I");
+								 break;
+						case 2 : addFieldMapping("net/minecraft/client/gui/GuiButton xPosition I", guiButton.name + " " + fieldMap.get(n) + " I");
+						 		break;
+						case 3 : addFieldMapping("net/minecraft/client/gui/GuiButton yPosition I", guiButton.name + " " + fieldMap.get(n) + " I");
+						 		break;
+						case 4 : addFieldMapping("net/minecraft/client/gui/GuiButton width I", guiButton.name + " " + fieldMap.get(n) + " I");
+						 		break;
+						case 5 : addFieldMapping("net/minecraft/client/gui/GuiButton height I", guiButton.name + " " + fieldMap.get(n) + " I");
+						 		break;
+						case 6 : addFieldMapping("net/minecraft/client/gui/GuiButton displayString Ljava/lang/String;", guiButton.name + " " + fieldMap.get(n) + " Ljava/lang/String;");
+						 		break;
+					}
+				}
+			}
+		}
+		
+		return true;
+	}
 	
 	
 	@Mapping(provides={			
@@ -2595,6 +2771,189 @@ public class ClientMappings extends MappingsBase
 	}
 	
 	
+	@Mapping(provides={
+			"net/minecraft/client/gui/GuiSlot",
+			"net/minecraft/client/gui/GuiListExtended",
+			"net/minecraft/client/gui/ServerSelectionList",
+			"net/minecraft/client/multiplayer/ServerList"
+			},
+			dependsMethods={
+			"net/minecraft/client/gui/GuiScreen initGui ()V"
+			},
+			depends={
+			"net/minecraft/client/gui/GuiMultiplayer",
+			"net/minecraft/client/Minecraft"
+			})
+	public boolean processGuiMultiplayerClass()
+	{
+		ClassNode guiMultiplayer = getClassNodeFromMapping("net/minecraft/client/gui/GuiMultiplayer");
+		ClassNode minecraft = getClassNodeFromMapping("net/minecraft/client/Minecraft");
+		if (!MeddleUtil.notNull(guiMultiplayer, minecraft)) return false;
+		
+		MethodNode initGui = getMethodNodeFromMapping(guiMultiplayer, "net/minecraft/client/gui/GuiScreen initGui ()V");
+		if (initGui == null) return false;
+		
+		String serverList = null;
+		
+		List<TypeInsnNode> nodes = getAllInsnNodesOfType(initGui.instructions.getFirst(), TypeInsnNode.class);
+		for (TypeInsnNode node : nodes) {
+			if (node.desc.startsWith("java/")) continue;			
+			if (serverList == null && searchConstantPoolForStrings(node.desc, "servers.dat", "servers", "Couldn\'t load server list")) {
+				addClassMapping("net/minecraft/client/multiplayer/ServerList", node.desc);
+				serverList = node.desc;
+				continue;
+			}		
+		}
+		
+		List<MethodInsnNode> miNodes = getAllInsnNodesOfType(initGui.instructions.getFirst(), MethodInsnNode.class);
+		for (Iterator<MethodInsnNode> it = miNodes.iterator(); it.hasNext(); ) {
+			MethodInsnNode mn = it.next();		
+			if (!mn.name.equals("<init>") || !mn.desc.equals("(L" + guiMultiplayer.name + ";L" + minecraft.name + ";IIIII)V"))
+				it.remove();
+		}
+		ClassNode serverSelectionList = null;
+		if (miNodes.size() == 1) {
+			serverSelectionList = getClassNode(miNodes.get(0).owner);
+			if (serverSelectionList.superName.equals("java/lang/Object")) return false;
+			
+			ClassNode guiListExtended = getClassNode(serverSelectionList.superName);
+			if (guiListExtended.superName.equals("java/lang/Object")) return false;
+			if ((guiListExtended.access & Opcodes.ACC_ABSTRACT) == 0) return false;
+			
+			ClassNode guiSlot = getClassNode(guiListExtended.superName);
+			if ((guiSlot.access & Opcodes.ACC_ABSTRACT) == 0) return false;
+			
+			if (guiSlot.superName.equals("java/lang/Object")) {
+				addClassMapping("net/minecraft/client/gui/ServerSelectionList", serverSelectionList.name);
+				addClassMapping("net/minecraft/client/gui/GuiListExtended", guiListExtended.name);
+				addClassMapping("net/minecraft/client/gui/GuiSlot", guiSlot.name);
+			}
+			else {
+				serverSelectionList = null;
+				guiListExtended = null;
+				guiSlot = null;
+			}			
+		}
+		
+		return true;
+	}
+	
+	
+	@Mapping(provides={
+			"net/minecraft/client/gui/GuiListExtended$IGuiListEntry"
+			},
+			providesMethods={
+			"net/minecraft/client/gui/GuiSlot elementClicked (IZII)V",
+			"net/minecraft/client/gui/GuiSlot isSelected (I)Z",
+			"net/minecraft/client/gui/GuiSlot drawBackground ()V",
+			"net/minecraft/client/gui/GuiSlot drawSlot (IIIIII)V",
+			"net/minecraft/client/gui/GuiSlot func_178040_a (III)V",
+			"net/minecraft/client/gui/GuiListExtended getListEntry (I)Lnet/minecraft/client/gui/GuiListExtended$IGuiListEntry;",
+			"net/minecraft/client/gui/GuiListExtended mouseClicked (III)Z",
+			"net/minecraft/client/gui/GuiListExtended mouseReleased (III)Z"
+			},
+			depends={
+			"net/minecraft/client/gui/GuiListExtended",
+			"net/minecraft/client/gui/GuiSlot"
+			})
+	public boolean processGuiListExtendedClass()
+	{
+		ClassNode guiListExtended = getClassNodeFromMapping("net/minecraft/client/gui/GuiListExtended");
+		ClassNode guiSlot = getClassNodeFromMapping("net/minecraft/client/gui/GuiSlot");
+		if (!MeddleUtil.notNull(guiListExtended, guiSlot)) return false;
+		
+		// protected void elementClicked(int slotIndex, boolean isDoubleClick, int mouseX, int mouseY)
+		List<MethodNode> methods = getMatchingMethods(guiListExtended, null, "(IZII)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/gui/GuiSlot elementClicked (IZII)V",
+					guiSlot.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		// protected boolean isSelected(int slotIndex)
+		methods = getMatchingMethods(guiListExtended, null, "(I)Z");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/gui/GuiSlot isSelected (I)Z",
+					guiSlot.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// protected void drawBackground()
+		methods = getMatchingMethods(guiListExtended, null, "()V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/gui/GuiSlot drawBackground ()V",
+					guiSlot.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// protected void drawSlot(int entryID, int p_180791_2_, int p_180791_3_, int p_180791_4_, int mouseXIn, int mouseYIn)
+		methods = getMatchingMethods(guiListExtended, null, "(IIIIII)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/gui/GuiSlot drawSlot (IIIIII)V",
+					guiSlot.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// protected void func_178040_a(int p_178040_1_, int p_178040_2_, int p_178040_3_)
+		methods = getMatchingMethods(guiListExtended, null, "(III)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/gui/GuiSlot func_178040_a (III)V",
+					guiSlot.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public abstract GuiListExtended.IGuiListEntry getListEntry(int p_148180_1_);
+		methods.clear();
+		for (MethodNode mn : guiListExtended.methods) {
+			if (mn.desc.startsWith("(I)L")) methods.add(mn);
+		}
+		ClassNode iGuiListEntry = null;
+		if (methods.size() == 1) {
+			Type t = Type.getMethodType(methods.get(0).desc);
+			Type returnType = t.getReturnType();
+			iGuiListEntry = getClassNode(returnType.getClassName());
+			if (iGuiListEntry != null && (iGuiListEntry.access & Opcodes.ACC_INTERFACE) != 0) {
+				addClassMapping("net/minecraft/client/gui/GuiListExtended$IGuiListEntry", iGuiListEntry.name);
+				addMethodMapping("net/minecraft/client/gui/GuiListExtended getListEntry (I)Lnet/minecraft/client/gui/GuiListExtended$IGuiListEntry;",
+						guiListExtended.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			}
+			else iGuiListEntry = null;
+		}
+		
+		
+		// public boolean mouseClicked(int mouseX, int mouseY, int mouseEvent)
+		// public boolean mouseReleased(int p_148181_1_, int p_148181_2_, int p_148181_3_)
+		methods = getMatchingMethods(guiListExtended, null, "(III)Z");
+		if (methods.size() == 2) {
+			List<String> mousePressed = new ArrayList<>();
+			List<String> mouseReleased = new ArrayList<>();
+			
+			List<MethodInsnNode> mnList1 = getAllInsnNodesOfType(methods.get(0).instructions.getFirst(), MethodInsnNode.class);
+			List<MethodInsnNode> mnList2 = getAllInsnNodesOfType(methods.get(1).instructions.getFirst(), MethodInsnNode.class);
+			for (MethodInsnNode mn : mnList1) {
+				if (mn.desc.equals("(IIIIII)Z")) { mousePressed.add(methods.get(0).name); continue; }
+				else if (mn.desc.equals("(IIIIII)V")) { mouseReleased.add(methods.get(0).name); continue; }
+			}
+			for (MethodInsnNode mn : mnList2) {
+				if (mn.desc.equals("(IIIIII)Z")) { mousePressed.add(methods.get(1).name); continue; }
+				else if (mn.desc.equals("(IIIIII)V")) { mouseReleased.add(methods.get(1).name); continue; }
+			}
+			
+			if (mousePressed.size() == 1 && mouseReleased.size() == 1) {
+				addMethodMapping("net/minecraft/client/gui/GuiListExtended mouseClicked (III)Z", guiListExtended.name + " " + mousePressed.get(0) + " (III)Z");
+				addMethodMapping("net/minecraft/client/gui/GuiListExtended mouseReleased (III)Z", guiListExtended.name + " " + mouseReleased.get(0) + " (III)Z");
+			}
+		}
+		
+		
+		
+		
+		return true;
+	}
+	
+	
+	
+	
+	
 	
 	
 	
@@ -2619,8 +2978,6 @@ public class ClientMappings extends MappingsBase
 		if (methods.size() == 1) return methods.get(0);
 		else return null;
 	}
-	
-	
 	
 		
 

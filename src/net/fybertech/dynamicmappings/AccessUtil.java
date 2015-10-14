@@ -22,7 +22,8 @@ public class AccessUtil
 	public List<String> accessTransformerFields = new ArrayList<>();
 	public List<String> accessTransformerMethods = new ArrayList<>();
 	public List<String> accessTransformerClasses = new ArrayList<>(); // TODO
-	
+
+	private boolean debug = false;
 	
 	public void readAllTransformerConfigs()
 	{
@@ -93,7 +94,7 @@ public class AccessUtil
 				if (!field.name.equals(fieldName) && !wildcardName) continue;
 				if (!field.desc.equals(fieldDesc) && !wildcardDesc) continue;
 				field.access = (field.access & ~allAccess) | access;
-				System.out.println("Modifying access of " + className + " " + field.name + " " + field.desc);
+				if (debug) System.out.println("Modifying access of " + className + " " + field.name + " " + field.desc);
 			}			
 		}
 		
@@ -121,7 +122,7 @@ public class AccessUtil
 				if (!method.name.equals(methodName) && !wildcardName) continue;
 				if (!method.desc.equals(methodDesc) && !wildcardDesc) continue;
 				method.access = (method.access & ~allAccess) | access;
-				System.out.println("Modifying access of " + className + " " + method.name + " " + method.desc);
+				if (debug) System.out.println("Modifying access of " + className + " " + method.name + " " + method.desc);
 			}			
 		}
 		

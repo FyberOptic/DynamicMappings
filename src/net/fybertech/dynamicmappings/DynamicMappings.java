@@ -87,7 +87,8 @@ public class DynamicMappings
 	 * Called to initialize all mappings.
 	 */
 	public static void generateClassMappings()
-	{		
+	{
+		generateClassLinkages();
 		DynamicMappings.registerMappingsClass(SharedMappings.class);
 		DynamicMappings.registerMappingsClass(ClientMappings.class);
 	}
@@ -258,23 +259,98 @@ public class DynamicMappings
 			}
 		}
 	}
+	
+	
+	public static Map<String, Set<String>> classDeps = new HashMap<>();
+	public static Map<String, Set<String>> classesExtendFrom = new HashMap<>();
+	public static Map<String, Set<String>> classesImplementFrom = new HashMap<>();
 
+	static String[] classSearchExceptions = new String[] { "java/", "javax/", "sun/", "com/google/", 
+			"org/apache/", "com/sun/", "io/netty/", "jdk/internal/", "org/xml/", 
+			"org/w3c/", "jdk/net/", "com/ibm/", "org/lwjgl/", "com/jcraft/",
+			"joptsimple/", "net/java/", "paulscode/", "com/mojang/"};
+	
+	public static void getConstantPoolClassesRecursive(String className)
+	{
+		if (startsWithAny(className, classSearchExceptions)) return;
+		
+		ClassReader reader = null;
+		try {
+			reader = new ClassReader(className);
+		} catch (IOException e) {}
+		if (reader != null) {
+			String superName = reader.getSuperName();
+			Set<String> extendSet = classesExtendFrom.get(superName);
+			if (extendSet == null) { extendSet = new HashSet<>(); classesExtendFrom.put(superName, extendSet); }
+			extendSet.add(className);			
+			
+			for (String iface : reader.getInterfaces()) {
+				Set<String> implementSet = classesImplementFrom.get(iface);
+				if (implementSet == null) { implementSet = new HashSet<>(); classesImplementFrom.put(iface, implementSet); }
+				implementSet.add(className);
+			}
+		}
+		
+		Set<String> classes = classDeps.get(className);
+		if (classes == null) {
+			classes = getConstantPoolClasses(className, true);
+			if (classes == null) return;
+			classDeps.put(className, classes);
+		}			
+		//System.out.println(className + " " + (classes != null));
+		for (String s : classes) {
+			if (!classDeps.containsKey(s)) getConstantPoolClassesRecursive(s);
+		}		
+	}
+	
+	
+	public static boolean startsWithAny(String string, String[] list) 
+	{
+		for (String s : list) {
+			if (string.startsWith(s)) return true;
+		}
+		return false;
+	}
+	
+	
+	public static Set<String> getChildClasses(String className) 
+	{
+		Set<String> outSet = new HashSet<>();
+		Set<String> tempSet = new HashSet<>();
+		if (classesExtendFrom.containsKey(className)) tempSet.addAll(classesExtendFrom.get(className));		
+		if (classesImplementFrom.containsKey(className)) tempSet.addAll(classesImplementFrom.get(className));
+		outSet.addAll(tempSet);
+		
+		for (String s : tempSet) {
+			outSet.addAll(getChildClasses(s));
+		}		
+		return outSet;
+	}
+	
+	public static void generateClassLinkages()
+	{
+		System.out.print("[DynamicMappings] Generating linkages...");
+		getConstantPoolClassesRecursive("net/minecraft/server/MinecraftServer");
+		getConstantPoolClassesRecursive("net/minecraft/client/main/Main");
+		System.out.println("done");
+	}
+	
 
 	/** Used for debugging purposes, and to print out a full list */
 	public static void main(String[] args)
 	{
 		// If true, prints out the mappings
-		boolean showMappings = false;
+		boolean showMappings = false;		
 		
-		generateClassMappings();		
+		generateClassMappings();	
 
-		System.out.println("Minecraft version: " + MeddleUtil.findMinecraftVersion());
-		System.out.println("Minecraft jar type: " + (MeddleUtil.isClientJar() ? "client" : "server"));
+		System.out.println("[DynamicMappings] Minecraft version: " + MeddleUtil.findMinecraftVersion());
+		System.out.println("[DynamicMappings] Minecraft jar type: " + (MeddleUtil.isClientJar() ? "client" : "server"));		
 
 		if (!showMappings) return;
-		
+
 		System.out.println("\nCLASSES:");	
-		
+
 		List<String> sorted = new ArrayList<String>();
 		sorted.addAll(classMappings.keySet());
 		Collections.sort(sorted);
@@ -487,8 +563,8 @@ public class DynamicMappings
 			if (pos == 0 || reader.b[pos - 1] != 8) continue;
 
 			Arrays.fill(buffer, (char)0);
-			reader.readUTF8(pos,  buffer);
-			String string = (new String(buffer)).trim();
+			String string = reader.readUTF8(pos,  buffer).trim();
+			//String string = (new String(buffer)).trim();
 
 			for (int n2 = 0; n2 < matchStrings.length; n2++) {
 				if (string.equals(matchStrings[n2].trim())) { matches++; break; }
@@ -528,8 +604,8 @@ public class DynamicMappings
 			if (pos == 0 || reader.b[pos - 1] != 7) continue;
 
 			Arrays.fill(buffer, (char)0);
-			reader.readUTF8(pos,  buffer);
-			String string = (new String(buffer)).trim();
+			String string = reader.readUTF8(pos,  buffer);
+			//String string = (new String(buffer)).trim();
 
 			for (int n2 = 0; n2 < matchStrings.length; n2++) {
 				if (string.equals(matchStrings[n2].replace(".", "/"))) { matches++; break; }
@@ -567,8 +643,8 @@ public class DynamicMappings
 			if (pos == 0 || reader.b[pos - 1] != 8) continue;
 
 			Arrays.fill(buffer, (char)0);
-			reader.readUTF8(pos,  buffer);
-			String string = (new String(buffer)).trim();
+			String string = reader.readUTF8(pos,  buffer);
+			//String string = (new String(buffer)).trim();
 
 			strings.add(string);
 		}
@@ -576,6 +652,49 @@ public class DynamicMappings
 		return strings;
 	}
 
+	
+	/**
+	 * Returns a set of the 'Class' types from the class's constant pool.
+	 * 
+	 * @param className - Name of class to search.
+	 * @return The list of constant pool strings.
+	 */
+	public static Set<String> getConstantPoolClasses(String className, boolean processArrays)
+	{
+		Set<String> strings = new HashSet<String>();
+
+		className = className.replace(".", "/");
+		InputStream stream = DynamicMappings.class.getClassLoader().getResourceAsStream(className + ".class");
+		if (stream == null) return null;
+
+		ClassReader reader = null;
+		try {
+			reader = new ClassReader(stream);
+		} catch (IOException e) { return null; }
+
+		int itemCount = reader.getItemCount();
+		char[] buffer = new char[reader.getMaxStringLength()];
+
+		for (int n = 1; n < itemCount; n++)	{
+			int pos = reader.getItem(n);
+			if (pos == 0 || reader.b[pos - 1] != 7) continue;
+
+			Arrays.fill(buffer, (char)0);
+			String string = reader.readUTF8(pos,  buffer);
+			//String string = (new String(buffer)).trim();
+			
+			if (string.startsWith("[") && processArrays) {
+				string = ModMappings.getArrayType(string);
+				if (string == null) continue;
+			}
+			if (string.length() < 1) continue;
+
+			strings.add(string);
+		}
+
+		return strings;
+	}
+	
 
 	/**
 	 * Confirm the parameter types of a method's description.
@@ -697,6 +816,24 @@ public class DynamicMappings
 			insn = getNextRealOpcode(insn);
 			if (insn == null) return null;
 			if (opcode != insn.getOpcode()) return null;
+			outNodes[pos++] = insn;
+			insn = insn.getNext();
+		}
+
+		return outNodes;
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public static AbstractInsnNode[] getInsnNodeSequenceArray(AbstractInsnNode insn, Class<? extends AbstractInsnNode>...nodeClasses)
+	{
+		AbstractInsnNode[] outNodes = new AbstractInsnNode[nodeClasses.length];
+		int pos = 0;
+		
+		for (Class<? extends AbstractInsnNode> nodeClass : nodeClasses) {
+			insn = getNextRealOpcode(insn);
+			if (insn == null) return null;
+			if (nodeClass != insn.getClass()) return null;
 			outNodes[pos++] = insn;
 			insn = insn.getNext();
 		}

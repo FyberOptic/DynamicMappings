@@ -148,6 +148,12 @@ public class MappingsBase
 		return DynamicMappings.getOpcodeSequenceArray(insn, opcodes);
 	}
 	
+	@SuppressWarnings("unchecked")
+	public AbstractInsnNode[] getInsnNodeSequenceArray(AbstractInsnNode insn, Class<? extends AbstractInsnNode>...nodeClasses)
+	{
+		return DynamicMappings.getInsnNodeSequenceArray(insn, nodeClasses);
+	}
+	
 	public AbstractInsnNode findNextOpcodeNum(AbstractInsnNode insn, int opcode)
 	{
 		return DynamicMappings.findNextOpcodeNum(insn, opcode);
