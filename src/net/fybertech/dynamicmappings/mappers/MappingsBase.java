@@ -1,9 +1,14 @@
 package net.fybertech.dynamicmappings.mappers;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import net.fybertech.dynamicmappings.DynamicMappings;
 
+import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -183,4 +188,73 @@ public class MappingsBase
 	{
 		return DynamicMappings.doesInheritFrom(className, inheritFrom);
 	}
+	
+	
+	public boolean searchConstantPoolForFields(String className, String...fields)
+	{		
+		className = className.replace(".", "/");
+		InputStream stream = DynamicMappings.class.getClassLoader().getResourceAsStream(className + ".class");
+		if (stream == null) return false;
+
+		ClassReader reader = null;
+		try {
+			reader = new ClassReader(stream);
+		} catch (IOException e) { return false; }
+
+		int itemCount = reader.getItemCount();
+		char[] buffer = new char[reader.getMaxStringLength()];
+
+		int matches = 0;
+
+		for (int n = 1; n < itemCount; n++)	{
+			int pos = reader.getItem(n);
+			if (pos == 0 || reader.b[pos - 1] != 9) continue;
+			String owner = reader.readClass(pos, buffer);
+			pos = reader.getItem(reader.readUnsignedShort(pos + 2));
+			String name = reader.readUTF8(pos, buffer);
+			String desc = reader.readUTF8(pos + 2, buffer);
+
+			String fieldRef = owner + " " + name + " " + desc;
+			
+			for (int n2 = 0; n2 < fields.length; n2++) {
+				if (fieldRef.equals(fields[n2].replace(".", "/"))) { matches++; break; }
+			}
+		}
+
+		return (matches == fields.length);		
+	}
+	
+	
+	public String getSoundField(String sound)
+	{
+		String full = getSoundFieldFull(sound);
+		if (full == null) return null;
+		
+		return full.split(" ")[1];
+		
+	}
+	
+	public String getSoundFieldFull(String sound)
+	{
+		sound = sound.replace(".", "_");
+		return DynamicMappings.getFieldMapping("net/minecraft/init/Sounds " + sound + " Lnet/minecraft/util/Sound;");
+	}
+	
+
+	public <T> List<T> getAllInsnNodesOfType(MethodNode method, Class<T> classType)
+	{
+		return DynamicMappings.getAllInsnNodesOfType(method.instructions.getFirst(), classType);
+	}	
+	
+	public <T> List<T> getAllInsnNodesOfType(ClassNode classNode, Class<T> classType)
+	{
+		List<T> output = new ArrayList<>();
+		if (classNode.methods == null) return output;
+		
+		for (MethodNode method : classNode.methods) {
+			output.addAll(getAllInsnNodesOfType(method, classType));
+		}
+		return output;
+	}
+	
 }

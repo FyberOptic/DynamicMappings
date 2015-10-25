@@ -769,6 +769,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/init/Blocks planks Lnet/minecraft/block/Block;",
 			"net/minecraft/init/Blocks sapling Lnet/minecraft/block/Block;",
 			"net/minecraft/init/Blocks bedrock Lnet/minecraft/block/Block;",
+			"net/minecraft/init/Blocks iron_block Lnet/minecraft/block/Block;",
 			
 			"net/minecraft/init/Blocks chest Lnet/minecraft/block/BlockChest;",			
 			"net/minecraft/init/Blocks obsidian Lnet/minecraft/block/Block;",
@@ -856,9 +857,7 @@ public class SharedMappings extends MappingsBase {
 			addClassMapping("net/minecraft/block/BlockGrass", className);
 		}	
 		
-		
-		
-		
+			
 		FieldInsnNode field;
 		
 		field = blocksFields.get("air");
@@ -889,14 +888,14 @@ public class SharedMappings extends MappingsBase {
 		if (field != null) addFieldMapping("net/minecraft/init/Blocks chest Lnet/minecraft/block/BlockChest;", field);
 			
 		field = blocksFields.get("glass_pane");
-		if (field != null) addFieldMapping("net/minecraft/init/Blocks glass_pane Lnet/minecraft/block/Block;", field);
-				
+		if (field != null) addFieldMapping("net/minecraft/init/Blocks glass_pane Lnet/minecraft/block/Block;", field);					
 		
-				
+		
+		field = blocksFields.get("iron_block");
+		if (field != null) addFieldMapping("net/minecraft/init/Blocks iron_block Lnet/minecraft/block/Block;", field);
+		
 		field = blocksFields.get("obsidian");
-		if (field != null) addFieldMapping("net/minecraft/init/Blocks obsidian Lnet/minecraft/block/Block;", field);
-				
-		
+		if (field != null) addFieldMapping("net/minecraft/init/Blocks obsidian Lnet/minecraft/block/Block;", field);		
 				
 		field = blocksFields.get("hopper");
 		if (field != null) addFieldMapping("net/minecraft/init/Blocks hopper Lnet/minecraft/block/BlockHopper;", field);
@@ -905,7 +904,62 @@ public class SharedMappings extends MappingsBase {
 		
 		return true;
 	}
+	
+	
+	
+	@Mapping(providesFields={
+			"net/minecraft/init/Sounds entity_creeper_primed Lnet/minecraft/util/Sound;",
+			"net/minecraft/init/Sounds entity_hostile_hurt Lnet/minecraft/util/Sound;",
+			"net/minecraft/init/Sounds entity_hostile_swim Lnet/minecraft/util/Sound;",
+			"net/minecraft/init/Sounds block_water_ambient Lnet/minecraft/util/Sound;",
+			"net/minecraft/init/Sounds block_lava_pop Lnet/minecraft/util/Sound;",
+			"net/minecraft/init/Sounds entity_generic_explode Lnet/minecraft/util/Sound;",
+			"net/minecraft/init/Sounds ui_button_click Lnet/minecraft/util/Sound;",
+			"net/minecraft/init/Sounds block_portal_trigger Lnet/minecraft/util/Sound;"
+			},
+			depends={
+			"net/minecraft/util/Sound",
+			"net/minecraft/init/Sounds"
+			})
+	public boolean processSoundsClass()
+	{
+		ClassNode sound = getClassNodeFromMapping("net/minecraft/util/Sound");
+		ClassNode sounds = getClassNodeFromMapping("net/minecraft/init/Sounds");
+		if (sound == null || sounds == null) return false;
+		
+		Map<String, FieldInsnNode> soundFields = new HashMap<>();
+		
+		// Generate list
+		for (MethodNode method : sounds.methods)
+		{
+			if (!method.name.equals("<clinit>")) continue;
 
+			String lastString = null;
+			for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext())
+			{
+				String s = getLdcString(insn);
+				if (s != null) lastString = s;
+				// Avoid any strings that definitely aren't block names
+				if (lastString == null || lastString.contains(" ")) continue;
+
+				if (insn.getOpcode() != Opcodes.PUTSTATIC) continue;
+				FieldInsnNode fieldNode = (FieldInsnNode)insn;
+				
+				// We only want sound objects
+				if (!fieldNode.desc.equals("L" + sound.name + ";")) continue;				
+				soundFields.put(lastString, fieldNode);
+				
+				String newName = lastString.replace(".", "_");
+				addFieldMapping("net/minecraft/init/Sounds " + newName + " Lnet/minecraft/util/Sound;", fieldNode);
+			}
+		}
+		
+		
+		
+		return true;
+	}
+	
+	
 	
 	@Mapping(providesMethods={}, depends={"net/minecraft/block/BlockHopper"})
 	public boolean processBlockHopperClass()
@@ -1739,16 +1793,19 @@ public class SharedMappings extends MappingsBase {
 			}
 		}
 		
+		// Can't detect "mob.sheep.shear" as of 15w43a
 		String sheepClass = entityListClasses.get("Sheep");
 		if (sheepClass != null) {
-			if (searchConstantPoolForStrings(sheepClass, "mob.sheep.shear")) {
+			if (searchConstantPoolForStrings(sheepClass, "Sheared")) {
 				addClassMapping("net/minecraft/entity/passive/EntitySheep", sheepClass);
 			}
 		}
+
 		
+		// Can't detect for "mob.endermen.portal" as of 15w43a		
 		String endermanClass = entityListClasses.get("Enderman");
 		if (endermanClass != null) {
-			if (searchConstantPoolForStrings(endermanClass, "carried", "mob.endermen.portal")) {
+			if (searchConstantPoolForStrings(endermanClass, "carried", "carriedData")) {
 				addClassMapping("net/minecraft/entity/monster/EntityEnderman", endermanClass);
 			}
 		}
@@ -1769,8 +1826,8 @@ public class SharedMappings extends MappingsBase {
 
 		return true;
 
-	}
-
+	}	
+	
 	
 	@Mapping(provides={
 			"net/minecraft/entity/monster/EntityMob",
@@ -1779,36 +1836,55 @@ public class SharedMappings extends MappingsBase {
 			},
 			providesMethods={
 			"net/minecraft/entity/Entity onUpdate ()V",
-			"net/minecraft/entity/Entity playSound (Ljava/lang/String;FF)V",
+			"net/minecraft/entity/Entity playSound (Lnet/minecraft/util/Sound;FF)V",
 			"net/minecraft/entity/monster/EntityCreeper explode ()V",
 			"net/minecraft/world/World getGameRules ()Lnet/minecraft/world/GameRules;",
 			"net/minecraft/world/World createExplosion (Lnet/minecraft/entity/Entity;DDDFZ)Lnet/minecraft/world/Explosion;"
 			},
+			dependsFields={
+			"net/minecraft/init/Sounds entity_creeper_primed Lnet/minecraft/util/Sound;",
+			"net/minecraft/init/Sounds entity_hostile_hurt Lnet/minecraft/util/Sound;",
+			"net/minecraft/init/Sounds entity_hostile_swim Lnet/minecraft/util/Sound;",
+			"net/minecraft/init/Sounds entity_generic_explode Lnet/minecraft/util/Sound;"
+			},
 			depends={
 			"net/minecraft/entity/monster/EntityCreeper",
 			"net/minecraft/entity/Entity",
-			"net/minecraft/world/World"
+			"net/minecraft/world/World",
+			"net/minecraft/init/Sounds",
+			"net/minecraft/util/Sound"
 			})
 	public boolean processEntityCreeperClass()
 	{
 		ClassNode creeper = getClassNodeFromMapping("net/minecraft/entity/monster/EntityCreeper");
 		ClassNode entity = getClassNodeFromMapping("net/minecraft/entity/Entity");
 		ClassNode world = getClassNodeFromMapping("net/minecraft/world/World");
-		if (!MeddleUtil.notNull(creeper, entity, world)) return false;
+		ClassNode sounds = getClassNodeFromMapping("net/minecraft/init/Sounds");
+		ClassNode sound = getClassNodeFromMapping("net/minecraft/util/Sound");
+		if (!MeddleUtil.notNull(creeper, entity, world, sound, sounds)) return false;		
 		
 		
-		if (searchConstantPoolForStrings(creeper.superName, "game.hostile.hurt", "game.hostile.swim"))
+		String hurtSound = getSoundFieldFull("entity.hostile.hurt");
+		String swimSound = getSoundFieldFull("entity.hostile.swim");
+		if (searchConstantPoolForFields(creeper.superName, hurtSound, swimSound))
 			addClassMapping("net/minecraft/entity/monster/EntityMob", creeper.superName);
 
+		
+		String fieldPrimed = getSoundField("entity.creeper.primed");		
 		
 		// public void onUpdate()
 		List<MethodNode> methods = getMatchingMethods(creeper, null, "()V");
 		for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {			
 			MethodNode method = it.next();
 			boolean hasIt = false;
-			for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
-				if (isLdcWithString(insn, "creeper.primed")) hasIt = true;
+			//for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				//if (isLdcWithString(insn, "creeper.primed")) hasIt = true;				
+			//}
+			List<FieldInsnNode> fields = getAllInsnNodesOfType(method.instructions.getFirst(), FieldInsnNode.class);
+			for (FieldInsnNode fn : fields) {
+				if (fn.owner.equals(sounds.name) && fn.name.equals(fieldPrimed)) hasIt = true;
 			}
+			
 			if (!hasIt) it.remove();
 		}
 		String explodeName = null;
@@ -1824,7 +1900,7 @@ public class SharedMappings extends MappingsBase {
 			List<MethodInsnNode> nodes = getAllInsnNodesOfType(methods.get(0).instructions.getFirst(), MethodInsnNode.class);
 			for (MethodInsnNode mn : nodes) {
 				//System.out.println(mn.owner + "(" + DynamicMappings.getReverseClassMapping(mn.owner) + ") " + mn.name + " " + mn.desc);
-				if (mn.owner.equals(creeper.name) && mn.desc.equals("(Ljava/lang/String;FF)V")) {
+				if (mn.owner.equals(creeper.name) && mn.desc.equals("(L" + sound.name + ";FF)V")) {
 					playSound = mn;
 					playSoundCount++;
 				}
@@ -1834,7 +1910,7 @@ public class SharedMappings extends MappingsBase {
 				}
 				
 				if (playSoundCount == 1) {
-					addMethodMapping("net/minecraft/entity/Entity playSound (Ljava/lang/String;FF)V", 
+					addMethodMapping("net/minecraft/entity/Entity playSound (Lnet/minecraft/util/Sound;FF)V", 
 							entity.name + " " + playSound.name + " " + playSound.desc);
 				}
 				if (explodeCount == 1) {
@@ -1846,6 +1922,7 @@ public class SharedMappings extends MappingsBase {
 
 		String gameRules = null;
 		
+		String soundExplosion = getSoundFieldFull("entity.generic.explode");		
 		
 		// net/minecraft/world/GameRules 
 		// World: public GameRules getGameRules()
@@ -1868,7 +1945,7 @@ public class SharedMappings extends MappingsBase {
 					}
 					else if (mn.desc.startsWith("(L" + entity.name + ";DDDFZ)L")) {
 						String returnClass = Type.getMethodType(mn.desc).getReturnType().getClassName();
-						if (searchConstantPoolForStrings(returnClass, "random.explode")) {
+						if (searchConstantPoolForFields(returnClass, soundExplosion)) {
 							addClassMapping("net/minecraft/world/Explosion", returnClass);
 							addMethodMapping("net/minecraft/world/World createExplosion (Lnet/minecraft/entity/Entity;DDDFZ)Lnet/minecraft/world/Explosion;",
 									world.name + " " + mn.name + " " + mn.desc);
@@ -2033,7 +2110,10 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/BlockFenceGate",
 			"net/minecraft/block/BlockPane",
 			"net/minecraft/block/BlockDynamicLiquid",
-			"net/minecraft/block/BlockStaticLiquid"
+			"net/minecraft/block/BlockStaticLiquid",
+			"net/minecraft/block/BlockOldLog",
+			"net/minecraft/block/BlockWorkbench",
+			"net/minecraft/block/BlockWorkbench$InterfaceCraftingTable"			
 			},
 			dependsMethods={
 			"net/minecraft/block/Block registerBlocks ()V"
@@ -2104,12 +2184,297 @@ public class SharedMappings extends MappingsBase {
 		if (className != null && searchConstantPoolForStrings(className, "doFireTick")) {
 			addClassMapping("net/minecraft/block/BlockStaticLiquid", className);
 		}
+		
+		className = blockClasses.get("log");
+		if (className != null && searchConstantPoolForStrings(className, "variant")) {
+			addClassMapping("net/minecraft/block/BlockOldLog", className);
+		}
+		
+		className = blockClasses.get("crafting_table");
+		if (className != null) {
+			ClassNode workbench = getClassNode(className);
+			if (workbench != null) {
+				List<TypeInsnNode> typeNodes = getAllInsnNodesOfType(workbench, TypeInsnNode.class);
+				for (TypeInsnNode tn : typeNodes) {
+					if (tn.desc.startsWith(className + "$") && searchConstantPoolForStrings(tn.desc, "minecraft:crafting_table")) {
+						addClassMapping("net/minecraft/block/BlockWorkbench", className);
+						addClassMapping("net/minecraft/block/BlockWorkbench$InterfaceCraftingTable", tn.desc);						
+						break;
+					}
+				}			
+			}
+		}
 			
 		
 		return true;
 	}
 	
 	
+	
+	@Mapping(provides={
+			"net/minecraft/stats/StatList",
+			"net/minecraft/util/ChatComponentTranslation",
+			"net/minecraft/inventory/ContainerWorkbench"
+			},
+			depends={
+			"net/minecraft/block/BlockWorkbench",
+			"net/minecraft/block/BlockWorkbench$InterfaceCraftingTable",
+			"net/minecraft/inventory/Container"
+			})
+	public boolean processBlockWorkbenchClass()
+	{
+		ClassNode workbench = getClassNodeFromMapping("net/minecraft/block/BlockWorkbench");
+		ClassNode workbenchIface = getClassNodeFromMapping("net/minecraft/block/BlockWorkbench$InterfaceCraftingTable");
+		ClassNode container = getClassNodeFromMapping("net/minecraft/inventory/Container");
+		if (!MeddleUtil.notNull(workbench, workbenchIface, container)) return false;
+		
+		List<FieldInsnNode> fieldNodes = getAllInsnNodesOfType(workbench, FieldInsnNode.class);
+		for (FieldInsnNode fn : fieldNodes) {
+			if (fn.getOpcode() != Opcodes.GETSTATIC) continue;
+			if (searchConstantPoolForStrings(fn.owner, "stat.leaveGame", "stat.playerKills")) {
+				addClassMapping("net/minecraft/stats/StatList", fn.owner);						
+			}
+		}
+		
+		boolean foundTranslate = false;
+		
+		List<TypeInsnNode> typeNodes = getAllInsnNodesOfType(workbenchIface, TypeInsnNode.class);
+		List<TypeInsnNode> containers = new ArrayList<>();
+		for (TypeInsnNode tn : typeNodes) {			
+			if (!foundTranslate && searchConstantPoolForStrings(tn.desc, "TranslatableComponent{key=\'")) {
+				foundTranslate = true;
+				addClassMapping("net/minecraft/util/ChatComponentTranslation", tn.desc);
+			}
+			else {
+				ClassNode cn = getClassNode(tn.desc);
+				if (cn != null && cn.superName != null && cn.superName.equals(container.name)) containers.add(tn);
+			}
+		}
+		if (containers.size() == 1) {
+			addClassMapping("net/minecraft/inventory/ContainerWorkbench", containers.get(0).desc);
+		}
+		
+		return true;
+	}
+	
+	
+		
+	@Mapping(provides={
+			"net/minecraft/block/BlockLog",
+			"net/minecraft/block/BlockRotatedPillar"
+			},
+			depends={
+			"net/minecraft/block/BlockOldLog",
+			"net/minecraft/block/Block"			
+			})
+	public boolean processBlockOldLog()
+	{
+		ClassNode oldLog = getClassNodeFromMapping("net/minecraft/block/BlockOldLog");
+		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
+		if (oldLog == null || block == null) return false;
+		
+		if (searchConstantPoolForStrings(oldLog.superName, "axis")) {
+			ClassNode blockLog = getClassNode(oldLog.superName);
+			if (blockLog != null && searchConstantPoolForStrings(blockLog.superName, "axis")) {
+				ClassNode rotatedPillar = getClassNode(blockLog.superName);
+				if (rotatedPillar != null && rotatedPillar.superName.equals(block.name)) {
+					addClassMapping("net/minecraft/block/BlockLog", blockLog.name);
+					addClassMapping("net/minecraft/block/BlockRotatedPillar", rotatedPillar.name);
+					return true;
+				}				
+			}
+		}
+		
+		return false;
+	}
+	
+	
+	
+	private boolean verifyBlockSoundTypeClass(String className)
+	{
+		ClassNode soundType = getClassNode(className);
+		ClassNode sound = getClassNodeFromMapping("net/minecraft/util/Sound");
+		if (soundType == null || sound == null) return false;
+		
+		List<MethodNode> methods = getMatchingMethods(soundType, "<init>", assembleDescriptor("(FF", sound, sound, sound, sound, sound, ")V"));
+		if (methods.size() == 1) return true;
+		
+		return false;
+	}
+	
+	
+	
+	@Mapping(provides={
+			"net/minecraft/block/BlockSoundType"
+			},
+			providesFields={
+			"net/minecraft/block/material/Material wood Lnet/minecraft/block/material/Material;",
+			"net/minecraft/block/Block soundTypeWood Lnet/minecraft/block/Block$SoundType;",
+			"net/minecraft/block/material/Material leaves Lnet/minecraft/block/material/Material;"
+			},
+			providesMethods={
+			"net/minecraft/block/Block setHardness (F)Lnet/minecraft/block/Block;",
+			"net/minecraft/block/Block setStepSound (Lnet/minecraft/block/Block$SoundType;)Lnet/minecraft/block/Block;",
+			"net/minecraft/block/Block breakBlock (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)V",
+			"net/minecraft/world/World isAreaLoaded (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/BlockPos;)Z",
+			"net/minecraft/util/BlockPos add (III)Lnet/minecraft/util/BlockPos;",
+			"net/minecraft/util/BlockPos getAllInBox (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/BlockPos;)Ljava/lang/Iterable;"
+			},
+			depends={
+			"net/minecraft/block/BlockLog",
+			"net/minecraft/block/Block",
+			"net/minecraft/block/material/Material",
+			"net/minecraft/creativetab/CreativeTabs",
+			"net/minecraft/world/World",
+			"net/minecraft/util/BlockPos",
+			"net/minecraft/block/state/IBlockState",
+			"net/minecraft/util/Sound"
+			})
+	public boolean processBlockLog()
+	{
+		ClassNode blockLog = getClassNodeFromMapping("net/minecraft/block/BlockLog");
+		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
+		ClassNode material = getClassNodeFromMapping("net/minecraft/block/material/Material");
+		ClassNode creativeTabs = getClassNodeFromMapping("net/minecraft/creativetab/CreativeTabs");
+		ClassNode world = getClassNodeFromMapping("net/minecraft/world/World");
+		ClassNode blockPos = getClassNodeFromMapping("net/minecraft/util/BlockPos");
+		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");		
+		if (!MeddleUtil.notNull(blockLog, block, material, creativeTabs, world, blockPos, iBlockState)) return false;
+		
+		List<MethodNode> methods = getMatchingMethods(blockLog, "<init>", "()V");
+		if (methods.size() == 1) {
+			List<FieldInsnNode> fieldNodes = getAllInsnNodesOfType(methods.get(0).instructions.getFirst(), FieldInsnNode.class);
+			List<MethodInsnNode> methodNodes = getAllInsnNodesOfType(methods.get(0).instructions.getFirst(), MethodInsnNode.class);
+			
+			String wood_name = null;
+			int materialCount = 0;
+			
+			String soundType_name = null;
+			String sound_name = null;
+			int soundCount = 0;
+			
+			for (FieldInsnNode fn : fieldNodes) {
+				if (!fn.desc.startsWith("L")) continue;
+				String className = Type.getType(fn.desc).getClassName();
+				
+				if (className.equals(creativeTabs.name)) continue;
+				else if (className.equals(material.name)) {
+					wood_name = fn.name;
+					materialCount++;
+				}				
+				else if (verifyBlockSoundTypeClass(className)) {
+					if (soundType_name == null) {
+						soundType_name = className;
+						addClassMapping("net/minecraft/block/BlockSoundType", className);
+					}					
+					sound_name = fn.name;
+					soundCount++;
+				}
+			}
+			
+			if (materialCount == 1) {
+				addFieldMapping("net/minecraft/block/material/Material wood Lnet/minecraft/block/material/Material;", 
+						material.name + " " + wood_name + " L" + material.name + ";");
+			}
+			if (soundCount == 1) {
+				addFieldMapping("net/minecraft/block/Block soundTypeWood Lnet/minecraft/block/Block$SoundType;",
+						block.name + " " + sound_name + " L" + soundType_name + ";");
+			}
+			
+			
+			String setHardness_name = null;
+			int setHardness_count = 0;
+			
+			String setStepSound_name = null;
+			int setStepSound_count = 0;
+			
+			for (MethodInsnNode mn : methodNodes) {
+				if (!mn.owner.equals(blockLog.name)) continue;				
+				if (mn.desc.equals("(F)L" + block.name + ";")) {
+					setHardness_name = mn.name;
+					setHardness_count++;					
+				}
+				else if (soundType_name != null && mn.desc.equals("(L" + soundType_name + ";)L" + block.name + ";")) {
+					setStepSound_name = mn.name;
+					setStepSound_count++;
+				}
+			}
+			
+			if (setHardness_count == 1) {
+				addMethodMapping("net/minecraft/block/Block setHardness (F)Lnet/minecraft/block/Block;",
+						block.name + " " + setHardness_name + " (F)L" + block.name + ";");
+			}
+			if (setStepSound_count == 1) {
+				addMethodMapping("net/minecraft/block/Block setStepSound (Lnet/minecraft/block/Block$SoundType;)Lnet/minecraft/block/Block;",
+						block.name + " " + setStepSound_name + " (L" + soundType_name + ";)L" + block.name + ";");
+			}
+			
+		}
+		
+		
+		// public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
+		methods = getMatchingMethods(blockLog, null, assembleDescriptor("(", world, blockPos, iBlockState, ")V"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block breakBlock (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)V",
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);		
+			
+			// World: public boolean isAreaLoaded(BlockPos param0, BlockPos param1)
+			List<MethodInsnNode> methodNodes = getAllInsnNodesOfType(methods.get(0).instructions.getFirst(), MethodInsnNode.class);
+			for (Iterator<MethodInsnNode> it = methodNodes.iterator(); it.hasNext();) {
+				MethodInsnNode mn = it.next();
+				if (!(mn.owner.equals(world.name) && mn.desc.equals("(L" + blockPos.name + ";L" + blockPos.name + ";)Z"))) it.remove();
+			}
+			if (methodNodes.size() == 1) {
+				addMethodMapping("net/minecraft/world/World isAreaLoaded (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/BlockPos;)Z",
+						world.name + " " + methodNodes.get(0).name + " " + methodNodes.get(0).desc);
+			}
+			
+			// Blockpos: public BlockPos add(int param0, int param1, int param2) 
+			methodNodes = getAllInsnNodesOfType(methods.get(0).instructions.getFirst(), MethodInsnNode.class);
+			for (Iterator<MethodInsnNode> it = methodNodes.iterator(); it.hasNext();) {
+				MethodInsnNode mn = it.next();
+				if (!(mn.owner.equals(blockPos.name) && mn.desc.equals("(III)L" + blockPos.name + ";"))) it.remove();
+			}
+			if (methodNodes.size() > 0) {
+				String add_name = methodNodes.get(0).name;
+				int add_matches = 0;				
+				for (MethodInsnNode mn : methodNodes) {
+					if (mn.name.equals(add_name)) add_matches++;
+				}
+			
+				if (methodNodes.size() == add_matches) {					
+					addMethodMapping("net/minecraft/util/BlockPos add (III)Lnet/minecraft/util/BlockPos;",
+							blockPos.name + " " + methodNodes.get(0).name + " " + methodNodes.get(0).desc);
+				}
+			}
+			
+			
+			// BlockPos: public static Iterable getAllInBox(BlockPos from, BlockPos to)
+			methodNodes = getAllInsnNodesOfType(methods.get(0).instructions.getFirst(), MethodInsnNode.class);
+			for (Iterator<MethodInsnNode> it = methodNodes.iterator(); it.hasNext();) {
+				MethodInsnNode mn = it.next();
+				if (!(mn.owner.equals(blockPos.name) && mn.desc.equals(assembleDescriptor("(", blockPos, blockPos, ")Ljava/lang/Iterable;")))) it.remove();
+			}
+			if (methodNodes.size() == 1) {
+				addMethodMapping("net/minecraft/util/BlockPos getAllInBox (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/BlockPos;)Ljava/lang/Iterable;",
+						blockPos.name + " " + methodNodes.get(0).name + " " + methodNodes.get(0).desc);
+			}
+			
+			
+			List<FieldInsnNode> fieldNodes = getAllInsnNodesOfType(methods.get(0).instructions.getFirst(), FieldInsnNode.class);
+			for (Iterator<FieldInsnNode> it = fieldNodes.iterator(); it.hasNext();) {
+				FieldInsnNode fn = it.next();
+				if (!fn.owner.equals(material.name)) it.remove();				
+			}
+			if (fieldNodes.size() == 1) {
+				addFieldMapping("net/minecraft/block/material/Material leaves Lnet/minecraft/block/material/Material;", 
+						material.name + " " + fieldNodes.get(0).name + " " + fieldNodes.get(0).desc);
+			}
+		}
+		
+		
+		return true;
+	}
 	
 	
 	@Mapping(provides={			
@@ -2172,7 +2537,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/BlockLiquid"
 			},
 			providesMethods={			
-			},
+			},			
 			depends={
 			"net/minecraft/block/BlockDynamicLiquid"
 			})
@@ -2180,9 +2545,9 @@ public class SharedMappings extends MappingsBase {
 	{
 		ClassNode dynamicLiquid = getClassNodeFromMapping("net/minecraft/block/BlockDynamicLiquid");
 		if (!MeddleUtil.notNull(dynamicLiquid)) return false;
-		
+				
 		String blockLiquid_name = dynamicLiquid.superName;
-		if (searchConstantPoolForStrings(blockLiquid_name, "level", "random.fizz")) {
+		if (searchConstantPoolForStrings(blockLiquid_name, "level")) {
 			addClassMapping("net/minecraft/block/BlockLiquid", blockLiquid_name);
 		}
 		
@@ -3070,7 +3435,10 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/item/ItemSoup",
 			"net/minecraft/item/ItemBanner",
 			"net/minecraft/item/ItemDye",
-			"net/minecraft/item/ItemBow"
+			"net/minecraft/item/ItemBow",
+			"net/minecraft/item/ItemRecord",
+			"net/minecraft/item/ItemAxe",
+			"net/minecraft/item/ItemTool"
 			},
 			providesMethods={
 			"net/minecraft/item/Item registerItems ()V"
@@ -3127,15 +3495,62 @@ public class SharedMappings extends MappingsBase {
 			addClassMapping("net/minecraft/item/ItemDye", className);
 		}
 		
+		// catch match to "random.bow" anymore with 15w43a
 		className = itemClassMap.get("bow");
-		if (className != null && searchConstantPoolForStrings(className, "pull", "random.bow")) {
+		if (className != null && searchConstantPoolForStrings(className, "pull", "pulling")) {
 			addClassMapping("net/minecraft/item/ItemBow", className);
 		}
-
+		
+		className = itemClassMap.get("record_13");
+		if (className != null && searchConstantPoolForStrings(className, "item.record.")) {
+			addClassMapping("net/minecraft/item/ItemRecord", className);
+		}
+		
+		className = itemClassMap.get("iron_axe");
+		if (className != null) {			
+			ClassNode axe = getClassNode(className);
+			if (axe != null) {
+				ClassNode tool = getClassNode(axe.superName);
+				if (tool != null) {
+					if (tool.superName.equals(itemClass.name) && searchConstantPoolForStrings(tool.name, "Tool modifier")) {
+						addClassMapping("net/minecraft/item/ItemAxe", axe.name);
+						addClassMapping("net/minecraft/item/ItemTool", tool.name);
+					}
+				}
+			}
+		}
+		
 
 		return true;
 	}
 
+	
+	@Mapping(provides={
+			"net/minecraft/util/Sound"
+			},
+			depends={
+			"net/minecraft/item/ItemRecord"
+			})
+	public boolean processItemRecordClass()
+	{
+		ClassNode itemRecord = getClassNodeFromMapping("net/minecraft/item/ItemRecord");
+		if (itemRecord == null) return false;
+		
+		List<MethodNode> methods = new ArrayList<>();
+		for (MethodNode method : itemRecord.methods) {
+			if (method.name.equals("<init>") && method.desc.startsWith("(Ljava/lang/String;L")) methods.add(method);
+		}
+		
+		if (methods.size() == 1) {
+			String soundClass = Type.getMethodType(methods.get(0).desc).getArgumentTypes()[1].getClassName();
+			if (searchConstantPoolForStrings(soundClass, "ambient.cave", "weather.rain")) {
+				addClassMapping("net/minecraft/util/Sound", soundClass);
+			}
+		}		
+		
+		return true;
+	}
+	
 	
 	
 	@Mapping(providesMethods={
@@ -3146,7 +3561,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/entity/EntityLivingBase setItemInUse (Lnet/minecraft/util/MainOrOffHand;)V"
 			},
 			provides={
-			"net/minecraft/item/EnumAction"
+			"net/minecraft/item/EnumAction",
+			"net/minecraft/init/Sounds"
 			},
 			dependsMethods={
 			"net/minecraft/item/Item onItemRightClick (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;)Lnet/minecraft/util/ObjectActionHolder;",
@@ -3158,7 +3574,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/world/World",
 			"net/minecraft/entity/player/EntityPlayer",
 			"net/minecraft/entity/EntityLivingBase",
-			"net/minecraft/util/MainOrOffHand"
+			"net/minecraft/util/MainOrOffHand",
+			"net/minecraft/util/Sound"
 			})
 	public boolean processItemBowClass()
 	{		
@@ -3169,13 +3586,23 @@ public class SharedMappings extends MappingsBase {
 		ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
 		ClassNode entityLivingBase = getClassNodeFromMapping("net/minecraft/entity/EntityLivingBase");
 		ClassNode hand = getClassNodeFromMapping("net/minecraft/util/MainOrOffHand");
-		if (!MeddleUtil.notNull(item, itemBow, itemStack, world, entityPlayer, entityLivingBase, hand)) return false;
+		ClassNode sound = getClassNodeFromMapping("net/minecraft/util/Sound");
+		if (!MeddleUtil.notNull(item, itemBow, itemStack, world, entityPlayer, entityLivingBase, hand, sound)) return false;
 		
 		// public void onPlayerStoppedUsing(ItemStack stack, World worldIn, EntityLivingBase playerIn, int timeLeft)
 		List<MethodNode> methods = getMatchingMethods(itemBow, null, assembleDescriptor("(", itemStack, world, entityLivingBase, "I)V"));
 		if (methods.size() == 1) {
 			addMethodMapping("net/minecraft/item/Item onPlayerStoppedUsing (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;I)V",
 					item.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			
+			List<FieldInsnNode> nodes = getAllInsnNodesOfType(methods.get(0).instructions.getFirst(), FieldInsnNode.class);
+			for (FieldInsnNode fn : nodes) {				
+				if (fn.desc.equals("L" + sound.name + ";")) {
+					if (searchConstantPoolForStrings(fn.owner, "Accessed Sounds before Bootstrap!")) {
+						addClassMapping("net/minecraft/init/Sounds", fn.owner);
+					}
+				}
+			}
 		}
 		
 		// public int getMaxItemUseDuration(ItemStack param0)
@@ -3820,7 +4247,8 @@ public class SharedMappings extends MappingsBase {
 			//"net/minecraft/block/Block setBlockBoundsBasedOnState (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)V"
 			"net/minecraft/block/Block setCreativeTab (Lnet/minecraft/creativetab/CreativeTabs;)Lnet/minecraft/block/Block;",
 			"net/minecraft/block/Block dropBlockAsItemWithChance (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;FI)V",
-			"net/minecraft/block/Block dropBlockAsItem (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;I)V"
+			"net/minecraft/block/Block dropBlockAsItem (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;I)V",
+			"net/minecraft/block/Block harvestBlock (Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/tileentity/TileEntity;Lnet/minecraft/item/ItemStack;)V"
 			},
 			depends={
 			"net/minecraft/block/Block",
@@ -3830,7 +4258,10 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/util/BlockPos",
 			"net/minecraft/world/World",
 			"net/minecraft/world/IBlockAccess",
-			"net/minecraft/creativetab/CreativeTabs"
+			"net/minecraft/creativetab/CreativeTabs",
+			"net/minecraft/entity/player/EntityPlayer",
+			"net/minecraft/tileentity/TileEntity",
+			"net/minecraft/item/ItemStack"
 			})
 	public boolean processBlockClass2()
 	{
@@ -3842,7 +4273,11 @@ public class SharedMappings extends MappingsBase {
 		ClassNode world = getClassNodeFromMapping("net/minecraft/world/World");
 		ClassNode iBlockAccess = getClassNodeFromMapping("net/minecraft/world/IBlockAccess");
 		ClassNode creativeTabs = getClassNodeFromMapping("net/minecraft/creativetab/CreativeTabs");
-		if (!MeddleUtil.notNull(block, item, iBlockState, blockState, blockPos, world, iBlockAccess, creativeTabs)) return false;
+		ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
+		ClassNode tileEntity = getClassNodeFromMapping("net/minecraft/tileentity/TileEntity");
+		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
+		if (!MeddleUtil.notNull(block, item, iBlockState, blockState, blockPos, world, iBlockAccess, creativeTabs,
+				entityPlayer, tileEntity, itemStack)) return false;
 		
 		List<MethodNode> methods;
 		
@@ -3981,6 +4416,14 @@ public class SharedMappings extends MappingsBase {
 			addMethodMapping("net/minecraft/block/Block dropBlockAsItemWithChance (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;FI)V",
 					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
+		
+		
+		// public void harvestBlock(World param0, EntityPlayer param1, BlockPos param2, IBlockState param3, TileEntity param4, ItemStack param5)
+		methods = getMatchingMethods(block, null, assembleDescriptor("(", world, entityPlayer, blockPos, iBlockState, tileEntity, itemStack, ")V"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block harvestBlock (Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/tileentity/TileEntity;Lnet/minecraft/item/ItemStack;)V",
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}		
 		
 		
 		return true;
@@ -4176,7 +4619,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/item/Item registerItemBlock (Lnet/minecraft/block/Block;)V",
 			"net/minecraft/item/Item onItemRightClick (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;)Lnet/minecraft/util/ObjectActionHolder;",
 			"net/minecraft/item/Item onItemUse (Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/ItemUseResult;",
-			"net/minecraft/item/Item onItemUseFinish (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/item/ItemStack;"
+			"net/minecraft/item/Item onItemUseFinish (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/item/ItemStack;",
+			"net/minecraft/item/Item onBlockDestroyed (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/EntityLivingBase;)Z"
 			},
 			providesFields={
 			"net/minecraft/item/Item maxStackSize I"
@@ -4188,7 +4632,9 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/world/World",
 			"net/minecraft/util/BlockPos",
 			"net/minecraft/entity/player/EntityPlayer",
-			"net/minecraft/entity/EntityLivingBase"})
+			"net/minecraft/entity/EntityLivingBase",
+			"net/minecraft/block/state/IBlockState"
+			})
 	public boolean processItemClass()
 	{
 		ClassNode item = getClassNodeFromMapping("net/minecraft/item/Item");
@@ -4198,6 +4644,8 @@ public class SharedMappings extends MappingsBase {
 		ClassNode blockPos = getClassNodeFromMapping("net/minecraft/util/BlockPos");
 		ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
 		ClassNode entityLivingBase = getClassNodeFromMapping("net/minecraft/entity/EntityLivingBase");
+		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
+		if (!MeddleUtil.notNull(item, block, itemStack, world, blockPos, entityPlayer, entityLivingBase, iBlockState)) return false;
 
 		String mainOrOffHand = null;
 		String enumFacing = null;
@@ -4431,7 +4879,14 @@ public class SharedMappings extends MappingsBase {
 			addMethodMapping("net/minecraft/item/Item onItemUseFinish (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/item/ItemStack;",
 					item.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
-
+		
+		
+		// public boolean onBlockDestroyed(ItemStack param0, World param1, IBlockState param2, BlockPos param3, EntityLivingBase param4)
+		methods = getMatchingMethods(item, null, assembleDescriptor("(", itemStack, world, iBlockState, blockPos, entityLivingBase, ")Z"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/item/Item onBlockDestroyed (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/EntityLivingBase;)Z",
+					item.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
 
 		return true;
 	}
@@ -4484,7 +4939,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/Block onBlockEventReceived (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;II)Z",
 			"net/minecraft/world/World setTileEntity (Lnet/minecraft/util/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
 			"net/minecraft/world/World markChunkDirty (Lnet/minecraft/util/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
-			"net/minecraft/world/World playSoundEffect (DDDLjava/lang/String;FF)V",
+			"net/minecraft/world/World playSoundEffect (DDDLnet/minecraft/util/Sound;FF)V",
 			"net/minecraft/world/World getEntitiesInAABBexcluding (Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;Lcom/google/common/base/Predicate;)Ljava/util/List;",
 			"net/minecraft/world/World getEntitiesWithinAABBExcludingEntity (Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;",
 			"net/minecraft/world/World getCollidingBoundingBoxes (Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;"
@@ -4497,7 +4952,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/Block",
 			"net/minecraft/tileentity/TileEntity",
 			"net/minecraft/util/AxisAlignedBB",
-			"net/minecraft/entity/Entity"
+			"net/minecraft/entity/Entity",
+			"net/minecraft/util/Sound"
 			})
 	public boolean processWorldClass()
 	{
@@ -4509,7 +4965,8 @@ public class SharedMappings extends MappingsBase {
 		ClassNode tileEntity = getClassNodeFromMapping("net/minecraft/tileentity/TileEntity");
 		ClassNode aabb = getClassNodeFromMapping("net/minecraft/util/AxisAlignedBB");
 		ClassNode entity = getClassNodeFromMapping("net/minecraft/entity/Entity");
-		if (!MeddleUtil.notNull(world, blockPos, iBlockState, entityPlayer, block, tileEntity, aabb, entity)) return false;
+		ClassNode sound = getClassNodeFromMapping("net/minecraft/util/Sound");
+		if (!MeddleUtil.notNull(world, blockPos, iBlockState, entityPlayer, block, tileEntity, aabb, entity, sound)) return false;
 
 		int count = 0;
 
@@ -4627,10 +5084,10 @@ public class SharedMappings extends MappingsBase {
 			}
 		}
 		
-		// public void playSoundEffect(double x, double y, double z, String soundName, float volume, float pitch)
-		methods = getMatchingMethods(world, null, "(DDDLjava/lang/String;FF)V");
+		// public void playSoundEffect(double x, double y, double z, Sound sound, float volume, float pitch)
+		methods = getMatchingMethods(world, null, "(DDDL" + sound.name + ";FF)V");
 		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/world/World playSoundEffect (DDDLjava/lang/String;FF)V",
+			addMethodMapping("net/minecraft/world/World playSoundEffect (DDDLnet/minecraft/util/Sound;FF)V",
 					world.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
@@ -5931,19 +6388,28 @@ public class SharedMappings extends MappingsBase {
 	@Mapping(providesMethods={
 			"net/minecraft/item/ItemStack getItemDamage ()I",
 			"net/minecraft/item/ItemStack setItemDamage (I)V",
-			"net/minecraft/item/ItemStack damageItem (ILnet/minecraft/entity/EntityLivingBase;)V"
+			"net/minecraft/item/ItemStack damageItem (ILnet/minecraft/entity/EntityLivingBase;)V",
+			"net/minecraft/item/ItemStack getMaxDamage ()I"
 			},
-			dependsMethods="net/minecraft/item/ItemStack getMetadata ()I",
+			providesFields={
+			"net/minecraft/item/ItemStack item Lnet/minecraft/item/Item;"	
+			},
+			dependsMethods={
+			"net/minecraft/item/ItemStack getMetadata ()I",
+			"net/minecraft/item/Item getMaxDamage ()I"
+			},
 			dependsFields="net/minecraft/item/ItemStack itemDamage I",
 			depends={
 			"net/minecraft/item/ItemStack",
-			"net/minecraft/entity/EntityLivingBase"
+			"net/minecraft/entity/EntityLivingBase",
+			"net/minecraft/item/Item"
 			})	
 	public boolean processItemStackClass2()
 	{
 		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
 		ClassNode entityLivingBase = getClassNodeFromMapping("net/minecraft/entity/EntityLivingBase");
-		if (!MeddleUtil.notNull(itemStack, entityLivingBase)) return false;
+		ClassNode item = getClassNodeFromMapping("net/minecraft/item/Item");
+		if (!MeddleUtil.notNull(itemStack, entityLivingBase, item)) return false;
 		
 		FieldNode itemDamage = getFieldNodeFromMapping(itemStack, "net/minecraft/item/ItemStack itemDamage I");
 		MethodNode getMetadata = getMethodNodeFromMapping(itemStack, "net/minecraft/item/ItemStack getMetadata ()I");
@@ -5988,6 +6454,33 @@ public class SharedMappings extends MappingsBase {
 			addMethodMapping("net/minecraft/item/ItemStack damageItem (ILnet/minecraft/entity/EntityLivingBase;)V", 
 					itemStack.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
+		
+		
+		MethodNode getMaxDamage = getMethodNodeFromMapping(item, "net/minecraft/item/Item getMaxDamage ()I");
+		if (getMaxDamage != null) {
+			methods = getMatchingMethods(itemStack, null, "()I");
+			for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
+				MethodNode method = it.next();
+				List<MethodInsnNode> nodes = getAllInsnNodesOfType(method, MethodInsnNode.class);
+				
+				boolean hasIt = false;
+				for (MethodInsnNode mn : nodes) {
+					if (mn.owner.equals(item.name) && mn.name.equals(getMaxDamage.name) && mn.desc.equals("()I")) hasIt = true;
+				}
+				if (!hasIt) it.remove();
+			}
+			if (methods.size() == 1) {
+				addMethodMapping("net/minecraft/item/ItemStack getMaxDamage ()I", itemStack.name + " " + methods.get(0).name + " ()I");
+			}
+		}
+		
+		
+		List<FieldNode> fields = getMatchingFields(itemStack, null, "L" + item.name + ";");
+		if (fields.size() == 1) {			
+			addFieldMapping("net/minecraft/item/ItemStack item Lnet/minecraft/item/Item;", 
+					itemStack.name + " " + fields.get(0).name + " " + fields.get(0).desc);
+		}
+		
 		
 		return true;		
 	}
@@ -6383,7 +6876,10 @@ public class SharedMappings extends MappingsBase {
 	@Mapping(providesFields={
 			"net/minecraft/init/Items leather Lnet/minecraft/item/Item;",
 			"net/minecraft/init/Items redstone Lnet/minecraft/item/Item;",
-			"net/minecraft/init/Items ender_pearl Lnet/minecraft/item/Item;"
+			"net/minecraft/init/Items ender_pearl Lnet/minecraft/item/Item;",
+			"net/minecraft/init/Items iron_ingot Lnet/minecraft/item/Item;",
+			"net/minecraft/init/Items stick Lnet/minecraft/item/Item;",
+			"net/minecraft/init/Items iron_axe Lnet/minecraft/item/Item;"
 			},
 			depends={
 			"net/minecraft/init/Items",
@@ -6438,7 +6934,21 @@ public class SharedMappings extends MappingsBase {
 		fieldName = itemsFields.get("ender_pearl");
 		if (fieldName != null) addFieldMapping("net/minecraft/init/Items ender_pearl Lnet/minecraft/item/Item;", 
 				itemsClass.name + " " + fieldName + " L" + itemClass.name + ";");
+		
+		fieldName = itemsFields.get("iron_ingot");
+		if (fieldName != null) addFieldMapping("net/minecraft/init/Items iron_ingot Lnet/minecraft/item/Item;", 
+				itemsClass.name + " " + fieldName + " L" + itemClass.name + ";");
+		
+		fieldName = itemsFields.get("stick");
+		if (fieldName != null) addFieldMapping("net/minecraft/init/Items stick Lnet/minecraft/item/Item;", 
+				itemsClass.name + " " + fieldName + " L" + itemClass.name + ";");
+		
+		fieldName = itemsFields.get("iron_axe");
+		if (fieldName != null) addFieldMapping("net/minecraft/init/Items iron_axe Lnet/minecraft/item/Item;", 
+				itemsClass.name + " " + fieldName + " L" + itemClass.name + ";");
 
+		
+		
 		// TODO - Other items
 
 		return true;
@@ -7081,6 +7591,126 @@ public class SharedMappings extends MappingsBase {
 	}
 	
 
+	
+	@Mapping(providesFields={
+			"net/minecraft/util/MainOrOffHand MAIN_HAND Lnet/minecraft/util/MainOrOffHand;",
+			"net/minecraft/util/MainOrOffHand OFF_HAND Lnet/minecraft/util/MainOrOffHand;"
+			},
+			depends="net/minecraft/util/MainOrOffHand")
+	public boolean processMainOrOffHand()
+	{
+		ClassNode mainOrOffHand = getClassNodeFromMapping("net/minecraft/util/MainOrOffHand");
+		if (mainOrOffHand == null) return false;
+		
+		List<FieldNode> fields = getMatchingFields(mainOrOffHand, null, "L" + mainOrOffHand.name + ";");
+		if (fields.size() == 2) {
+			addFieldMapping("net/minecraft/util/MainOrOffHand MAIN_HAND Lnet/minecraft/util/MainOrOffHand;", 
+					mainOrOffHand.name + " " + fields.get(0).name + " " + fields.get(0).desc);
+			addFieldMapping("net/minecraft/util/MainOrOffHand OFF_HAND Lnet/minecraft/util/MainOrOffHand;", 
+					mainOrOffHand.name + " " + fields.get(1).name + " " + fields.get(1).desc);
+		}
+		
+		return true;
+	}
+	
+	
+	@Mapping(provides={
+			"net/minecraft/inventory/EnumEquipSlot"
+			},
+			providesMethods={
+			"net/minecraft/entity/EntityLivingBase getHeldItem (Lnet/minecraft/util/MainOrOffHand;)Lnet/minecraft/item/ItemStack;",
+			"net/minecraft/entity/EntityLivingBase getHeldMainHandItem ()Lnet/minecraft/item/ItemStack;",
+			"net/minecraft/entity/EntityLivingBase getHeldOffHandItem ()Lnet/minecraft/item/ItemStack;",
+			"net/minecraft/entity/EntityLivingBase setHeldItem (Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/item/ItemStack;)V"
+			},
+			depends={
+			"net/minecraft/entity/EntityLivingBase",
+			"net/minecraft/item/ItemStack",
+			"net/minecraft/util/MainOrOffHand"
+			})
+	public boolean processEntityLivingBase()
+	{
+		ClassNode entityLivingBase = getClassNodeFromMapping("net/minecraft/entity/EntityLivingBase");
+		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
+		ClassNode mainOrOffHand = getClassNodeFromMapping("net/minecraft/util/MainOrOffHand");
+		if (!MeddleUtil.notNull(entityLivingBase, itemStack, mainOrOffHand)) return false;
+		
+		String enumEquipSlot_name = null;
+		
+		//public ItemStack getHeldItem(MainOrOffHand param0)
+		List<MethodNode> methods = getMatchingMethods(entityLivingBase, null, "(L" + mainOrOffHand.name + ";)L" + itemStack.name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/entity/EntityLivingBase getHeldItem (Lnet/minecraft/util/MainOrOffHand;)Lnet/minecraft/item/ItemStack;",
+					entityLivingBase.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			
+			List<MethodInsnNode> nodes = getAllInsnNodesOfType(methods.get(0), MethodInsnNode.class);
+			for (MethodInsnNode mn : nodes) {
+				if (!mn.owner.equals(entityLivingBase.name)) continue;
+				if (!mn.desc.startsWith("(L") || !mn.desc.endsWith(")L" + itemStack.name + ";")) continue;
+				Type t = Type.getMethodType(mn.desc);
+				Type[] args = t.getArgumentTypes();				
+				if (args.length != 1) continue;
+				String className = args[0].getClassName();
+				if (searchConstantPoolForStrings(className, "MAINHAND", "OFFHAND", "FEET", "LEGS")) {
+					addClassMapping("net/minecraft/inventory/EnumEquipSlot", className);
+					enumEquipSlot_name = className;
+					break;
+				}				
+			}
+		}		
+		
+		
+		// ItemStack getHeldMainHandItem(), ItemStack getHeldOffHandItem()
+		methods = getMatchingMethods(entityLivingBase, null, "()L" + itemStack.name + ";");
+		// Remove getItemInUse() in case we're on the client
+		for (Iterator<MethodNode> it = methods.iterator(); it.hasNext(); ) {
+			MethodNode method = it.next();
+			if (matchOpcodeSequence(method.instructions.getFirst(), Opcodes.ALOAD, Opcodes.GETFIELD, Opcodes.ARETURN)) it.remove();
+		}		
+		if (methods.size() == 2 && enumEquipSlot_name != null) {
+			List<FieldInsnNode> nodes1 = getAllInsnNodesOfType(methods.get(0), FieldInsnNode.class);
+			List<FieldInsnNode> nodes2 = getAllInsnNodesOfType(methods.get(1), FieldInsnNode.class);
+			
+			if (nodes1.size() == 1 && nodes2.size() == 1) {
+				FieldInsnNode fn1 = nodes1.get(0);
+				FieldInsnNode fn2 = nodes2.get(0);
+				
+				if (fn1.owner.equals(enumEquipSlot_name) && fn2.owner.equals(enumEquipSlot_name)) {
+					
+					MethodNode main = null;
+					MethodNode off = null;
+					
+					if (fn1.name.equals("a") && fn2.name.equals("b")) {
+						main = methods.get(0);
+						off = methods.get(1);
+					}
+					else if (fn1.name.equals("b") && fn2.name.equals("a")) {
+						main = methods.get(1);
+						off = methods.get(0);
+					}
+					
+					if (main != null && off != null) {					
+						addMethodMapping("net/minecraft/entity/EntityLivingBase getHeldMainHandItem ()Lnet/minecraft/item/ItemStack;",
+							entityLivingBase.name + " " + main.name + " " + main.desc);
+						addMethodMapping("net/minecraft/entity/EntityLivingBase getHeldOffHandItem ()Lnet/minecraft/item/ItemStack;",
+							entityLivingBase.name + " " + off.name + " " + off.desc);
+					}
+					
+				}
+			}
+		}
+		
+		
+		// void setHeldItem(MainOrOffHand, ItemStack)
+		methods = getMatchingMethods(entityLivingBase, null, "(L" + mainOrOffHand.name + ";L" + itemStack.name + ";)V");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/entity/EntityLivingBase setHeldItem (Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/item/ItemStack;)V",
+					entityLivingBase.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		return true;
+	}
+	
 	
 }
 

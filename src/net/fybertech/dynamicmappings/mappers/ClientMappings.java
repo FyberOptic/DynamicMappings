@@ -452,7 +452,7 @@ public class ClientMappings extends MappingsBase
 				continue;
 			}
 			
-			if (renderGlobal == null && DynamicMappings.searchConstantPoolForStrings(className, "textures/environment/moon_phases.png", "Exception while adding particle", "random.click")) {
+			if (renderGlobal == null && DynamicMappings.searchConstantPoolForStrings(className, "textures/environment/moon_phases.png", "Exception while adding particle")) {
 				renderGlobal = className;
 				continue;
 			}
@@ -598,6 +598,15 @@ public class ClientMappings extends MappingsBase
 	
 	
 	
+	private boolean verifyGuiButtonClass(String className)
+	{
+		String soundClick = getSoundFieldFull("ui.button.click");
+		if (searchConstantPoolForStrings(className, "textures/gui/widgets.png") && searchConstantPoolForFields(className, soundClick))
+			return true;
+		else return false;
+	}
+	
+	
 	@Mapping(provides={
 			"net/minecraft/client/gui/FontRenderer",
 			"net/minecraft/client/gui/GuiButton"
@@ -622,6 +631,9 @@ public class ClientMappings extends MappingsBase
 			"net/minecraft/client/gui/GuiScreen actionPerformed (Lnet/minecraft/client/gui/GuiButton;)V",
 			"net/minecraft/client/gui/GuiScreen drawDefaultBackground ()V",
 			"net/minecraft/client/gui/GuiScreen drawWorldBackground (I)V"
+			},
+			dependsFields={
+			"net/minecraft/init/Sounds ui_button_click Lnet/minecraft/util/Sound;"
 			},
 			depends={
 			"net/minecraft/client/gui/GuiScreen",
@@ -765,7 +777,7 @@ public class ClientMappings extends MappingsBase
 				for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
 					if (insn.getOpcode() == Opcodes.CHECKCAST) {
 						TypeInsnNode tn = (TypeInsnNode)insn;
-						if (DynamicMappings.searchConstantPoolForStrings(tn.desc, "textures/gui/widgets.png", "gui.button.press")) {
+						if (verifyGuiButtonClass(tn.desc)) {
 							addClassMapping("net/minecraft/client/gui/GuiButton", tn.desc);
 							guiButton = tn.desc;
 						}
@@ -1062,9 +1074,12 @@ public class ClientMappings extends MappingsBase
 			"net/minecraft/client/entity/EntityPlayerSP",
 			"net/minecraft/client/entity/AbstractClientPlayer"
 			},
+			dependsFields={
+			"net/minecraft/init/Sounds block_portal_trigger Lnet/minecraft/util/Sound;"
+			},
 			depends={
 			"net/minecraft/client/Minecraft",
-			"net/minecraft/entity/player/EntityPlayer"
+			"net/minecraft/entity/player/EntityPlayer"			
 			})		
 	public boolean getEntityPlayerSPClass()
 	{
@@ -1074,6 +1089,8 @@ public class ClientMappings extends MappingsBase
 		
 		String entityPlayerSP_name = null;
 		
+		String portalSound = getSoundFieldFull("block.portal.trigger");
+		
 		List<MethodNode> methods = DynamicMappings.getMatchingMethods(minecraft,  null, "(I)V");
 		startloop:
 		for (MethodNode method : methods) {
@@ -1082,7 +1099,8 @@ public class ClientMappings extends MappingsBase
 				FieldInsnNode fn = (FieldInsnNode)insn;
 				if (!fn.owner.equals(minecraft.name) || fn.desc.contains("/")) continue;
 				String className = fn.desc.substring(1, fn.desc.length() - 1);				
-				if (DynamicMappings.searchConstantPoolForStrings(className, "minecraft:chest", "minecraft:anvil", "portal.trigger")) {
+				if (DynamicMappings.searchConstantPoolForStrings(className, "minecraft:chest", "minecraft:anvil") &&
+					searchConstantPoolForFields(className, portalSound)) {
 					entityPlayerSP_name = className;
 					break startloop;
 				}
