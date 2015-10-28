@@ -340,7 +340,7 @@ public class DynamicMappings
 	public static void main(String[] args)
 	{
 		// If true, prints out the mappings
-		boolean showMappings = true;		
+		boolean showMappings = false;		
 		
 		generateClassMappings();	
 

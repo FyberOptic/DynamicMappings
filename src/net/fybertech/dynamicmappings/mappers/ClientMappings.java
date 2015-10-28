@@ -1234,7 +1234,8 @@ public class ClientMappings extends MappingsBase
 			"net/minecraft/client/Minecraft",
 			"net/minecraft/client/entity/EntityPlayerSP",
 			"net/minecraft/item/ItemStack",
-			"net/minecraft/client/gui/GuiScreen"
+			"net/minecraft/client/gui/GuiScreen",
+			"net/minecraft/inventory/EnumContainerAction"
 			})	
 	public boolean processGuiContainerClass()
 	{
@@ -1244,10 +1245,12 @@ public class ClientMappings extends MappingsBase
 		ClassNode playerSP = getClassNodeFromMapping("net/minecraft/client/entity/EntityPlayerSP");
 		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
 		ClassNode guiScreen = getClassNodeFromMapping("net/minecraft/client/gui/GuiScreen");
-		if (!MeddleUtil.notNull(guiContainer, slot, minecraft, playerSP, itemStack, guiScreen)) return false;
+		ClassNode containerAction = getClassNodeFromMapping("net/minecraft/inventory/EnumContainerAction");
+		if (!MeddleUtil.notNull(guiContainer, slot, minecraft, playerSP, itemStack, guiScreen, containerAction)) return false;
 		
 		// protected void handleMouseClick(Slot slotIn, int slotId, int clickedButton, int clickType)
-		List<MethodNode> methods = DynamicMappings.getMatchingMethods(guiContainer, null, "(L" + slot.name + ";III)V");
+		// As of 15w44a: protected void handleMouseClick(Slot slotIn, int slotId, int clickedButton, EnumContainerAction clickType)
+		List<MethodNode> methods = DynamicMappings.getMatchingMethods(guiContainer, null, "(L" + slot.name + ";IIL" + containerAction.name + ";)V");
 		if (methods.size() == 1) {
 			addMethodMapping("net/minecraft/client/gui/inventory/GuiContainer handleMouseClick (Lnet/minecraft/inventory/Slot;III)V",
 					guiContainer.name + " " + methods.get(0).name + " " + methods.get(0).desc);

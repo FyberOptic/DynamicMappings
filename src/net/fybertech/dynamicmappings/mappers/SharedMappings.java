@@ -2969,7 +2969,8 @@ public class SharedMappings extends MappingsBase {
 	
 	
 	@Mapping(provides={
-			"net/minecraft/inventory/Slot"
+			"net/minecraft/inventory/Slot",
+			"net/minecraft/inventory/EnumContainerAction"
 			},
 			providesFields={
 			"net/minecraft/inventory/Container inventorySlots Ljava/util/List;",
@@ -2982,7 +2983,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/inventory/Container onContainerClosed (Lnet/minecraft/entity/player/EntityPlayer;)V",
 			"net/minecraft/inventory/Container getSlot (I)Lnet/minecraft/inventory/Slot;",
 			"net/minecraft/inventory/Container mergeItemStack (Lnet/minecraft/item/ItemStack;IIZ)Z",
-			"net/minecraft/inventory/Container slotClick (IIILnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;",
+			"net/minecraft/inventory/Container slotClick (IILnet/minecraft/inventory/EnumContainerAction;Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;",
 			"net/minecraft/inventory/Container putStackInSlot (ILnet/minecraft/item/ItemStack;)V",
 			"net/minecraft/inventory/Container onCraftMatrixChanged (Lnet/minecraft/inventory/IInventory;)V",
 			"net/minecraft/inventory/Container detectAndSendChanges ()V",
@@ -3081,11 +3082,23 @@ public class SharedMappings extends MappingsBase {
 		
 		
 		// public ItemStack slotClick(int slotId, int clickedButton, int mode, EntityPlayer playerIn)
-		methods = getMatchingMethods(container, null, "(IIIL" + entityPlayer.name + ";)L" + itemStack.name + ";");
-		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/inventory/Container slotClick (IIILnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;",
-					container.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		// As of 15w44a: public ItemStack slotClick(int slotId, int clickedButton, EnumContainerAction mode, EntityPlayer playerIn)
+		methods.clear(); // = getMatchingMethods(container, null, "(IIIL" + entityPlayer.name + ";)L" + itemStack.name + ";");
+		for (MethodNode method : container.methods) {
+			if (method.desc.startsWith("(IIL") && method.desc.endsWith(";L" + entityPlayer.name + ";)L" + itemStack.name + ";")) {
+				Type[] args = Type.getMethodType(method.desc).getArgumentTypes();
+				if (args.length == 4) methods.add(method);
+			}
 		}
+		if (methods.size() == 1) {
+			String containerAction = Type.getMethodType(methods.get(0).desc).getArgumentTypes()[2].getClassName();
+			if (searchConstantPoolForStrings(containerAction, "PICKUP", "QUICK_CRAFT")) {
+				addClassMapping("net/minecraft/inventory/EnumContainerAction", containerAction);
+				addMethodMapping("net/minecraft/inventory/Container slotClick (IILnet/minecraft/inventory/EnumContainerAction;Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;",
+						container.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			}
+		}
+		
 		
 		// public void putStackInSlot(int p_75141_1_, ItemStack p_75141_2_)
 		methods = getMatchingMethods(container, null, "(IL" + itemStack.name + ";)V");

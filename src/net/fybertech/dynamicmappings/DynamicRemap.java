@@ -1,5 +1,6 @@
 package net.fybertech.dynamicmappings;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,6 +29,7 @@ import org.objectweb.asm.tree.MethodNode;
 import net.fybertech.dynamicmappings.InheritanceMap;
 import net.fybertech.dynamicmappings.InheritanceMap.FieldHolder;
 import net.fybertech.dynamicmappings.InheritanceMap.MethodHolder;
+import net.fybertech.dynamicmappings.ParmParser.Parm;
 
 
 public class DynamicRemap 
@@ -308,27 +310,16 @@ public class DynamicRemap
 	}
 	
 	
-	static String[] fieldTransformers = new String[] {
-		"net/minecraft/inventory/Slot * I 1",
-		"net/minecraft/item/crafting/ShapedRecipes * * 1",
-		"net/minecraft/item/crafting/ShapelessRecipes * * 1"
-	};
-	
-	static String[] methodTransformers = new String[] {
-		"net/minecraft/block/Block <init> * 1",
-		"net/minecraft/block/Block registerBlock * 1",
-		"net/minecraft/item/Item registerItem * 1",
-		"net/minecraft/item/Item registerItemBlock * 1",
-		"net/minecraft/client/gui/inventory/GuiContainer drawItemStack (Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V 1"
-	};
-	
-	
-	
-	
 	
 	public static void main(String[] args)
 	{	
-				
+		ParmParser pp = new ParmParser();
+		Parm outputParm = pp.addParm("-o",  1); // Output location		
+		pp.processArgs(args);
+		
+		File outputFile = new File("mcremapped.jar");
+		if (outputParm.found) outputFile = new File(outputParm.getFirstResult());
+		
 		DynamicMappings.generateClassMappings();
 
 		AccessUtil accessUtil = new AccessUtil();
@@ -391,7 +382,7 @@ public class DynamicRemap
 		
 		JarOutputStream outJar = null;
 		try {
-			outJar = new JarOutputStream(new FileOutputStream("mcremapped.jar"));
+			outJar = new JarOutputStream(new FileOutputStream(outputFile));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
