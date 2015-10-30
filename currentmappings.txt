@@ -1,86 +1,90 @@
 [DynamicMappings] Generating linkages...done
 [DynamicMappings] Processing class net.fybertech.dynamicmappings.mappers.SharedMappings
 [DynamicMappings] Processing class net.fybertech.dynamicmappings.mappers.ClientMappings
-[DynamicMappings] Minecraft version: 15w43c
+[DynamicMappings] Minecraft version: 15w44b
 [DynamicMappings] Minecraft jar type: client
 
 CLASSES:
-net/minecraft/block/Block -> ajj
-net/minecraft/block/BlockAnvil -> aja
-net/minecraft/block/BlockAnvil$Anvil -> aja$a
-net/minecraft/block/BlockBed -> ajh
-net/minecraft/block/BlockChest -> aju
-net/minecraft/block/BlockContainer -> ajd
-net/minecraft/block/BlockDirectional -> alw
-net/minecraft/block/BlockDoor -> akl
-net/minecraft/block/BlockDoor$EnumDoorHalf -> akl$a
-net/minecraft/block/BlockDoor$EnumHingePosition -> akl$b
-net/minecraft/block/BlockDynamicLiquid -> akp
-net/minecraft/block/BlockFenceGate -> ala
-net/minecraft/block/BlockFire -> alb
-net/minecraft/block/BlockGrass -> all
-net/minecraft/block/BlockHopper -> alv
-net/minecraft/block/BlockLeaves -> amb
-net/minecraft/block/BlockLeavesBase -> aov
-net/minecraft/block/BlockLiquid -> ame
-net/minecraft/block/BlockLog -> amf
-net/minecraft/block/BlockOldLog -> amv
-net/minecraft/block/BlockPane -> aos
-net/minecraft/block/BlockRotatedPillar -> ans
-net/minecraft/block/BlockSlab -> alp
-net/minecraft/block/BlockSoundType -> aoe
-net/minecraft/block/BlockStaticLiquid -> aok
-net/minecraft/block/BlockWorkbench -> akc
-net/minecraft/block/BlockWorkbench$InterfaceCraftingTable -> akc$a
-net/minecraft/block/ITileEntityProvider -> akw
-net/minecraft/block/material/MapColor -> awt
-net/minecraft/block/material/Material -> aws
-net/minecraft/block/properties/IProperty -> arg
-net/minecraft/block/properties/PropertyBool -> arc
-net/minecraft/block/properties/PropertyDirection -> ard
-net/minecraft/block/properties/PropertyEnum -> are
-net/minecraft/block/properties/PropertyHelper -> arb
-net/minecraft/block/state/BlockState -> aqs
-net/minecraft/block/state/IBlockState -> aqr
-net/minecraft/client/Minecraft -> bbt
-net/minecraft/client/entity/AbstractClientPlayer -> bly
-net/minecraft/client/entity/EntityPlayerSP -> bmb
-net/minecraft/client/gui/FontRenderer -> bcc
-net/minecraft/client/gui/Gui -> bce
-net/minecraft/client/gui/GuiButton -> bci
-net/minecraft/client/gui/GuiIngame -> bcd
-net/minecraft/client/gui/GuiLanguage -> bed
-net/minecraft/client/gui/GuiListExtended -> bcv
-net/minecraft/client/gui/GuiListExtended$IGuiListEntry -> bcv$a
-net/minecraft/client/gui/GuiMainMenu -> bes
-net/minecraft/client/gui/GuiMultiplayer -> bgb
-net/minecraft/client/gui/GuiOptions -> bef
-net/minecraft/client/gui/GuiScreen -> bel
-net/minecraft/client/gui/GuiSelectWorld -> bgv
-net/minecraft/client/gui/GuiSlot -> bda
-net/minecraft/client/gui/GuiYesNo -> bdr
-net/minecraft/client/gui/GuiYesNoCallback -> bdq
-net/minecraft/client/gui/ServerSelectionList -> bgf
-net/minecraft/client/gui/inventory/GuiChest -> bfj
-net/minecraft/client/gui/inventory/GuiContainer -> bfd
-net/minecraft/client/main/GameConfiguration -> bhk
+net/minecraft/block/Block -> ajn
+net/minecraft/block/BlockAir -> ajd
+net/minecraft/block/BlockAnvil -> aje
+net/minecraft/block/BlockAnvil$Anvil -> aje$a
+net/minecraft/block/BlockBed -> ajl
+net/minecraft/block/BlockChest -> ajy
+net/minecraft/block/BlockContainer -> ajh
+net/minecraft/block/BlockDirectional -> ama
+net/minecraft/block/BlockDoor -> akp
+net/minecraft/block/BlockDoor$EnumDoorHalf -> akp$a
+net/minecraft/block/BlockDoor$EnumHingePosition -> akp$b
+net/minecraft/block/BlockDynamicLiquid -> akt
+net/minecraft/block/BlockFenceGate -> ale
+net/minecraft/block/BlockFire -> alf
+net/minecraft/block/BlockGrass -> alp
+net/minecraft/block/BlockHopper -> alz
+net/minecraft/block/BlockLeaves -> amf
+net/minecraft/block/BlockLeavesBase -> aoz
+net/minecraft/block/BlockLiquid -> ami
+net/minecraft/block/BlockLog -> amj
+net/minecraft/block/BlockOldLog -> amz
+net/minecraft/block/BlockPane -> aow
+net/minecraft/block/BlockRotatedPillar -> anw
+net/minecraft/block/BlockSlab -> alt
+net/minecraft/block/BlockSoundType -> aoi
+net/minecraft/block/BlockStaticLiquid -> aoo
+net/minecraft/block/BlockWorkbench -> akg
+net/minecraft/block/BlockWorkbench$InterfaceCraftingTable -> akg$a
+net/minecraft/block/EnumBlockMirroring -> aml
+net/minecraft/block/EnumBlockRotation -> anx
+net/minecraft/block/EnumRenderType -> anu
+net/minecraft/block/ITileEntityProvider -> ala
+net/minecraft/block/material/MapColor -> awy
+net/minecraft/block/material/Material -> awx
+net/minecraft/block/properties/IProperty -> ark
+net/minecraft/block/properties/PropertyBool -> arg
+net/minecraft/block/properties/PropertyDirection -> arh
+net/minecraft/block/properties/PropertyEnum -> ari
+net/minecraft/block/properties/PropertyHelper -> arf
+net/minecraft/block/state/BlockState -> aqw
+net/minecraft/block/state/IBlockState -> aqv
+net/minecraft/client/Minecraft -> bca
+net/minecraft/client/entity/AbstractClientPlayer -> bmf
+net/minecraft/client/entity/EntityPlayerSP -> bmi
+net/minecraft/client/gui/FontRenderer -> bcj
+net/minecraft/client/gui/Gui -> bcl
+net/minecraft/client/gui/GuiButton -> bcp
+net/minecraft/client/gui/GuiIngame -> bck
+net/minecraft/client/gui/GuiLanguage -> bek
+net/minecraft/client/gui/GuiListExtended -> bdc
+net/minecraft/client/gui/GuiListExtended$IGuiListEntry -> bdc$a
+net/minecraft/client/gui/GuiMainMenu -> bez
+net/minecraft/client/gui/GuiMultiplayer -> bgi
+net/minecraft/client/gui/GuiOptions -> bem
+net/minecraft/client/gui/GuiScreen -> bes
+net/minecraft/client/gui/GuiSelectWorld -> bhc
+net/minecraft/client/gui/GuiSlot -> bdh
+net/minecraft/client/gui/GuiYesNo -> bdy
+net/minecraft/client/gui/GuiYesNoCallback -> bdx
+net/minecraft/client/gui/ServerSelectionList -> bgm
+net/minecraft/client/gui/inventory/GuiChest -> bfq
+net/minecraft/client/gui/inventory/GuiContainer -> bfk
+net/minecraft/client/main/GameConfiguration -> bhr
 net/minecraft/client/main/Main -> net/minecraft/client/main/Main
-net/minecraft/client/multiplayer/GuiConnecting -> bds
-net/minecraft/client/multiplayer/ServerList -> bkg
-net/minecraft/client/multiplayer/WorldClient -> bkc
-net/minecraft/client/network/NetHandlerPlayClient -> bka
-net/minecraft/client/renderer/BlockRendererDispatcher -> bnj
-net/minecraft/client/renderer/ItemModelMesher -> bms
-net/minecraft/client/renderer/RenderGlobal -> bmv
-net/minecraft/client/renderer/RenderHelper -> bbr
-net/minecraft/client/renderer/WorldRenderer -> bmh
-net/minecraft/client/renderer/entity/RenderItem -> brf
-net/minecraft/client/renderer/texture/TextureAtlasSprite -> bul
-net/minecraft/client/renderer/texture/TextureMap -> buk
-net/minecraft/client/renderer/vertex/VertexFormat -> buv
-net/minecraft/client/resources/model/ModelResourceLocation -> bwx
-net/minecraft/client/settings/GameSettings -> bbw
-net/minecraft/client/settings/KeyBinding -> bbq
+net/minecraft/client/multiplayer/GuiConnecting -> bdz
+net/minecraft/client/multiplayer/ServerList -> bkn
+net/minecraft/client/multiplayer/WorldClient -> bkj
+net/minecraft/client/network/NetHandlerPlayClient -> bkh
+net/minecraft/client/renderer/BlockRendererDispatcher -> bnq
+net/minecraft/client/renderer/ItemModelMesher -> bmz
+net/minecraft/client/renderer/RenderGlobal -> bnc
+net/minecraft/client/renderer/RenderHelper -> bby
+net/minecraft/client/renderer/WorldRenderer -> bmo
+net/minecraft/client/renderer/entity/RenderItem -> brm
+net/minecraft/client/renderer/texture/TextureAtlasSprite -> buu
+net/minecraft/client/renderer/texture/TextureMap -> but
+net/minecraft/client/renderer/vertex/VertexFormat -> bve
+net/minecraft/client/resources/model/ModelResourceLocation -> bxg
+net/minecraft/client/settings/GameSettings -> bcd
+net/minecraft/client/settings/KeyBinding -> bbx
 net/minecraft/command/CommandException -> bz
 net/minecraft/command/CommandHandler -> j
 net/minecraft/command/CommandResultStats -> n
@@ -90,52 +94,53 @@ net/minecraft/command/ICommandManager -> l
 net/minecraft/command/ICommandSender -> m
 net/minecraft/command/ServerCommandManager -> bd
 net/minecraft/crash/CrashReportCategory -> c
-net/minecraft/creativetab/CreativeTabs -> aci
-net/minecraft/entity/Entity -> rn
-net/minecraft/entity/EntityList -> rp
-net/minecraft/entity/EntityLivingBase -> rw
-net/minecraft/entity/item/EntityEnderPearl -> aae
-net/minecraft/entity/item/EntityItem -> xz
-net/minecraft/entity/monster/EntityCreeper -> yn
-net/minecraft/entity/monster/EntityEnderman -> yo
-net/minecraft/entity/monster/EntityMob -> yv
-net/minecraft/entity/monster/EntityZombie -> ze
-net/minecraft/entity/passive/EntityAnimal -> vr
-net/minecraft/entity/passive/EntitySheep -> vz
-net/minecraft/entity/passive/EntityVillager -> zi
-net/minecraft/entity/player/EntityPlayer -> zn
+net/minecraft/creativetab/CreativeTabs -> ack
+net/minecraft/entity/Entity -> ro
+net/minecraft/entity/EntityList -> rq
+net/minecraft/entity/EntityLivingBase -> rx
+net/minecraft/entity/item/EntityEnderPearl -> aaf
+net/minecraft/entity/item/EntityItem -> ya
+net/minecraft/entity/monster/EntityCreeper -> yo
+net/minecraft/entity/monster/EntityEnderman -> yp
+net/minecraft/entity/monster/EntityMob -> yw
+net/minecraft/entity/monster/EntityZombie -> zf
+net/minecraft/entity/passive/EntityAnimal -> vs
+net/minecraft/entity/passive/EntitySheep -> wa
+net/minecraft/entity/passive/EntityVillager -> zj
+net/minecraft/entity/player/EntityPlayer -> zo
 net/minecraft/entity/player/EntityPlayerMP -> ls
-net/minecraft/entity/player/InventoryPlayer -> zm
-net/minecraft/init/Blocks -> ajk
-net/minecraft/init/Items -> adk
+net/minecraft/entity/player/InventoryPlayer -> zn
+net/minecraft/init/Blocks -> ajo
+net/minecraft/init/Items -> adn
 net/minecraft/init/Sounds -> nh
-net/minecraft/inventory/Container -> aan
-net/minecraft/inventory/ContainerChest -> aat
-net/minecraft/inventory/ContainerWorkbench -> aav
-net/minecraft/inventory/EnumEquipSlot -> rs
-net/minecraft/inventory/ICrafting -> aas
+net/minecraft/inventory/Container -> aao
+net/minecraft/inventory/ContainerChest -> aav
+net/minecraft/inventory/ContainerWorkbench -> aax
+net/minecraft/inventory/EnumContainerAction -> aat
+net/minecraft/inventory/EnumEquipSlot -> rt
+net/minecraft/inventory/ICrafting -> aau
 net/minecraft/inventory/IInventory -> qe
-net/minecraft/inventory/InventoryBasic -> qr
-net/minecraft/inventory/InventoryCrafting -> aau
-net/minecraft/inventory/Slot -> abl
-net/minecraft/item/EnumAction -> aes
-net/minecraft/item/EnumDyeColor -> acm
-net/minecraft/item/Item -> adg
-net/minecraft/item/ItemAxe -> abr
-net/minecraft/item/ItemBanner -> abs
-net/minecraft/item/ItemBlock -> abu
-net/minecraft/item/ItemBow -> abz
-net/minecraft/item/ItemDye -> acn
-net/minecraft/item/ItemRecord -> adx
-net/minecraft/item/ItemSoup -> aca
-net/minecraft/item/ItemStack -> adi
-net/minecraft/item/ItemSword -> aep
-net/minecraft/item/ItemTool -> acj
-net/minecraft/item/crafting/CraftingManager -> afn
-net/minecraft/item/crafting/IRecipe -> afm
-net/minecraft/item/crafting/ShapedRecipes -> afp
-net/minecraft/item/crafting/ShapelessRecipes -> afq
-net/minecraft/item/state/IItemState -> adj
+net/minecraft/inventory/InventoryBasic -> qs
+net/minecraft/inventory/InventoryCrafting -> aaw
+net/minecraft/inventory/Slot -> abn
+net/minecraft/item/EnumAction -> aev
+net/minecraft/item/EnumDyeColor -> aco
+net/minecraft/item/Item -> adj
+net/minecraft/item/ItemAxe -> abt
+net/minecraft/item/ItemBanner -> abu
+net/minecraft/item/ItemBlock -> abw
+net/minecraft/item/ItemBow -> acb
+net/minecraft/item/ItemDye -> acp
+net/minecraft/item/ItemRecord -> aea
+net/minecraft/item/ItemSoup -> acc
+net/minecraft/item/ItemStack -> adl
+net/minecraft/item/ItemSword -> aes
+net/minecraft/item/ItemTool -> acl
+net/minecraft/item/crafting/CraftingManager -> afr
+net/minecraft/item/crafting/IRecipe -> afq
+net/minecraft/item/crafting/ShapedRecipes -> aft
+net/minecraft/item/crafting/ShapelessRecipes -> afu
+net/minecraft/item/state/IItemState -> adm
 net/minecraft/nbt/NBTBase -> eb
 net/minecraft/nbt/NBTBase$NBTPrimitive -> eb$a
 net/minecraft/nbt/NBTTagByte -> dm
@@ -157,134 +162,143 @@ net/minecraft/network/PacketBuffer -> em
 net/minecraft/network/play/server/S2DPacketOpenWindow -> gc
 net/minecraft/server/MinecraftServer -> net/minecraft/server/MinecraftServer
 net/minecraft/server/gui/IUpdatePlayerListBox -> kz
-net/minecraft/server/integrated/IntegratedServer -> bxr
+net/minecraft/server/integrated/IntegratedServer -> bya
 net/minecraft/server/management/PlayerProfileCache -> mj
 net/minecraft/stats/StatList -> nt
-net/minecraft/tileentity/TileEntity -> apl
-net/minecraft/tileentity/TileEntityChest -> apn
-net/minecraft/tileentity/TileEntityLockable -> apz
-net/minecraft/util/AxisAlignedBB -> bav
+net/minecraft/tileentity/TileEntity -> app
+net/minecraft/tileentity/TileEntityChest -> apr
+net/minecraft/tileentity/TileEntityLockable -> aqd
+net/minecraft/util/AxisAlignedBB -> bbc
 net/minecraft/util/BlockPos -> cj
 net/minecraft/util/ChatComponentText -> fa
 net/minecraft/util/ChatComponentTranslation -> fb
 net/minecraft/util/DataVersionManager -> pb
 net/minecraft/util/EnumFacing -> cq
-net/minecraft/util/EnumWorldBlockLayer -> ahd
+net/minecraft/util/EnumWorldBlockLayer -> ahh
 net/minecraft/util/IChatComponent -> eu
 net/minecraft/util/IStringSerializable -> or
 net/minecraft/util/IThreadListener -> qa
-net/minecraft/util/ItemUseResult -> ql
-net/minecraft/util/MainOrOffHand -> qj
-net/minecraft/util/MovingObjectPosition -> baw
-net/minecraft/util/ObjectActionHolder -> qm
+net/minecraft/util/ItemUseResult -> qm
+net/minecraft/util/MainOrOffHand -> qk
+net/minecraft/util/MovingObjectPosition -> bbd
+net/minecraft/util/ObjectActionHolder -> qn
 net/minecraft/util/ObjectIntIdentityMap -> ct
 net/minecraft/util/RegistryNamespaced -> cx
 net/minecraft/util/RegistryNamespacedDefaultedByKey -> co
 net/minecraft/util/ResourceLocation -> kl
 net/minecraft/util/Sound -> ng
-net/minecraft/util/Vec3 -> bax
+net/minecraft/util/Vec3 -> bbe
 net/minecraft/util/Vec3i -> df
-net/minecraft/world/Explosion -> ahg
-net/minecraft/world/GameRules -> ahi
-net/minecraft/world/IBlockAccess -> aho
-net/minecraft/world/IInteractionObject -> qk
-net/minecraft/world/IWorldNameable -> qq
-net/minecraft/world/World -> ahk
+net/minecraft/world/Explosion -> ahk
+net/minecraft/world/GameRules -> ahm
+net/minecraft/world/IBlockAccess -> ahs
+net/minecraft/world/IInteractionObject -> ql
+net/minecraft/world/IWorldNameable -> qr
+net/minecraft/world/World -> aho
 net/minecraft/world/WorldServer -> lq
-net/minecraft/world/WorldSettings -> ahn
-net/minecraft/world/WorldType -> ahp
+net/minecraft/world/WorldSettings -> ahr
+net/minecraft/world/WorldType -> aht
 
 FIELDS:
-net/minecraft/block/Block BLOCK_STATE_IDS Lnet/minecraft/util/ObjectIntIdentityMap; -> ajj i Lct;
-net/minecraft/block/Block blockRegistry Lnet/minecraft/util/RegistryNamespacedDefaultedByKey; -> ajj h Lco;
-net/minecraft/block/Block blockState Lnet/minecraft/block/state/BlockState; -> ajj A Laqs;
-net/minecraft/block/Block soundTypeWood Lnet/minecraft/block/Block$SoundType; -> ajj a Laoe;
-net/minecraft/block/Block unlocalizedName Ljava/lang/String; -> ajj d Ljava/lang/String;
-net/minecraft/block/BlockDirectional FACING Lnet/minecraft/block/properties/PropertyDirection; -> alw B Lard;
-net/minecraft/block/BlockDoor FACING Lnet/minecraft/block/properties/PropertyDirection; -> akl a Lard;
-net/minecraft/block/BlockDoor HALF Lnet/minecraft/block/properties/PropertyEnum; -> akl e Lare;
-net/minecraft/block/BlockDoor HINGE Lnet/minecraft/block/properties/PropertyEnum; -> akl c Lare;
-net/minecraft/block/BlockDoor OPEN Lnet/minecraft/block/properties/PropertyBool; -> akl b Larc;
-net/minecraft/block/BlockDoor POWERED Lnet/minecraft/block/properties/PropertyBool; -> akl d Larc;
-net/minecraft/block/BlockDoor$EnumDoorHalf LOWER Lnet/minecraft/block/BlockDoor$EnumDoorHalf; -> akl$a b Lakl$a;
-net/minecraft/block/BlockDoor$EnumDoorHalf UPPER Lnet/minecraft/block/BlockDoor$EnumDoorHalf; -> akl$a a Lakl$a;
-net/minecraft/block/BlockDoor$EnumHingePosition LEFT Lnet/minecraft/block/BlockDoor$EnumHingePosition; -> akl$b a Lakl$b;
-net/minecraft/block/BlockDoor$EnumHingePosition RIGHT Lnet/minecraft/block/BlockDoor$EnumHingePosition; -> akl$b b Lakl$b;
-net/minecraft/block/BlockPane EAST Lnet/minecraft/block/properties/PropertyBool; -> aos c Larc;
-net/minecraft/block/BlockPane NORTH Lnet/minecraft/block/properties/PropertyBool; -> aos b Larc;
-net/minecraft/block/BlockPane SOUTH Lnet/minecraft/block/properties/PropertyBool; -> aos d Larc;
-net/minecraft/block/BlockPane WEST Lnet/minecraft/block/properties/PropertyBool; -> aos e Larc;
-net/minecraft/block/material/Material leaves Lnet/minecraft/block/material/Material; -> aws j Laws;
-net/minecraft/block/material/Material wood Lnet/minecraft/block/material/Material; -> aws d Laws;
-net/minecraft/client/Minecraft gameSettings Lnet/minecraft/client/entity/EntityPlayerSP; -> bbt u Lbbw;
-net/minecraft/client/Minecraft thePlayer Lnet/minecraft/client/entity/EntityPlayerSP; -> bbt h Lbmb;
-net/minecraft/client/Minecraft theWorld Lnet/minecraft/client/multiplayer/WorldClient; -> bbt f Lbkc;
-net/minecraft/client/gui/GuiButton displayString Ljava/lang/String; -> bci j Ljava/lang/String;
-net/minecraft/client/gui/GuiButton height I -> bci g I
-net/minecraft/client/gui/GuiButton id I -> bci k I
-net/minecraft/client/gui/GuiButton width I -> bci f I
-net/minecraft/client/gui/GuiButton xPosition I -> bci h I
-net/minecraft/client/gui/GuiButton yPosition I -> bci i I
-net/minecraft/client/gui/GuiScreen buttonList Ljava/util/List; -> bel n Ljava/util/List;
-net/minecraft/client/gui/GuiScreen fontRendererObj Lnet/minecraft/client/gui/FontRenderer; -> bel q Lbcc;
-net/minecraft/client/gui/GuiScreen height I -> bel m I
-net/minecraft/client/gui/GuiScreen itemRender Lnet/minecraft/client/renderer/entity/RenderItem; -> brf k Lbrf;
-net/minecraft/client/gui/GuiScreen mc Lnet/minecraft/client/Minecraft; -> bel j Lbbt;
-net/minecraft/client/gui/GuiScreen width I -> bel l I
-net/minecraft/client/gui/inventory/GuiContainer guiLeft I -> bfd i I
-net/minecraft/client/gui/inventory/GuiContainer guiTop I -> bfd r I
-net/minecraft/client/renderer/texture/TextureAtlasSprite framesTextureData Ljava/util/List; -> bul a Ljava/util/List;
-net/minecraft/client/renderer/texture/TextureAtlasSprite height I -> bul g I
-net/minecraft/client/renderer/texture/TextureAtlasSprite iconName Ljava/lang/String; -> bul j Ljava/lang/String;
-net/minecraft/client/renderer/texture/TextureAtlasSprite maxU F -> bul m F
-net/minecraft/client/renderer/texture/TextureAtlasSprite maxV F -> bul o F
-net/minecraft/client/renderer/texture/TextureAtlasSprite minU F -> bul l F
-net/minecraft/client/renderer/texture/TextureAtlasSprite minV F -> bul n F
-net/minecraft/client/renderer/texture/TextureAtlasSprite originX I -> bul d I
-net/minecraft/client/renderer/texture/TextureAtlasSprite originY I -> bul e I
-net/minecraft/client/renderer/texture/TextureAtlasSprite rotated Z -> bul c Z
-net/minecraft/client/renderer/texture/TextureAtlasSprite width I -> bul f I
-net/minecraft/client/settings/KeyBinding keyCategory Ljava/lang/String; -> bbq f Ljava/lang/String;
-net/minecraft/client/settings/KeyBinding keyCode I -> bbq g I
-net/minecraft/client/settings/KeyBinding keyCodeDefault I -> bbq e I
-net/minecraft/client/settings/KeyBinding keyDescription Ljava/lang/String; -> bbq d Ljava/lang/String;
-net/minecraft/client/settings/KeyBinding pressTime I -> bbq i I
-net/minecraft/client/settings/KeyBinding pressed Z -> bbq h Z
-net/minecraft/creativetab/CreativeTabs tabAllSearch Lnet/minecraft/creativetab/CreativeTabs; -> aci g Laci;
-net/minecraft/creativetab/CreativeTabs tabBlock Lnet/minecraft/creativetab/CreativeTabs; -> aci b Laci;
-net/minecraft/creativetab/CreativeTabs tabBrewing Lnet/minecraft/creativetab/CreativeTabs; -> aci k Laci;
-net/minecraft/creativetab/CreativeTabs tabCombat Lnet/minecraft/creativetab/CreativeTabs; -> aci j Laci;
-net/minecraft/creativetab/CreativeTabs tabDecorations Lnet/minecraft/creativetab/CreativeTabs; -> aci c Laci;
-net/minecraft/creativetab/CreativeTabs tabFood Lnet/minecraft/creativetab/CreativeTabs; -> aci h Laci;
-net/minecraft/creativetab/CreativeTabs tabInventory Lnet/minecraft/creativetab/CreativeTabs; -> aci m Laci;
-net/minecraft/creativetab/CreativeTabs tabMaterials Lnet/minecraft/creativetab/CreativeTabs; -> aci l Laci;
-net/minecraft/creativetab/CreativeTabs tabMisc Lnet/minecraft/creativetab/CreativeTabs; -> aci f Laci;
-net/minecraft/creativetab/CreativeTabs tabRedstone Lnet/minecraft/creativetab/CreativeTabs; -> aci d Laci;
-net/minecraft/creativetab/CreativeTabs tabTools Lnet/minecraft/creativetab/CreativeTabs; -> aci i Laci;
-net/minecraft/creativetab/CreativeTabs tabTransport Lnet/minecraft/creativetab/CreativeTabs; -> aci e Laci;
-net/minecraft/entity/Entity fallDistance F -> rn K F
-net/minecraft/entity/monster/EntityEnderman carriableBlocks Ljava/util/Set; -> yo c Ljava/util/Set;
-net/minecraft/entity/player/EntityPlayer inventory Lnet/minecraft/entity/player/InventoryPlayer; -> zn bn Lzm;
-net/minecraft/entity/player/EntityPlayer openContainer Lnet/minecraft/inventory/Container; -> zn bp Laan;
-net/minecraft/init/Blocks air Lnet/minecraft/block/Block; -> ajk a Lajj;
-net/minecraft/init/Blocks bedrock Lnet/minecraft/block/Block; -> ajk h Lajj;
-net/minecraft/init/Blocks chest Lnet/minecraft/block/BlockChest; -> ajk ae Laju;
-net/minecraft/init/Blocks cobblestone Lnet/minecraft/block/Block; -> ajk e Lajj;
-net/minecraft/init/Blocks dirt Lnet/minecraft/block/Block; -> ajk d Lajj;
-net/minecraft/init/Blocks glass_pane Lnet/minecraft/block/Block; -> ajk bj Lajj;
-net/minecraft/init/Blocks grass Lnet/minecraft/block/BlockGrass; -> ajk c Lall;
-net/minecraft/init/Blocks hopper Lnet/minecraft/block/BlockHopper; -> ajk cp Lalv;
-net/minecraft/init/Blocks iron_block Lnet/minecraft/block/Block; -> ajk S Lajj;
-net/minecraft/init/Blocks obsidian Lnet/minecraft/block/Block; -> ajk Z Lajj;
-net/minecraft/init/Blocks planks Lnet/minecraft/block/Block; -> ajk f Lajj;
-net/minecraft/init/Blocks sapling Lnet/minecraft/block/Block; -> ajk g Lajj;
-net/minecraft/init/Blocks stone Lnet/minecraft/block/Block; -> ajk b Lajj;
-net/minecraft/init/Items ender_pearl Lnet/minecraft/item/Item; -> adk bB Ladg;
-net/minecraft/init/Items iron_axe Lnet/minecraft/item/Item; -> adk c Ladg;
-net/minecraft/init/Items iron_ingot Lnet/minecraft/item/Item; -> adk l Ladg;
-net/minecraft/init/Items leather Lnet/minecraft/item/Item; -> adk aM Ladg;
-net/minecraft/init/Items redstone Lnet/minecraft/item/Item; -> adk aE Ladg;
-net/minecraft/init/Items stick Lnet/minecraft/item/Item; -> adk A Ladg;
+net/minecraft/block/Block AIR_ID Lnet/minecraft/util/ResourceLocation; -> ajn a Lkl;
+net/minecraft/block/Block BLOCK_STATE_IDS Lnet/minecraft/util/ObjectIntIdentityMap; -> ajn i Lct;
+net/minecraft/block/Block blockMaterial Lnet/minecraft/block/material/Material; -> ajn x Lawx;
+net/minecraft/block/Block blockRegistry Lnet/minecraft/util/RegistryNamespacedDefaultedByKey; -> ajn h Lco;
+net/minecraft/block/Block blockState Lnet/minecraft/block/state/BlockState; -> ajn A Laqw;
+net/minecraft/block/Block lightOpacity I -> ajn m I
+net/minecraft/block/Block mapColor Lnet/minecraft/block/material/MapColor; -> ajn y Lawy;
+net/minecraft/block/Block soundTypeWood Lnet/minecraft/block/Block$SoundType; -> ajn a Laoi;
+net/minecraft/block/Block unlocalizedName Ljava/lang/String; -> ajn d Ljava/lang/String;
+net/minecraft/block/BlockDirectional FACING Lnet/minecraft/block/properties/PropertyDirection; -> ama B Larh;
+net/minecraft/block/BlockDoor FACING Lnet/minecraft/block/properties/PropertyDirection; -> akp a Larh;
+net/minecraft/block/BlockDoor HALF Lnet/minecraft/block/properties/PropertyEnum; -> akp e Lari;
+net/minecraft/block/BlockDoor HINGE Lnet/minecraft/block/properties/PropertyEnum; -> akp c Lari;
+net/minecraft/block/BlockDoor OPEN Lnet/minecraft/block/properties/PropertyBool; -> akp b Larg;
+net/minecraft/block/BlockDoor POWERED Lnet/minecraft/block/properties/PropertyBool; -> akp d Larg;
+net/minecraft/block/BlockDoor$EnumDoorHalf LOWER Lnet/minecraft/block/BlockDoor$EnumDoorHalf; -> akp$a b Lakp$a;
+net/minecraft/block/BlockDoor$EnumDoorHalf UPPER Lnet/minecraft/block/BlockDoor$EnumDoorHalf; -> akp$a a Lakp$a;
+net/minecraft/block/BlockDoor$EnumHingePosition LEFT Lnet/minecraft/block/BlockDoor$EnumHingePosition; -> akp$b a Lakp$b;
+net/minecraft/block/BlockDoor$EnumHingePosition RIGHT Lnet/minecraft/block/BlockDoor$EnumHingePosition; -> akp$b b Lakp$b;
+net/minecraft/block/BlockPane EAST Lnet/minecraft/block/properties/PropertyBool; -> aow c Larg;
+net/minecraft/block/BlockPane NORTH Lnet/minecraft/block/properties/PropertyBool; -> aow b Larg;
+net/minecraft/block/BlockPane SOUTH Lnet/minecraft/block/properties/PropertyBool; -> aow d Larg;
+net/minecraft/block/BlockPane WEST Lnet/minecraft/block/properties/PropertyBool; -> aow e Larg;
+net/minecraft/block/EnumRenderType ENTITYBLOCK_ANIMATED Lnet/minecraft/block/EnumRenderType; -> anu c Lanu;
+net/minecraft/block/EnumRenderType INVISIBLE Lnet/minecraft/block/EnumRenderType; -> anu a Lanu;
+net/minecraft/block/EnumRenderType LIQUID Lnet/minecraft/block/EnumRenderType; -> anu b Lanu;
+net/minecraft/block/EnumRenderType MODEL Lnet/minecraft/block/EnumRenderType; -> anu d Lanu;
+net/minecraft/block/material/Material air Lnet/minecraft/block/material/Material; -> awx a Lawx;
+net/minecraft/block/material/Material leaves Lnet/minecraft/block/material/Material; -> awx j Lawx;
+net/minecraft/block/material/Material wood Lnet/minecraft/block/material/Material; -> awx d Lawx;
+net/minecraft/client/Minecraft gameSettings Lnet/minecraft/client/entity/EntityPlayerSP; -> bca u Lbcd;
+net/minecraft/client/Minecraft thePlayer Lnet/minecraft/client/entity/EntityPlayerSP; -> bca h Lbmi;
+net/minecraft/client/Minecraft theWorld Lnet/minecraft/client/multiplayer/WorldClient; -> bca f Lbkj;
+net/minecraft/client/gui/GuiButton displayString Ljava/lang/String; -> bcp j Ljava/lang/String;
+net/minecraft/client/gui/GuiButton height I -> bcp g I
+net/minecraft/client/gui/GuiButton id I -> bcp k I
+net/minecraft/client/gui/GuiButton width I -> bcp f I
+net/minecraft/client/gui/GuiButton xPosition I -> bcp h I
+net/minecraft/client/gui/GuiButton yPosition I -> bcp i I
+net/minecraft/client/gui/GuiScreen buttonList Ljava/util/List; -> bes n Ljava/util/List;
+net/minecraft/client/gui/GuiScreen fontRendererObj Lnet/minecraft/client/gui/FontRenderer; -> bes q Lbcj;
+net/minecraft/client/gui/GuiScreen height I -> bes m I
+net/minecraft/client/gui/GuiScreen itemRender Lnet/minecraft/client/renderer/entity/RenderItem; -> brm k Lbrm;
+net/minecraft/client/gui/GuiScreen mc Lnet/minecraft/client/Minecraft; -> bes j Lbca;
+net/minecraft/client/gui/GuiScreen width I -> bes l I
+net/minecraft/client/gui/inventory/GuiContainer guiLeft I -> bfk i I
+net/minecraft/client/gui/inventory/GuiContainer guiTop I -> bfk r I
+net/minecraft/client/renderer/texture/TextureAtlasSprite framesTextureData Ljava/util/List; -> buu a Ljava/util/List;
+net/minecraft/client/renderer/texture/TextureAtlasSprite height I -> buu g I
+net/minecraft/client/renderer/texture/TextureAtlasSprite iconName Ljava/lang/String; -> buu j Ljava/lang/String;
+net/minecraft/client/renderer/texture/TextureAtlasSprite maxU F -> buu m F
+net/minecraft/client/renderer/texture/TextureAtlasSprite maxV F -> buu o F
+net/minecraft/client/renderer/texture/TextureAtlasSprite minU F -> buu l F
+net/minecraft/client/renderer/texture/TextureAtlasSprite minV F -> buu n F
+net/minecraft/client/renderer/texture/TextureAtlasSprite originX I -> buu d I
+net/minecraft/client/renderer/texture/TextureAtlasSprite originY I -> buu e I
+net/minecraft/client/renderer/texture/TextureAtlasSprite rotated Z -> buu c Z
+net/minecraft/client/renderer/texture/TextureAtlasSprite width I -> buu f I
+net/minecraft/client/settings/KeyBinding keyCategory Ljava/lang/String; -> bbx f Ljava/lang/String;
+net/minecraft/client/settings/KeyBinding keyCode I -> bbx g I
+net/minecraft/client/settings/KeyBinding keyCodeDefault I -> bbx e I
+net/minecraft/client/settings/KeyBinding keyDescription Ljava/lang/String; -> bbx d Ljava/lang/String;
+net/minecraft/client/settings/KeyBinding pressTime I -> bbx i I
+net/minecraft/client/settings/KeyBinding pressed Z -> bbx h Z
+net/minecraft/creativetab/CreativeTabs tabAllSearch Lnet/minecraft/creativetab/CreativeTabs; -> ack g Lack;
+net/minecraft/creativetab/CreativeTabs tabBlock Lnet/minecraft/creativetab/CreativeTabs; -> ack b Lack;
+net/minecraft/creativetab/CreativeTabs tabBrewing Lnet/minecraft/creativetab/CreativeTabs; -> ack k Lack;
+net/minecraft/creativetab/CreativeTabs tabCombat Lnet/minecraft/creativetab/CreativeTabs; -> ack j Lack;
+net/minecraft/creativetab/CreativeTabs tabDecorations Lnet/minecraft/creativetab/CreativeTabs; -> ack c Lack;
+net/minecraft/creativetab/CreativeTabs tabFood Lnet/minecraft/creativetab/CreativeTabs; -> ack h Lack;
+net/minecraft/creativetab/CreativeTabs tabInventory Lnet/minecraft/creativetab/CreativeTabs; -> ack m Lack;
+net/minecraft/creativetab/CreativeTabs tabMaterials Lnet/minecraft/creativetab/CreativeTabs; -> ack l Lack;
+net/minecraft/creativetab/CreativeTabs tabMisc Lnet/minecraft/creativetab/CreativeTabs; -> ack f Lack;
+net/minecraft/creativetab/CreativeTabs tabRedstone Lnet/minecraft/creativetab/CreativeTabs; -> ack d Lack;
+net/minecraft/creativetab/CreativeTabs tabTools Lnet/minecraft/creativetab/CreativeTabs; -> ack i Lack;
+net/minecraft/creativetab/CreativeTabs tabTransport Lnet/minecraft/creativetab/CreativeTabs; -> ack e Lack;
+net/minecraft/entity/Entity fallDistance F -> ro K F
+net/minecraft/entity/monster/EntityEnderman carriableBlocks Ljava/util/Set; -> yp c Ljava/util/Set;
+net/minecraft/entity/player/EntityPlayer inventory Lnet/minecraft/entity/player/InventoryPlayer; -> zo bn Lzn;
+net/minecraft/entity/player/EntityPlayer openContainer Lnet/minecraft/inventory/Container; -> zo bp Laao;
+net/minecraft/init/Blocks air Lnet/minecraft/block/Block; -> ajo a Lajn;
+net/minecraft/init/Blocks bedrock Lnet/minecraft/block/Block; -> ajo h Lajn;
+net/minecraft/init/Blocks chest Lnet/minecraft/block/BlockChest; -> ajo ae Lajy;
+net/minecraft/init/Blocks cobblestone Lnet/minecraft/block/Block; -> ajo e Lajn;
+net/minecraft/init/Blocks dirt Lnet/minecraft/block/Block; -> ajo d Lajn;
+net/minecraft/init/Blocks glass_pane Lnet/minecraft/block/Block; -> ajo bj Lajn;
+net/minecraft/init/Blocks grass Lnet/minecraft/block/BlockGrass; -> ajo c Lalp;
+net/minecraft/init/Blocks hopper Lnet/minecraft/block/BlockHopper; -> ajo cp Lalz;
+net/minecraft/init/Blocks iron_block Lnet/minecraft/block/Block; -> ajo S Lajn;
+net/minecraft/init/Blocks obsidian Lnet/minecraft/block/Block; -> ajo Z Lajn;
+net/minecraft/init/Blocks planks Lnet/minecraft/block/Block; -> ajo f Lajn;
+net/minecraft/init/Blocks sapling Lnet/minecraft/block/Block; -> ajo g Lajn;
+net/minecraft/init/Blocks stone Lnet/minecraft/block/Block; -> ajo b Lajn;
+net/minecraft/init/Items ender_pearl Lnet/minecraft/item/Item; -> adn bB Ladj;
+net/minecraft/init/Items iron_axe Lnet/minecraft/item/Item; -> adn c Ladj;
+net/minecraft/init/Items iron_ingot Lnet/minecraft/item/Item; -> adn l Ladj;
+net/minecraft/init/Items leather Lnet/minecraft/item/Item; -> adn aM Ladj;
+net/minecraft/init/Items redstone Lnet/minecraft/item/Item; -> adn aE Ladj;
+net/minecraft/init/Items stick Lnet/minecraft/item/Item; -> adn A Ladj;
 net/minecraft/init/Sounds ambient_cave Lnet/minecraft/util/Sound; -> nh a Lng;
 net/minecraft/init/Sounds block_anvil_break Lnet/minecraft/util/Sound; -> nh b Lng;
 net/minecraft/init/Sounds block_anvil_destroy Lnet/minecraft/util/Sound; -> nh c Lng;
@@ -658,218 +672,230 @@ net/minecraft/init/Sounds record_ward Lnet/minecraft/util/Sound; -> nh dM Lng;
 net/minecraft/init/Sounds ui_button_click Lnet/minecraft/util/Sound; -> nh fj Lng;
 net/minecraft/init/Sounds weather_rain Lnet/minecraft/util/Sound; -> nh fr Lng;
 net/minecraft/init/Sounds weather_rain_above Lnet/minecraft/util/Sound; -> nh fs Lng;
-net/minecraft/inventory/Container crafters Ljava/util/List; -> aan e Ljava/util/List;
-net/minecraft/inventory/Container inventorySlots Ljava/util/List; -> aan c Ljava/util/List;
-net/minecraft/inventory/Container windowId I -> aan d I
-net/minecraft/inventory/InventoryBasic hasCustomName Z -> qr e Z
-net/minecraft/inventory/InventoryBasic inventoryContent [Lnet/minecraft/item/ItemStack; -> qr c [Ladi;
-net/minecraft/inventory/InventoryBasic inventoryTitle Ljava/lang/String; -> qr a Ljava/lang/String;
-net/minecraft/inventory/InventoryBasic slotsCount I -> qr b I
-net/minecraft/inventory/Slot inventory Lnet/minecraft/inventory/IInventory; -> abl d Lqe;
-net/minecraft/inventory/Slot slotIndex I -> abl a I
-net/minecraft/inventory/Slot slotNumber I -> abl e I
-net/minecraft/inventory/Slot xDisplayPosition I -> abl f I
-net/minecraft/inventory/Slot yDisplayPosition I -> abl g I
-net/minecraft/item/EnumAction BLOCK Lnet/minecraft/item/EnumAction; -> aes d Laes;
-net/minecraft/item/EnumAction BOW Lnet/minecraft/item/EnumAction; -> aes e Laes;
-net/minecraft/item/EnumAction DRINK Lnet/minecraft/item/EnumAction; -> aes c Laes;
-net/minecraft/item/EnumAction EAT Lnet/minecraft/item/EnumAction; -> aes b Laes;
-net/minecraft/item/EnumAction NONE Lnet/minecraft/item/EnumAction; -> aes a Laes;
-net/minecraft/item/Item maxDamage I -> adg o I
-net/minecraft/item/Item maxStackSize I -> adg i I
-net/minecraft/item/Item unlocalizedName Ljava/lang/String; -> adg q Ljava/lang/String;
-net/minecraft/item/ItemStack item Lnet/minecraft/item/Item; -> adi d Ladg;
-net/minecraft/item/ItemStack itemDamage I -> adi f I
-net/minecraft/item/ItemStack stackSize I -> adi b I
-net/minecraft/item/ItemStack stackTagCompound Lnet/minecraft/nbt/NBTTagCompound; -> adi e Ldn;
-net/minecraft/item/crafting/ShapedRecipes copyIngredientNBT Z -> afp e Z
-net/minecraft/item/crafting/ShapedRecipes recipeHeight I -> afp b I
-net/minecraft/item/crafting/ShapedRecipes recipeItems [Lnet/minecraft/item/ItemStack; -> afp c [Ladi;
-net/minecraft/item/crafting/ShapedRecipes recipeOutput Lnet/minecraft/item/ItemStack; -> afp d Ladi;
-net/minecraft/item/crafting/ShapedRecipes recipeWidth I -> afp a I
-net/minecraft/item/crafting/ShapelessRecipes recipeItems Ljava/util/List; -> afq b Ljava/util/List;
-net/minecraft/item/crafting/ShapelessRecipes recipeOutput Lnet/minecraft/item/ItemStack; -> afq a Ladi;
+net/minecraft/inventory/Container crafters Ljava/util/List; -> aao e Ljava/util/List;
+net/minecraft/inventory/Container inventorySlots Ljava/util/List; -> aao c Ljava/util/List;
+net/minecraft/inventory/Container windowId I -> aao d I
+net/minecraft/inventory/InventoryBasic hasCustomName Z -> qs e Z
+net/minecraft/inventory/InventoryBasic inventoryContent [Lnet/minecraft/item/ItemStack; -> qs c [Ladl;
+net/minecraft/inventory/InventoryBasic inventoryTitle Ljava/lang/String; -> qs a Ljava/lang/String;
+net/minecraft/inventory/InventoryBasic slotsCount I -> qs b I
+net/minecraft/inventory/Slot inventory Lnet/minecraft/inventory/IInventory; -> abn d Lqe;
+net/minecraft/inventory/Slot slotIndex I -> abn a I
+net/minecraft/inventory/Slot slotNumber I -> abn e I
+net/minecraft/inventory/Slot xDisplayPosition I -> abn f I
+net/minecraft/inventory/Slot yDisplayPosition I -> abn g I
+net/minecraft/item/EnumAction BLOCK Lnet/minecraft/item/EnumAction; -> aev d Laev;
+net/minecraft/item/EnumAction BOW Lnet/minecraft/item/EnumAction; -> aev e Laev;
+net/minecraft/item/EnumAction DRINK Lnet/minecraft/item/EnumAction; -> aev c Laev;
+net/minecraft/item/EnumAction EAT Lnet/minecraft/item/EnumAction; -> aev b Laev;
+net/minecraft/item/EnumAction NONE Lnet/minecraft/item/EnumAction; -> aev a Laev;
+net/minecraft/item/Item maxDamage I -> adj o I
+net/minecraft/item/Item maxStackSize I -> adj i I
+net/minecraft/item/Item unlocalizedName Ljava/lang/String; -> adj q Ljava/lang/String;
+net/minecraft/item/ItemStack item Lnet/minecraft/item/Item; -> adl d Ladj;
+net/minecraft/item/ItemStack itemDamage I -> adl f I
+net/minecraft/item/ItemStack stackSize I -> adl b I
+net/minecraft/item/ItemStack stackTagCompound Lnet/minecraft/nbt/NBTTagCompound; -> adl e Ldn;
+net/minecraft/item/crafting/ShapedRecipes copyIngredientNBT Z -> aft e Z
+net/minecraft/item/crafting/ShapedRecipes recipeHeight I -> aft b I
+net/minecraft/item/crafting/ShapedRecipes recipeItems [Lnet/minecraft/item/ItemStack; -> aft c [Ladl;
+net/minecraft/item/crafting/ShapedRecipes recipeOutput Lnet/minecraft/item/ItemStack; -> aft d Ladl;
+net/minecraft/item/crafting/ShapedRecipes recipeWidth I -> aft a I
+net/minecraft/item/crafting/ShapelessRecipes recipeItems Ljava/util/List; -> afu b Ljava/util/List;
+net/minecraft/item/crafting/ShapelessRecipes recipeOutput Lnet/minecraft/item/ItemStack; -> afu a Ladl;
 net/minecraft/nbt/NBTTagList tagType B -> du d B
 net/minecraft/network/play/server/S2DPacketOpenWindow inventoryType Ljava/lang/String -> gc b Ljava/lang/String;
 net/minecraft/network/play/server/S2DPacketOpenWindow slotCount I -> gc d I
 net/minecraft/network/play/server/S2DPacketOpenWindow windowId I -> gc a I
 net/minecraft/network/play/server/S2DPacketOpenWindow windowTitle Lnet/minecraft/util/IChatComponent; -> gc c Leu;
-net/minecraft/tileentity/TileEntity blockMetadata I -> apl h I
-net/minecraft/tileentity/TileEntity blockType Lnet/minecraft/block/Block; -> apl e Lajj;
-net/minecraft/tileentity/TileEntity pos Lnet/minecraft/util/BlockPos; -> apl c Lcj;
-net/minecraft/tileentity/TileEntity tileEntityInvalid Z -> apl d Z
-net/minecraft/tileentity/TileEntity worldObj Lnet/minecraft/world/World; -> apl b Lahk;
-net/minecraft/util/AxisAlignedBB maxX D -> bav d D
-net/minecraft/util/AxisAlignedBB maxY D -> bav e D
-net/minecraft/util/AxisAlignedBB maxZ D -> bav f D
-net/minecraft/util/AxisAlignedBB minX D -> bav a D
-net/minecraft/util/AxisAlignedBB minY D -> bav b D
-net/minecraft/util/AxisAlignedBB minZ D -> bav c D
+net/minecraft/tileentity/TileEntity blockMetadata I -> app h I
+net/minecraft/tileentity/TileEntity blockType Lnet/minecraft/block/Block; -> app e Lajn;
+net/minecraft/tileentity/TileEntity pos Lnet/minecraft/util/BlockPos; -> app c Lcj;
+net/minecraft/tileentity/TileEntity tileEntityInvalid Z -> app d Z
+net/minecraft/tileentity/TileEntity worldObj Lnet/minecraft/world/World; -> app b Laho;
+net/minecraft/util/AxisAlignedBB maxX D -> bbc d D
+net/minecraft/util/AxisAlignedBB maxY D -> bbc e D
+net/minecraft/util/AxisAlignedBB maxZ D -> bbc f D
+net/minecraft/util/AxisAlignedBB minX D -> bbc a D
+net/minecraft/util/AxisAlignedBB minY D -> bbc b D
+net/minecraft/util/AxisAlignedBB minZ D -> bbc c D
 net/minecraft/util/EnumFacing DOWN Lnet/minecraft/util/EnumFacing; -> cq a Lcq;
 net/minecraft/util/EnumFacing EAST Lnet/minecraft/util/EnumFacing; -> cq f Lcq;
 net/minecraft/util/EnumFacing NORTH Lnet/minecraft/util/EnumFacing; -> cq c Lcq;
 net/minecraft/util/EnumFacing SOUTH Lnet/minecraft/util/EnumFacing; -> cq d Lcq;
 net/minecraft/util/EnumFacing UP Lnet/minecraft/util/EnumFacing; -> cq b Lcq;
 net/minecraft/util/EnumFacing WEST Lnet/minecraft/util/EnumFacing; -> cq e Lcq;
-net/minecraft/util/ItemUseResult FAIL Lnet/minecraft/util/ItemUseResult; -> ql c Lql;
-net/minecraft/util/ItemUseResult PASS Lnet/minecraft/util/ItemUseResult; -> ql b Lql;
-net/minecraft/util/ItemUseResult SUCCESS Lnet/minecraft/util/ItemUseResult; -> ql a Lql;
-net/minecraft/util/MainOrOffHand MAIN_HAND Lnet/minecraft/util/MainOrOffHand; -> qj a Lqj;
-net/minecraft/util/MainOrOffHand OFF_HAND Lnet/minecraft/util/MainOrOffHand; -> qj b Lqj;
-net/minecraft/util/Vec3 xCoord D -> bax a D
-net/minecraft/util/Vec3 yCoord D -> bax b D
-net/minecraft/util/Vec3 zCoord D -> bax c D
+net/minecraft/util/ItemUseResult FAIL Lnet/minecraft/util/ItemUseResult; -> qm c Lqm;
+net/minecraft/util/ItemUseResult PASS Lnet/minecraft/util/ItemUseResult; -> qm b Lqm;
+net/minecraft/util/ItemUseResult SUCCESS Lnet/minecraft/util/ItemUseResult; -> qm a Lqm;
+net/minecraft/util/MainOrOffHand MAIN_HAND Lnet/minecraft/util/MainOrOffHand; -> qk a Lqk;
+net/minecraft/util/MainOrOffHand OFF_HAND Lnet/minecraft/util/MainOrOffHand; -> qk b Lqk;
+net/minecraft/util/Vec3 xCoord D -> bbe a D
+net/minecraft/util/Vec3 yCoord D -> bbe b D
+net/minecraft/util/Vec3 zCoord D -> bbe c D
 net/minecraft/util/Vec3i x I -> df a I
 net/minecraft/util/Vec3i y I -> df c I
 net/minecraft/util/Vec3i z I -> df d I
-net/minecraft/world/World isRemote Z -> ahk E Z
+net/minecraft/world/World isRemote Z -> aho E Z
 
 METHODS:
-net/minecraft/block/Block breakBlock (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)V -> ajj b (Lahk;Lcj;Laqr;)V
-net/minecraft/block/Block collisionRayTrace (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;)Lnet/minecraft/util/MovingObjectPosition; -> ajj a (Laqr;Lahk;Lcj;Lbax;Lbax;)Lbaw;
-net/minecraft/block/Block createBlockState ()Lnet/minecraft/block/state/BlockState; -> ajj b ()Laqs;
-net/minecraft/block/Block dropBlockAsItem (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;I)V -> ajj b (Lahk;Lcj;Laqr;I)V
-net/minecraft/block/Block dropBlockAsItemWithChance (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;FI)V -> ajj a (Lahk;Lcj;Laqr;FI)V
-net/minecraft/block/Block getActualState (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/block/state/IBlockState; -> ajj b (Laqr;Laho;Lcj;)Laqr;
-net/minecraft/block/Block getBlockById (I)Lnet/minecraft/block/Block; -> ajj b (I)Lajj;
-net/minecraft/block/Block getBlockFromItem (Lnet/minecraft/item/Item;)Lnet/minecraft/block/Block; -> ajj a (Ladg;)Lajj;
-net/minecraft/block/Block getBlockFromName (Ljava/lang/String;)Lnet/minecraft/block/Block; -> ajj b (Ljava/lang/String;)Lajj;
-net/minecraft/block/Block getBlockState ()Lnet/minecraft/block/state/BlockState; -> ajj u ()Laqs;
-net/minecraft/block/Block getDefaultState ()Lnet/minecraft/block/state/IBlockState; -> ajj v ()Laqr;
-net/minecraft/block/Block getIdFromBlock (Lnet/minecraft/block/Block;)I -> ajj a (Lajj;)I
-net/minecraft/block/Block getLocalizedName ()Ljava/lang/String; -> ajj c ()Ljava/lang/String;
-net/minecraft/block/Block getMetaFromState (Lnet/minecraft/block/state/IBlockState;)I -> ajj f (Laqr;)I
-net/minecraft/block/Block getMixedBrightnessForBlock (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)I -> ajj c (Laqr;Laho;Lcj;)I
-net/minecraft/block/Block getStateById (I)Lnet/minecraft/block/state/IBlockState; -> ajj c (I)Laqr;
-net/minecraft/block/Block getStateFromMeta (I)Lnet/minecraft/block/state/IBlockState; -> ajj a (I)Laqr;
-net/minecraft/block/Block getStateId (Lnet/minecraft/block/state/IBlockState;)I -> ajj k (Laqr;)I
-net/minecraft/block/Block getUnlocalizedName ()Ljava/lang/String; -> ajj a ()Ljava/lang/String;
-net/minecraft/block/Block harvestBlock (Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/tileentity/TileEntity;Lnet/minecraft/item/ItemStack;)V -> ajj a (Lahk;Lzn;Lcj;Laqr;Lapl;Ladi;)V
-net/minecraft/block/Block onBlockActivated (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumFacing;FFF)Z -> ajj a (Lahk;Lcj;Laqr;Lzn;Lqj;Ladi;Lcq;FFF)Z
-net/minecraft/block/Block onBlockClicked (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/player/EntityPlayer;)V -> ajj a (Lahk;Lcj;Lzn;)V
-net/minecraft/block/Block onBlockEventReceived (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;II)Z -> ajj a (Lahk;Lcj;Laqr;II)Z
-net/minecraft/block/Block onBlockPlaced (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;FFFILnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/block/state/IBlockState; -> ajj a (Lahk;Lcj;Lcq;FFFILrw;)Laqr;
-net/minecraft/block/Block onEntityCollidedWithBlock (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/Entity;)V -> ajj a (Lahk;Lcj;Lrn;)V
-net/minecraft/block/Block onNeighborBlockChange (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/Block;)V -> ajj a (Lahk;Lcj;Laqr;Lajj;)V
-net/minecraft/block/Block registerBlock (ILjava/lang/String;Lnet/minecraft/block/Block;)V -> ajj a (ILjava/lang/String;Lajj;)V
-net/minecraft/block/Block registerBlock (ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/block/Block;)V -> ajj a (ILkl;Lajj;)V
-net/minecraft/block/Block registerBlocks ()V -> ajj y ()V
-net/minecraft/block/Block setCreativeTab (Lnet/minecraft/creativetab/CreativeTabs;)Lnet/minecraft/block/Block; -> ajj a (Laci;)Lajj;
-net/minecraft/block/Block setDefaultState (Lnet/minecraft/block/state/IBlockState;)V -> ajj x (Laqr;)V
-net/minecraft/block/Block setHardness (F)Lnet/minecraft/block/Block; -> ajj c (F)Lajj;
-net/minecraft/block/Block setStepSound (Lnet/minecraft/block/Block$SoundType;)Lnet/minecraft/block/Block; -> ajj a (Laoe;)Lajj;
-net/minecraft/block/Block setUnlocalizedName (Ljava/lang/String;)Lnet/minecraft/block/Block; -> ajj c (Ljava/lang/String;)Lajj;
-net/minecraft/block/Block spawnAsEntity (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/item/ItemStack;)V -> ajj a (Lahk;Lcj;Ladi;)V
-net/minecraft/block/ITileEntityProvider createNewTileEntity (Lnet/minecraft/world/World;I)Lnet/minecraft/tileentity/TileEntity; -> akw a (Lahk;I)Lapl;
-net/minecraft/block/material/Material getMaterialMapColor ()Lnet/minecraft/block/material/MapColor; -> aws r ()Lawt;
-net/minecraft/block/properties/PropertyDirection create (Ljava/lang/String;)Lnet/minecraft/block/properties/PropertyDirection; -> ard a (Ljava/lang/String;)Lard;
-net/minecraft/block/properties/PropertyEnum create (Ljava/lang/String;Ljava/lang/Class;)Lnet/minecraft/block/properties/PropertyEnum; -> are a (Ljava/lang/String;Ljava/lang/Class;)Lare;
-net/minecraft/block/state/BlockState getAllowedValues ()Ljava/util/List; -> aqs e ()Ljava/util/List;
-net/minecraft/block/state/BlockState getBaseState ()Lnet/minecraft/block/state/IBlockState; -> aqs b ()Laqr;
-net/minecraft/block/state/BlockState getBlock ()Lnet/minecraft/block/Block; -> aqs c ()Lajj;
-net/minecraft/block/state/BlockState getProperties ()Ljava/util/Collection; -> aqs d ()Ljava/util/Collection;
-net/minecraft/block/state/BlockState getProperty (Ljava/lang/String;)Lnet/minecraft/block/properties/IProperty; -> aqs a (Ljava/lang/String;)Larg;
-net/minecraft/block/state/BlockState getPropertyValue (Lnet/minecraft/block/Block;Lnet/minecraft/block/properties/IProperty;)Ljava/lang/String; -> aqs a (Lajj;Larg;)Ljava/lang/String;
-net/minecraft/block/state/BlockState getValidStates ()Lcom/google/common/collect/ImmutableList; -> aqs a ()Lcom/google/common/collect/ImmutableList;
-net/minecraft/block/state/IBlockState cycleProperty (Lnet/minecraft/block/properties/IProperty;)Lnet/minecraft/block/state/IBlockState; -> aqr a (Larg;)Laqr;
-net/minecraft/block/state/IBlockState getBlock ()Lnet/minecraft/block/Block; -> aqr s ()Lajj;
-net/minecraft/block/state/IBlockState getProperties ()Lcom/google/common/collect/ImmutableMap; -> aqr r ()Lcom/google/common/collect/ImmutableMap;
-net/minecraft/block/state/IBlockState getPropertyNames ()Ljava/util/Collection; -> aqr q ()Ljava/util/Collection;
-net/minecraft/block/state/IBlockState getValue (Lnet/minecraft/block/properties/IProperty;)Ljava/lang/Comparable; -> aqr b (Larg;)Ljava/lang/Comparable;
-net/minecraft/block/state/IBlockState withProperty (Lnet/minecraft/block/properties/IProperty;Ljava/lang/Comparable;)Lnet/minecraft/block/state/IBlockState; -> aqr a (Larg;Ljava/lang/Comparable;)Laqr;
-net/minecraft/client/Minecraft displayGuiScreen (Lnet/minecraft/client/gui/GuiScreen;)V -> bbt a (Lbel;)V
-net/minecraft/client/Minecraft getIntegratedServer ()Lnet/minecraft/server/integrated/IntegratedServer; -> bbt E ()Lbxr;
-net/minecraft/client/Minecraft getMinecraft ()Lnet/minecraft/client/Minecraft; -> bbt y ()Lbbt;
-net/minecraft/client/Minecraft getRenderItem ()Lnet/minecraft/client/renderer/entity/RenderItem; -> bbt ac ()Lbrf;
-net/minecraft/client/Minecraft getTextureMapBlocks ()Lnet/minecraft/client/renderer/texture/TextureMap; -> bbt Q ()Lbuk;
-net/minecraft/client/Minecraft launchIntegratedServer (Ljava/lang/String;Ljava/lang/String;Lnet/minecraft/world/WorldSettings;)V -> bbt a (Ljava/lang/String;Ljava/lang/String;Lahn;)V
-net/minecraft/client/Minecraft refreshResources ()V -> bbt e ()V
-net/minecraft/client/Minecraft startGame ()V -> bbt ak ()V
-net/minecraft/client/gui/FontRenderer getStringWidth (Ljava/lang/String;)I -> bcc a (Ljava/lang/String;)I
-net/minecraft/client/gui/Gui drawCenteredString (Lnet/minecraft/client/gui/FontRenderer;Ljava/lang/String;III)V -> bce a (Lbcc;Ljava/lang/String;III)V
-net/minecraft/client/gui/Gui drawString (Lnet/minecraft/client/gui/FontRenderer;Ljava/lang/String;III)V -> bce c (Lbcc;Ljava/lang/String;III)V
-net/minecraft/client/gui/GuiListExtended getListEntry (I)Lnet/minecraft/client/gui/GuiListExtended$IGuiListEntry; -> bcv b (I)Lbcv$a;
-net/minecraft/client/gui/GuiListExtended mouseClicked (III)Z -> bcv b (III)Z
-net/minecraft/client/gui/GuiListExtended mouseReleased (III)Z -> bcv c (III)Z
-net/minecraft/client/gui/GuiScreen actionPerformed (Lnet/minecraft/client/gui/GuiButton;)V -> bel a (Lbci;)V
-net/minecraft/client/gui/GuiScreen doesGuiPauseGame ()Z -> bel d ()Z
-net/minecraft/client/gui/GuiScreen drawDefaultBackground ()V -> bel c ()V
-net/minecraft/client/gui/GuiScreen drawScreen (IIF)V -> bel a (IIF)V
-net/minecraft/client/gui/GuiScreen drawWorldBackground (I)V -> bel a_ (I)V
-net/minecraft/client/gui/GuiScreen initGui ()V -> bel b ()V
-net/minecraft/client/gui/GuiScreen keyTyped (CI)V -> bel a (CI)V
-net/minecraft/client/gui/GuiScreen mouseClickMove (IIIJ)V -> bel a (IIIJ)V
-net/minecraft/client/gui/GuiScreen mouseClicked (III)V -> bel a (III)V
-net/minecraft/client/gui/GuiScreen mouseReleased (III)V -> bel b (III)V
-net/minecraft/client/gui/GuiScreen onGuiClosed ()V -> bel m ()V
-net/minecraft/client/gui/GuiScreen onResize (Lnet/minecraft/client/Minecraft;II)V -> bel b (Lbbt;II)V
-net/minecraft/client/gui/GuiScreen setWorldAndResolution (Lnet/minecraft/client/Minecraft;II)V -> bel a (Lbbt;II)V
-net/minecraft/client/gui/GuiScreen updateScreen ()V -> bel e ()V
-net/minecraft/client/gui/GuiSlot drawBackground ()V -> bda a ()V
-net/minecraft/client/gui/GuiSlot drawSlot (IIIIII)V -> bda a (IIIIII)V
-net/minecraft/client/gui/GuiSlot elementClicked (IZII)V -> bda a (IZII)V
-net/minecraft/client/gui/GuiSlot func_178040_a (III)V -> bda a (III)V
-net/minecraft/client/gui/GuiSlot isSelected (I)Z -> bda a (I)Z
-net/minecraft/client/gui/inventory/GuiContainer checkHotbarKeys (I)Z -> bfd b (I)Z
-net/minecraft/client/gui/inventory/GuiContainer drawGuiContainerBackgroundLayer (FII)V -> bfd a (FII)V
-net/minecraft/client/gui/inventory/GuiContainer drawGuiContainerForegroundLayer (II)V -> bfd b (II)V
-net/minecraft/client/gui/inventory/GuiContainer drawItemStack (Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V -> bfd a (Ladi;IILjava/lang/String;)V
-net/minecraft/client/gui/inventory/GuiContainer drawSlot (Lnet/minecraft/inventory/Slot;)V -> bfd a (Labl;)V
-net/minecraft/client/gui/inventory/GuiContainer getSlotAtPosition (II)Lnet/minecraft/inventory/Slot; -> bfd c (II)Labl;
-net/minecraft/client/gui/inventory/GuiContainer handleMouseClick (Lnet/minecraft/inventory/Slot;III)V -> bfd a (Labl;III)V
-net/minecraft/client/gui/inventory/GuiContainer isMouseOverSlot (Lnet/minecraft/inventory/Slot;II)Z -> bfd a (Labl;II)Z
-net/minecraft/client/gui/inventory/GuiContainer isPointInRegion (IIIIII)Z -> bfd c (IIIIII)Z
-net/minecraft/client/gui/inventory/GuiContainer updateDragSplitting ()V -> bfd a ()V
-net/minecraft/client/network/NetHandlerPlayClient handleOpenWindow (Lnet/minecraft/network/play/server/S2DPacketOpenWindow;)V -> bka a (Lgc;)V
-net/minecraft/client/renderer/BlockRendererDispatcher renderBlock (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/BlockPos;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/client/renderer/WorldRenderer;)Z -> bnj a (Laqr;Lcj;Laho;Lbmh;)Z
-net/minecraft/client/renderer/ItemModelMesher register (Lnet/minecraft/item/Item;ILnet/minecraft/client/resources/model/ModelResourceLocation;)V -> bms a (Ladg;ILbwx;)V
-net/minecraft/client/renderer/RenderGlobal renderBlockLayer (Lnet/minecraft/util/EnumWorldBlockLayer;)V -> bmv a (Lahd;)V
-net/minecraft/client/renderer/RenderHelper disableStandardItemLighting ()V -> bbr a ()V
-net/minecraft/client/renderer/RenderHelper enableGUIStandardItemLighting ()V -> bbr c ()V
-net/minecraft/client/renderer/RenderHelper enableStandardItemLighting ()V -> bbr b ()V
-net/minecraft/client/renderer/WorldRenderer addVertex (DDD)Lnet/minecraft/client/renderer/WorldRenderer; -> bmh b (DDD)Lbmh;
-net/minecraft/client/renderer/WorldRenderer endVertex ()V -> bmh d ()V
-net/minecraft/client/renderer/WorldRenderer finishDrawing ()V -> bmh e ()V
-net/minecraft/client/renderer/WorldRenderer getByteBuffer ()Ljava/nio/ByteBuffer; -> bmh f ()Ljava/nio/ByteBuffer;
-net/minecraft/client/renderer/WorldRenderer getDrawMode ()I -> bmh i ()I
-net/minecraft/client/renderer/WorldRenderer getVertexCount ()I -> bmh h ()I
-net/minecraft/client/renderer/WorldRenderer markDirty ()V -> bmh c ()V
-net/minecraft/client/renderer/WorldRenderer postNormal (FFF)V -> bmh b (FFF)V
-net/minecraft/client/renderer/WorldRenderer putBrightness4 (IIII)V -> bmh a (IIII)V
-net/minecraft/client/renderer/WorldRenderer putBulkData ([I)V -> bmh a ([I)V
-net/minecraft/client/renderer/WorldRenderer putColor4 (I)V -> bmh a (I)V
-net/minecraft/client/renderer/WorldRenderer putColorMultiplier (FFFI)V -> bmh a (FFFI)V
-net/minecraft/client/renderer/WorldRenderer putColorRGB_F (FFFI)V -> bmh b (FFFI)V
-net/minecraft/client/renderer/WorldRenderer putColorRGB_F4 (FFF)V -> bmh d (FFF)V
-net/minecraft/client/renderer/WorldRenderer putPosition (DDD)V -> bmh a (DDD)V
-net/minecraft/client/renderer/WorldRenderer reset ()V -> bmh b ()V
-net/minecraft/client/renderer/WorldRenderer setBrightness (II)Lnet/minecraft/client/renderer/WorldRenderer; -> bmh a (II)Lbmh;
-net/minecraft/client/renderer/WorldRenderer setColorRGBA (IIII)Lnet/minecraft/client/renderer/WorldRenderer; -> bmh b (IIII)Lbmh;
-net/minecraft/client/renderer/WorldRenderer setColorRGBA_F (FFFF)Lnet/minecraft/client/renderer/WorldRenderer; -> bmh a (FFFF)Lbmh;
-net/minecraft/client/renderer/WorldRenderer setNormal (FFF)Lnet/minecraft/client/renderer/WorldRenderer; -> bmh c (FFF)Lbmh;
-net/minecraft/client/renderer/WorldRenderer setTextureUV (DD)Lnet/minecraft/client/renderer/WorldRenderer; -> bmh a (DD)Lbmh;
-net/minecraft/client/renderer/WorldRenderer setTranslation (DDD)V -> bmh c (DDD)V
-net/minecraft/client/renderer/WorldRenderer sortQuads (FFF)V -> bmh a (FFF)V
-net/minecraft/client/renderer/WorldRenderer startDrawing (ILnet/minecraft/client/renderer/vertex/VertexFormat;)V -> bmh a (ILbuv;)V
-net/minecraft/client/renderer/entity/RenderItem getItemModelMesher ()Lnet/minecraft/client/renderer/ItemModelMesher; -> brf a ()Lbms;
-net/minecraft/client/renderer/texture/TextureAtlasSprite getIconName ()Ljava/lang/String; -> bul i ()Ljava/lang/String;
-net/minecraft/client/renderer/texture/TextureAtlasSprite getInterpolatedU (D)F -> bul a (D)F
-net/minecraft/client/renderer/texture/TextureAtlasSprite getInterpolatedV (D)F -> bul b (D)F
-net/minecraft/client/renderer/texture/TextureAtlasSprite getMaxU ()F -> bul f ()F
-net/minecraft/client/renderer/texture/TextureAtlasSprite getMaxV ()F -> bul h ()F
-net/minecraft/client/renderer/texture/TextureAtlasSprite getMinU ()F -> bul e ()F
-net/minecraft/client/renderer/texture/TextureAtlasSprite getMinV ()F -> bul g ()F
-net/minecraft/client/renderer/texture/TextureMap getAtlasSprite (Ljava/lang/String;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite; -> buk a (Ljava/lang/String;)Lbul;
-net/minecraft/client/settings/KeyBinding getKeybinds ()Ljava/util/Set; -> bbq d ()Ljava/util/Set;
-net/minecraft/client/settings/KeyBinding isKeyDown ()Z -> bbq e ()Z
-net/minecraft/client/settings/KeyBinding isPressed ()Z -> bbq g ()Z
-net/minecraft/client/settings/KeyBinding onTick (I)V -> bbq a (I)V
-net/minecraft/client/settings/KeyBinding resetKeyBindingArrayAndHash ()V -> bbq c ()V
-net/minecraft/client/settings/KeyBinding setKeyBindState (IZ)V -> bbq a (IZ)V
-net/minecraft/client/settings/KeyBinding setKeyCode (I)V -> bbq b (I)V
-net/minecraft/client/settings/KeyBinding unPressAllKeys ()V -> bbq b ()V
-net/minecraft/client/settings/KeyBinding unpressKey ()V -> bbq k ()V
-net/minecraft/client/settings/KeyBinding updateAllKeys ()V -> bbq a ()V
+net/minecraft/block/Block breakBlock (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)V -> ajn b (Laho;Lcj;Laqv;)V
+net/minecraft/block/Block canCollideCheck (Lnet/minecraft/block/state/IBlockState;Z)Z -> ajn a (Laqv;Z)Z
+net/minecraft/block/Block collisionRayTrace (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;)Lnet/minecraft/util/MovingObjectPosition; -> ajn a (Laqv;Laho;Lcj;Lbbe;Lbbe;)Lbbd;
+net/minecraft/block/Block createBlockState ()Lnet/minecraft/block/state/BlockState; -> ajn b ()Laqw;
+net/minecraft/block/Block dropBlockAsItem (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;I)V -> ajn b (Laho;Lcj;Laqv;I)V
+net/minecraft/block/Block dropBlockAsItemWithChance (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;FI)V -> ajn a (Laho;Lcj;Laqv;FI)V
+net/minecraft/block/Block getActualState (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/block/state/IBlockState; -> ajn b (Laqv;Lahs;Lcj;)Laqv;
+net/minecraft/block/Block getBlockById (I)Lnet/minecraft/block/Block; -> ajn b (I)Lajn;
+net/minecraft/block/Block getBlockFromItem (Lnet/minecraft/item/Item;)Lnet/minecraft/block/Block; -> ajn a (Ladj;)Lajn;
+net/minecraft/block/Block getBlockFromName (Ljava/lang/String;)Lnet/minecraft/block/Block; -> ajn b (Ljava/lang/String;)Lajn;
+net/minecraft/block/Block getBlockState ()Lnet/minecraft/block/state/BlockState; -> ajn u ()Laqw;
+net/minecraft/block/Block getCollisionBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB; -> ajn a (Laqv;Laho;Lcj;)Lbbc;
+net/minecraft/block/Block getDefaultState ()Lnet/minecraft/block/state/IBlockState; -> ajn v ()Laqv;
+net/minecraft/block/Block getIdFromBlock (Lnet/minecraft/block/Block;)I -> ajn a (Lajn;)I
+net/minecraft/block/Block getLocalizedName ()Ljava/lang/String; -> ajn c ()Ljava/lang/String;
+net/minecraft/block/Block getMapColor (Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/block/material/MapColor; -> ajn r (Laqv;)Lawy;
+net/minecraft/block/Block getMaterial (Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/block/material/Material; -> ajn q (Laqv;)Lawx;
+net/minecraft/block/Block getMetaFromState (Lnet/minecraft/block/state/IBlockState;)I -> ajn f (Laqv;)I
+net/minecraft/block/Block getMixedBrightnessForBlock (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)I -> ajn c (Laqv;Lahs;Lcj;)I
+net/minecraft/block/Block getRenderType ()Lnet/minecraft/block/EnumRenderType; -> ajn a (Laqv;)Lanu;
+net/minecraft/block/Block getStateById (I)Lnet/minecraft/block/state/IBlockState; -> ajn c (I)Laqv;
+net/minecraft/block/Block getStateFromMeta (I)Lnet/minecraft/block/state/IBlockState; -> ajn a (I)Laqv;
+net/minecraft/block/Block getStateFromMirroring (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/EnumBlockMirroring;)Lnet/minecraft/block/state/IBlockState; -> ajn a (Laqv;Laml;)Laqv;
+net/minecraft/block/Block getStateFromRotation (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/EnumBlockRotation;)Lnet/minecraft/block/state/IBlockState; -> ajn a (Laqv;Lanx;)Laqv;
+net/minecraft/block/Block getStateId (Lnet/minecraft/block/state/IBlockState;)I -> ajn k (Laqv;)I
+net/minecraft/block/Block getUnlocalizedName ()Ljava/lang/String; -> ajn a ()Ljava/lang/String;
+net/minecraft/block/Block harvestBlock (Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/tileentity/TileEntity;Lnet/minecraft/item/ItemStack;)V -> ajn a (Laho;Lzo;Lcj;Laqv;Lapp;Ladl;)V
+net/minecraft/block/Block isOpaqueCube (Lnet/minecraft/block/state/IBlockState;)Z -> ajn b (Laqv;)Z
+net/minecraft/block/Block isReplaceable (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Z -> ajn a (Laho;Lcj;)Z
+net/minecraft/block/Block onBlockActivated (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumFacing;FFF)Z -> ajn a (Laho;Lcj;Laqv;Lzo;Lqk;Ladl;Lcq;FFF)Z
+net/minecraft/block/Block onBlockClicked (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/player/EntityPlayer;)V -> ajn a (Laho;Lcj;Lzo;)V
+net/minecraft/block/Block onBlockEventReceived (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;II)Z -> ajn a (Laho;Lcj;Laqv;II)Z
+net/minecraft/block/Block onBlockPlaced (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;FFFILnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/block/state/IBlockState; -> ajn a (Laho;Lcj;Lcq;FFFILrx;)Laqv;
+net/minecraft/block/Block onEntityCollidedWithBlock (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/Entity;)V -> ajn a (Laho;Lcj;Lro;)V
+net/minecraft/block/Block onNeighborBlockChange (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/Block;)V -> ajn a (Laho;Lcj;Laqv;Lajn;)V
+net/minecraft/block/Block registerBlock (ILjava/lang/String;Lnet/minecraft/block/Block;)V -> ajn a (ILjava/lang/String;Lajn;)V
+net/minecraft/block/Block registerBlock (ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/block/Block;)V -> ajn a (ILkl;Lajn;)V
+net/minecraft/block/Block registerBlocks ()V -> ajn y ()V
+net/minecraft/block/Block setCreativeTab (Lnet/minecraft/creativetab/CreativeTabs;)Lnet/minecraft/block/Block; -> ajn a (Lack;)Lajn;
+net/minecraft/block/Block setDefaultState (Lnet/minecraft/block/state/IBlockState;)V -> ajn x (Laqv;)V
+net/minecraft/block/Block setHardness (F)Lnet/minecraft/block/Block; -> ajn c (F)Lajn;
+net/minecraft/block/Block setLightLevel (F)Lnet/minecraft/block/Block; -> ajn a (F)Lajn;
+net/minecraft/block/Block setLightOpacity (I)Lnet/minecraft/block/Block; -> ajn d (I)Lajn;
+net/minecraft/block/Block setResistance (F)Lnet/minecraft/block/Block; -> ajn b (F)Lajn;
+net/minecraft/block/Block setStepSound (Lnet/minecraft/block/Block$SoundType;)Lnet/minecraft/block/Block; -> ajn a (Laoi;)Lajn;
+net/minecraft/block/Block setUnlocalizedName (Ljava/lang/String;)Lnet/minecraft/block/Block; -> ajn c (Ljava/lang/String;)Lajn;
+net/minecraft/block/Block spawnAsEntity (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/item/ItemStack;)V -> ajn a (Laho;Lcj;Ladl;)V
+net/minecraft/block/ITileEntityProvider createNewTileEntity (Lnet/minecraft/world/World;I)Lnet/minecraft/tileentity/TileEntity; -> ala a (Laho;I)Lapp;
+net/minecraft/block/material/Material getMaterialMapColor ()Lnet/minecraft/block/material/MapColor; -> awx r ()Lawy;
+net/minecraft/block/properties/PropertyDirection create (Ljava/lang/String;)Lnet/minecraft/block/properties/PropertyDirection; -> arh a (Ljava/lang/String;)Larh;
+net/minecraft/block/properties/PropertyEnum create (Ljava/lang/String;Ljava/lang/Class;)Lnet/minecraft/block/properties/PropertyEnum; -> ari a (Ljava/lang/String;Ljava/lang/Class;)Lari;
+net/minecraft/block/state/BlockState getAllowedValues ()Ljava/util/List; -> aqw e ()Ljava/util/List;
+net/minecraft/block/state/BlockState getBaseState ()Lnet/minecraft/block/state/IBlockState; -> aqw b ()Laqv;
+net/minecraft/block/state/BlockState getBlock ()Lnet/minecraft/block/Block; -> aqw c ()Lajn;
+net/minecraft/block/state/BlockState getProperties ()Ljava/util/Collection; -> aqw d ()Ljava/util/Collection;
+net/minecraft/block/state/BlockState getProperty (Ljava/lang/String;)Lnet/minecraft/block/properties/IProperty; -> aqw a (Ljava/lang/String;)Lark;
+net/minecraft/block/state/BlockState getPropertyValue (Lnet/minecraft/block/Block;Lnet/minecraft/block/properties/IProperty;)Ljava/lang/String; -> aqw a (Lajn;Lark;)Ljava/lang/String;
+net/minecraft/block/state/BlockState getValidStates ()Lcom/google/common/collect/ImmutableList; -> aqw a ()Lcom/google/common/collect/ImmutableList;
+net/minecraft/block/state/IBlockState cycleProperty (Lnet/minecraft/block/properties/IProperty;)Lnet/minecraft/block/state/IBlockState; -> aqv a (Lark;)Laqv;
+net/minecraft/block/state/IBlockState getBlock ()Lnet/minecraft/block/Block; -> aqv s ()Lajn;
+net/minecraft/block/state/IBlockState getProperties ()Lcom/google/common/collect/ImmutableMap; -> aqv r ()Lcom/google/common/collect/ImmutableMap;
+net/minecraft/block/state/IBlockState getPropertyNames ()Ljava/util/Collection; -> aqv q ()Ljava/util/Collection;
+net/minecraft/block/state/IBlockState getValue (Lnet/minecraft/block/properties/IProperty;)Ljava/lang/Comparable; -> aqv b (Lark;)Ljava/lang/Comparable;
+net/minecraft/block/state/IBlockState withProperty (Lnet/minecraft/block/properties/IProperty;Ljava/lang/Comparable;)Lnet/minecraft/block/state/IBlockState; -> aqv a (Lark;Ljava/lang/Comparable;)Laqv;
+net/minecraft/client/Minecraft displayGuiScreen (Lnet/minecraft/client/gui/GuiScreen;)V -> bca a (Lbes;)V
+net/minecraft/client/Minecraft getIntegratedServer ()Lnet/minecraft/server/integrated/IntegratedServer; -> bca E ()Lbya;
+net/minecraft/client/Minecraft getMinecraft ()Lnet/minecraft/client/Minecraft; -> bca y ()Lbca;
+net/minecraft/client/Minecraft getRenderItem ()Lnet/minecraft/client/renderer/entity/RenderItem; -> bca ac ()Lbrm;
+net/minecraft/client/Minecraft getTextureMapBlocks ()Lnet/minecraft/client/renderer/texture/TextureMap; -> bca Q ()Lbut;
+net/minecraft/client/Minecraft launchIntegratedServer (Ljava/lang/String;Ljava/lang/String;Lnet/minecraft/world/WorldSettings;)V -> bca a (Ljava/lang/String;Ljava/lang/String;Lahr;)V
+net/minecraft/client/Minecraft refreshResources ()V -> bca e ()V
+net/minecraft/client/Minecraft startGame ()V -> bca ak ()V
+net/minecraft/client/gui/FontRenderer getStringWidth (Ljava/lang/String;)I -> bcj a (Ljava/lang/String;)I
+net/minecraft/client/gui/Gui drawCenteredString (Lnet/minecraft/client/gui/FontRenderer;Ljava/lang/String;III)V -> bcl a (Lbcj;Ljava/lang/String;III)V
+net/minecraft/client/gui/Gui drawString (Lnet/minecraft/client/gui/FontRenderer;Ljava/lang/String;III)V -> bcl c (Lbcj;Ljava/lang/String;III)V
+net/minecraft/client/gui/GuiListExtended getListEntry (I)Lnet/minecraft/client/gui/GuiListExtended$IGuiListEntry; -> bdc b (I)Lbdc$a;
+net/minecraft/client/gui/GuiListExtended mouseClicked (III)Z -> bdc b (III)Z
+net/minecraft/client/gui/GuiListExtended mouseReleased (III)Z -> bdc c (III)Z
+net/minecraft/client/gui/GuiScreen actionPerformed (Lnet/minecraft/client/gui/GuiButton;)V -> bes a (Lbcp;)V
+net/minecraft/client/gui/GuiScreen doesGuiPauseGame ()Z -> bes d ()Z
+net/minecraft/client/gui/GuiScreen drawDefaultBackground ()V -> bes c ()V
+net/minecraft/client/gui/GuiScreen drawScreen (IIF)V -> bes a (IIF)V
+net/minecraft/client/gui/GuiScreen drawWorldBackground (I)V -> bes a_ (I)V
+net/minecraft/client/gui/GuiScreen initGui ()V -> bes b ()V
+net/minecraft/client/gui/GuiScreen keyTyped (CI)V -> bes a (CI)V
+net/minecraft/client/gui/GuiScreen mouseClickMove (IIIJ)V -> bes a (IIIJ)V
+net/minecraft/client/gui/GuiScreen mouseClicked (III)V -> bes a (III)V
+net/minecraft/client/gui/GuiScreen mouseReleased (III)V -> bes b (III)V
+net/minecraft/client/gui/GuiScreen onGuiClosed ()V -> bes m ()V
+net/minecraft/client/gui/GuiScreen onResize (Lnet/minecraft/client/Minecraft;II)V -> bes b (Lbca;II)V
+net/minecraft/client/gui/GuiScreen setWorldAndResolution (Lnet/minecraft/client/Minecraft;II)V -> bes a (Lbca;II)V
+net/minecraft/client/gui/GuiScreen updateScreen ()V -> bes e ()V
+net/minecraft/client/gui/GuiSlot drawBackground ()V -> bdh a ()V
+net/minecraft/client/gui/GuiSlot drawSlot (IIIIII)V -> bdh a (IIIIII)V
+net/minecraft/client/gui/GuiSlot elementClicked (IZII)V -> bdh a (IZII)V
+net/minecraft/client/gui/GuiSlot func_178040_a (III)V -> bdh a (III)V
+net/minecraft/client/gui/GuiSlot isSelected (I)Z -> bdh a (I)Z
+net/minecraft/client/gui/inventory/GuiContainer checkHotbarKeys (I)Z -> bfk b (I)Z
+net/minecraft/client/gui/inventory/GuiContainer drawGuiContainerBackgroundLayer (FII)V -> bfk a (FII)V
+net/minecraft/client/gui/inventory/GuiContainer drawGuiContainerForegroundLayer (II)V -> bfk b (II)V
+net/minecraft/client/gui/inventory/GuiContainer drawItemStack (Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V -> bfk a (Ladl;IILjava/lang/String;)V
+net/minecraft/client/gui/inventory/GuiContainer drawSlot (Lnet/minecraft/inventory/Slot;)V -> bfk a (Labn;)V
+net/minecraft/client/gui/inventory/GuiContainer getSlotAtPosition (II)Lnet/minecraft/inventory/Slot; -> bfk c (II)Labn;
+net/minecraft/client/gui/inventory/GuiContainer handleMouseClick (Lnet/minecraft/inventory/Slot;III)V -> bfk a (Labn;IILaat;)V
+net/minecraft/client/gui/inventory/GuiContainer isMouseOverSlot (Lnet/minecraft/inventory/Slot;II)Z -> bfk a (Labn;II)Z
+net/minecraft/client/gui/inventory/GuiContainer isPointInRegion (IIIIII)Z -> bfk c (IIIIII)Z
+net/minecraft/client/gui/inventory/GuiContainer updateDragSplitting ()V -> bfk a ()V
+net/minecraft/client/network/NetHandlerPlayClient handleOpenWindow (Lnet/minecraft/network/play/server/S2DPacketOpenWindow;)V -> bkh a (Lgc;)V
+net/minecraft/client/renderer/BlockRendererDispatcher renderBlock (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/BlockPos;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/client/renderer/WorldRenderer;)Z -> bnq a (Laqv;Lcj;Lahs;Lbmo;)Z
+net/minecraft/client/renderer/ItemModelMesher register (Lnet/minecraft/item/Item;ILnet/minecraft/client/resources/model/ModelResourceLocation;)V -> bmz a (Ladj;ILbxg;)V
+net/minecraft/client/renderer/RenderGlobal renderBlockLayer (Lnet/minecraft/util/EnumWorldBlockLayer;)V -> bnc a (Lahh;)V
+net/minecraft/client/renderer/RenderHelper disableStandardItemLighting ()V -> bby a ()V
+net/minecraft/client/renderer/RenderHelper enableGUIStandardItemLighting ()V -> bby c ()V
+net/minecraft/client/renderer/RenderHelper enableStandardItemLighting ()V -> bby b ()V
+net/minecraft/client/renderer/WorldRenderer addVertex (DDD)Lnet/minecraft/client/renderer/WorldRenderer; -> bmo b (DDD)Lbmo;
+net/minecraft/client/renderer/WorldRenderer endVertex ()V -> bmo d ()V
+net/minecraft/client/renderer/WorldRenderer finishDrawing ()V -> bmo e ()V
+net/minecraft/client/renderer/WorldRenderer getByteBuffer ()Ljava/nio/ByteBuffer; -> bmo f ()Ljava/nio/ByteBuffer;
+net/minecraft/client/renderer/WorldRenderer getDrawMode ()I -> bmo i ()I
+net/minecraft/client/renderer/WorldRenderer getVertexCount ()I -> bmo h ()I
+net/minecraft/client/renderer/WorldRenderer markDirty ()V -> bmo c ()V
+net/minecraft/client/renderer/WorldRenderer postNormal (FFF)V -> bmo b (FFF)V
+net/minecraft/client/renderer/WorldRenderer putBrightness4 (IIII)V -> bmo a (IIII)V
+net/minecraft/client/renderer/WorldRenderer putBulkData ([I)V -> bmo a ([I)V
+net/minecraft/client/renderer/WorldRenderer putColor4 (I)V -> bmo a (I)V
+net/minecraft/client/renderer/WorldRenderer putColorMultiplier (FFFI)V -> bmo a (FFFI)V
+net/minecraft/client/renderer/WorldRenderer putColorRGB_F (FFFI)V -> bmo b (FFFI)V
+net/minecraft/client/renderer/WorldRenderer putColorRGB_F4 (FFF)V -> bmo d (FFF)V
+net/minecraft/client/renderer/WorldRenderer putPosition (DDD)V -> bmo a (DDD)V
+net/minecraft/client/renderer/WorldRenderer reset ()V -> bmo b ()V
+net/minecraft/client/renderer/WorldRenderer setBrightness (II)Lnet/minecraft/client/renderer/WorldRenderer; -> bmo a (II)Lbmo;
+net/minecraft/client/renderer/WorldRenderer setColorRGBA (IIII)Lnet/minecraft/client/renderer/WorldRenderer; -> bmo b (IIII)Lbmo;
+net/minecraft/client/renderer/WorldRenderer setColorRGBA_F (FFFF)Lnet/minecraft/client/renderer/WorldRenderer; -> bmo a (FFFF)Lbmo;
+net/minecraft/client/renderer/WorldRenderer setNormal (FFF)Lnet/minecraft/client/renderer/WorldRenderer; -> bmo c (FFF)Lbmo;
+net/minecraft/client/renderer/WorldRenderer setTextureUV (DD)Lnet/minecraft/client/renderer/WorldRenderer; -> bmo a (DD)Lbmo;
+net/minecraft/client/renderer/WorldRenderer setTranslation (DDD)V -> bmo c (DDD)V
+net/minecraft/client/renderer/WorldRenderer sortQuads (FFF)V -> bmo a (FFF)V
+net/minecraft/client/renderer/WorldRenderer startDrawing (ILnet/minecraft/client/renderer/vertex/VertexFormat;)V -> bmo a (ILbve;)V
+net/minecraft/client/renderer/entity/RenderItem getItemModelMesher ()Lnet/minecraft/client/renderer/ItemModelMesher; -> brm a ()Lbmz;
+net/minecraft/client/renderer/texture/TextureAtlasSprite getIconName ()Ljava/lang/String; -> buu i ()Ljava/lang/String;
+net/minecraft/client/renderer/texture/TextureAtlasSprite getInterpolatedU (D)F -> buu a (D)F
+net/minecraft/client/renderer/texture/TextureAtlasSprite getInterpolatedV (D)F -> buu b (D)F
+net/minecraft/client/renderer/texture/TextureAtlasSprite getMaxU ()F -> buu f ()F
+net/minecraft/client/renderer/texture/TextureAtlasSprite getMaxV ()F -> buu h ()F
+net/minecraft/client/renderer/texture/TextureAtlasSprite getMinU ()F -> buu e ()F
+net/minecraft/client/renderer/texture/TextureAtlasSprite getMinV ()F -> buu g ()F
+net/minecraft/client/renderer/texture/TextureMap getAtlasSprite (Ljava/lang/String;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite; -> but a (Ljava/lang/String;)Lbuu;
+net/minecraft/client/settings/KeyBinding getKeybinds ()Ljava/util/Set; -> bbx d ()Ljava/util/Set;
+net/minecraft/client/settings/KeyBinding isKeyDown ()Z -> bbx e ()Z
+net/minecraft/client/settings/KeyBinding isPressed ()Z -> bbx g ()Z
+net/minecraft/client/settings/KeyBinding onTick (I)V -> bbx a (I)V
+net/minecraft/client/settings/KeyBinding resetKeyBindingArrayAndHash ()V -> bbx c ()V
+net/minecraft/client/settings/KeyBinding setKeyBindState (IZ)V -> bbx a (IZ)V
+net/minecraft/client/settings/KeyBinding setKeyCode (I)V -> bbx b (I)V
+net/minecraft/client/settings/KeyBinding unPressAllKeys ()V -> bbx b ()V
+net/minecraft/client/settings/KeyBinding unpressKey ()V -> bbx k ()V
+net/minecraft/client/settings/KeyBinding updateAllKeys ()V -> bbx a ()V
 net/minecraft/command/CommandHandler registerCommand (Lnet/minecraft/command/ICommand;)Lnet/minecraft/command/ICommand; -> j a (Lk;)Lk;
 net/minecraft/command/ICommand addTabCompletionOptions (Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/command/ICommandSender;[Ljava/lang/String;Lnet/minecraft/util/BlockPos;)Ljava/util/List; -> k a (Lnet/minecraft/server/MinecraftServer;Lm;[Ljava/lang/String;Lcj;)Ljava/util/List;
 net/minecraft/command/ICommand canCommandSenderUseCommand (Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/command/ICommandSender;)Z -> k a (Lnet/minecraft/server/MinecraftServer;Lm;)Z
@@ -880,134 +906,134 @@ net/minecraft/command/ICommand isUsernameIndex ([Ljava/lang/String;I)Z -> k b ([
 net/minecraft/command/ICommand processCommand (Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/command/ICommandSender;[Ljava/lang/String;)V -> k a (Lnet/minecraft/server/MinecraftServer;Lm;[Ljava/lang/String;)V
 net/minecraft/command/ICommandSender addChatMessage (Lnet/minecraft/util/IChatComponent;)V -> m a (Leu;)V
 net/minecraft/command/ICommandSender canCommandSenderUseCommand (ILjava/lang/String;)Z -> m a (ILjava/lang/String;)Z
-net/minecraft/command/ICommandSender getCommandSenderEntity ()Lnet/minecraft/entity/Entity; -> m f ()Lrn;
+net/minecraft/command/ICommandSender getCommandSenderEntity ()Lnet/minecraft/entity/Entity; -> m f ()Lro;
 net/minecraft/command/ICommandSender getCommandSenderName ()Ljava/lang/String; -> m h_ ()Ljava/lang/String;
 net/minecraft/command/ICommandSender getDisplayName ()Lnet/minecraft/util/IChatComponent; -> m i_ ()Leu;
-net/minecraft/command/ICommandSender getEntityWorld ()Lnet/minecraft/world/World; -> m e ()Lahk;
+net/minecraft/command/ICommandSender getEntityWorld ()Lnet/minecraft/world/World; -> m e ()Laho;
 net/minecraft/command/ICommandSender getPosition ()Lnet/minecraft/util/BlockPos; -> m c ()Lcj;
-net/minecraft/command/ICommandSender getPositionVector ()Lnet/minecraft/util/Vec3; -> m d ()Lbax;
+net/minecraft/command/ICommandSender getPositionVector ()Lnet/minecraft/util/Vec3; -> m d ()Lbbe;
 net/minecraft/command/ICommandSender sendCommandFeedback ()Z -> m v_ ()Z
 net/minecraft/command/ICommandSender setCommandStat (Lnet/minecraft/command/CommandResultStats$Type;I)V -> m a (Ln$a;I)V
-net/minecraft/entity/Entity getFlag (I)Z -> rn g (I)Z
-net/minecraft/entity/Entity isSneaking ()Z -> rn aE ()Z
-net/minecraft/entity/Entity onUpdate ()V -> rn m ()V
-net/minecraft/entity/Entity playSound (Lnet/minecraft/util/Sound;FF)V -> rn a (Lng;FF)V
-net/minecraft/entity/Entity setPositionAndUpdate (DDD)V -> rn a (DDD)V
-net/minecraft/entity/EntityLivingBase getHeldItem (Lnet/minecraft/util/MainOrOffHand;)Lnet/minecraft/item/ItemStack; -> rw b (Lqj;)Ladi;
-net/minecraft/entity/EntityLivingBase getHeldMainHandItem ()Lnet/minecraft/item/ItemStack; -> rw bR ()Ladi;
-net/minecraft/entity/EntityLivingBase getHeldOffHandItem ()Lnet/minecraft/item/ItemStack; -> rw bS ()Ladi;
-net/minecraft/entity/EntityLivingBase setHeldItem (Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/item/ItemStack;)V -> rw a (Lqj;Ladi;)V
-net/minecraft/entity/EntityLivingBase setItemInUse (Lnet/minecraft/util/MainOrOffHand;)V -> rw c (Lqj;)V
-net/minecraft/entity/monster/EntityCreeper explode ()V -> yn cZ ()V
-net/minecraft/entity/player/EntityPlayer displayGUIChest (Lnet/minecraft/inventory/IInventory;)V -> zn a (Lqe;)V
-net/minecraft/entity/player/EntityPlayer displayGui (Lnet/minecraft/world/IInteractionObject;)V -> zn a (Lqk;)V
-net/minecraft/inventory/Container addSlotToContainer (Lnet/minecraft/inventory/Slot;)Lnet/minecraft/inventory/Slot; -> aan a (Labl;)Labl;
-net/minecraft/inventory/Container canAddItemToSlot (Lnet/minecraft/inventory/Slot;Lnet/minecraft/item/ItemStack;Z)Z -> aan a (Labl;Ladi;Z)Z
-net/minecraft/inventory/Container canInteractWith (Lnet/minecraft/entity/player/EntityPlayer;)Z -> aan a (Lzn;)Z
-net/minecraft/inventory/Container detectAndSendChanges ()V -> aan b ()V
-net/minecraft/inventory/Container getSlot (I)Lnet/minecraft/inventory/Slot; -> aan a (I)Labl;
-net/minecraft/inventory/Container mergeItemStack (Lnet/minecraft/item/ItemStack;IIZ)Z -> aan a (Ladi;IIZ)Z
-net/minecraft/inventory/Container onContainerClosed (Lnet/minecraft/entity/player/EntityPlayer;)V -> aan b (Lzn;)V
-net/minecraft/inventory/Container onCraftGuiOpened (Lnet/minecraft/inventory/ICrafting;)V -> aan a (Laas;)V
-net/minecraft/inventory/Container onCraftMatrixChanged (Lnet/minecraft/inventory/IInventory;)V -> aan a (Lqe;)V
-net/minecraft/inventory/Container putStackInSlot (ILnet/minecraft/item/ItemStack;)V -> aan a (ILadi;)V
-net/minecraft/inventory/Container slotClick (IIILnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack; -> aan a (IIILzn;)Ladi;
-net/minecraft/inventory/Container transferStackInSlot (Lnet/minecraft/entity/player/EntityPlayer;I)Lnet/minecraft/item/ItemStack; -> aan b (Lzn;I)Ladi;
-net/minecraft/inventory/ICrafting func_175173_a (Lnet/minecraft/inventory/Container;Lnet/minecraft/inventory/IInventory;)V -> aas a (Laan;Lqe;)V
-net/minecraft/inventory/ICrafting sendProgressBarUpdate (Lnet/minecraft/inventory/Container;II)V -> aas a (Laan;II)V
-net/minecraft/inventory/ICrafting sendSlotContents (Lnet/minecraft/inventory/Container;ILnet/minecraft/item/ItemStack;)V -> aas a (Laan;ILadi;)V
-net/minecraft/inventory/ICrafting updateCraftingInventory (Lnet/minecraft/inventory/Container;Ljava/util/List;)V -> aas a (Laan;Ljava/util/List;)V
+net/minecraft/entity/Entity getFlag (I)Z -> ro h (I)Z
+net/minecraft/entity/Entity isSneaking ()Z -> ro aE ()Z
+net/minecraft/entity/Entity onUpdate ()V -> ro m ()V
+net/minecraft/entity/Entity playSound (Lnet/minecraft/util/Sound;FF)V -> ro a (Lng;FF)V
+net/minecraft/entity/Entity setPositionAndUpdate (DDD)V -> ro a (DDD)V
+net/minecraft/entity/EntityLivingBase getHeldItem (Lnet/minecraft/util/MainOrOffHand;)Lnet/minecraft/item/ItemStack; -> rx b (Lqk;)Ladl;
+net/minecraft/entity/EntityLivingBase getHeldMainHandItem ()Lnet/minecraft/item/ItemStack; -> rx bS ()Ladl;
+net/minecraft/entity/EntityLivingBase getHeldOffHandItem ()Lnet/minecraft/item/ItemStack; -> rx bT ()Ladl;
+net/minecraft/entity/EntityLivingBase setHeldItem (Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/item/ItemStack;)V -> rx a (Lqk;Ladl;)V
+net/minecraft/entity/EntityLivingBase setItemInUse (Lnet/minecraft/util/MainOrOffHand;)V -> rx c (Lqk;)V
+net/minecraft/entity/monster/EntityCreeper explode ()V -> yo da ()V
+net/minecraft/entity/player/EntityPlayer displayGUIChest (Lnet/minecraft/inventory/IInventory;)V -> zo a (Lqe;)V
+net/minecraft/entity/player/EntityPlayer displayGui (Lnet/minecraft/world/IInteractionObject;)V -> zo a (Lql;)V
+net/minecraft/inventory/Container addSlotToContainer (Lnet/minecraft/inventory/Slot;)Lnet/minecraft/inventory/Slot; -> aao a (Labn;)Labn;
+net/minecraft/inventory/Container canAddItemToSlot (Lnet/minecraft/inventory/Slot;Lnet/minecraft/item/ItemStack;Z)Z -> aao a (Labn;Ladl;Z)Z
+net/minecraft/inventory/Container canInteractWith (Lnet/minecraft/entity/player/EntityPlayer;)Z -> aao a (Lzo;)Z
+net/minecraft/inventory/Container detectAndSendChanges ()V -> aao b ()V
+net/minecraft/inventory/Container getSlot (I)Lnet/minecraft/inventory/Slot; -> aao a (I)Labn;
+net/minecraft/inventory/Container mergeItemStack (Lnet/minecraft/item/ItemStack;IIZ)Z -> aao a (Ladl;IIZ)Z
+net/minecraft/inventory/Container onContainerClosed (Lnet/minecraft/entity/player/EntityPlayer;)V -> aao b (Lzo;)V
+net/minecraft/inventory/Container onCraftGuiOpened (Lnet/minecraft/inventory/ICrafting;)V -> aao a (Laau;)V
+net/minecraft/inventory/Container onCraftMatrixChanged (Lnet/minecraft/inventory/IInventory;)V -> aao a (Lqe;)V
+net/minecraft/inventory/Container putStackInSlot (ILnet/minecraft/item/ItemStack;)V -> aao a (ILadl;)V
+net/minecraft/inventory/Container slotClick (IILnet/minecraft/inventory/EnumContainerAction;Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack; -> aao a (IILaat;Lzo;)Ladl;
+net/minecraft/inventory/Container transferStackInSlot (Lnet/minecraft/entity/player/EntityPlayer;I)Lnet/minecraft/item/ItemStack; -> aao b (Lzo;I)Ladl;
+net/minecraft/inventory/ICrafting func_175173_a (Lnet/minecraft/inventory/Container;Lnet/minecraft/inventory/IInventory;)V -> aau a (Laao;Lqe;)V
+net/minecraft/inventory/ICrafting sendProgressBarUpdate (Lnet/minecraft/inventory/Container;II)V -> aau a (Laao;II)V
+net/minecraft/inventory/ICrafting sendSlotContents (Lnet/minecraft/inventory/Container;ILnet/minecraft/item/ItemStack;)V -> aau a (Laao;ILadl;)V
+net/minecraft/inventory/ICrafting updateCraftingInventory (Lnet/minecraft/inventory/Container;Ljava/util/List;)V -> aau a (Laao;Ljava/util/List;)V
 net/minecraft/inventory/IInventory clear ()V -> qe l ()V
-net/minecraft/inventory/IInventory closeInventory (Lnet/minecraft/entity/player/EntityPlayer;)V -> qe c (Lzn;)V
-net/minecraft/inventory/IInventory decrStackSize (II)Lnet/minecraft/item/ItemStack; -> qe a (II)Ladi;
+net/minecraft/inventory/IInventory closeInventory (Lnet/minecraft/entity/player/EntityPlayer;)V -> qe c (Lzo;)V
+net/minecraft/inventory/IInventory decrStackSize (II)Lnet/minecraft/item/ItemStack; -> qe a (II)Ladl;
 net/minecraft/inventory/IInventory getField (I)I -> qe c (I)I
 net/minecraft/inventory/IInventory getFieldCount ()I -> qe g ()I
 net/minecraft/inventory/IInventory getInventoryStackLimit ()I -> qe s_ ()I
 net/minecraft/inventory/IInventory getSizeInventory ()I -> qe q_ ()I
-net/minecraft/inventory/IInventory getStackInSlot (I)Lnet/minecraft/item/ItemStack; -> qe a (I)Ladi;
-net/minecraft/inventory/IInventory getStackInSlotOnClosing (I)Lnet/minecraft/item/ItemStack; -> qe b (I)Ladi;
-net/minecraft/inventory/IInventory isItemValidForSlot (ILnet/minecraft/item/ItemStack;)Z -> qe b (ILadi;)Z
-net/minecraft/inventory/IInventory isUseableByPlayer (Lnet/minecraft/entity/player/EntityPlayer;)Z -> qe a (Lzn;)Z
+net/minecraft/inventory/IInventory getStackInSlot (I)Lnet/minecraft/item/ItemStack; -> qe a (I)Ladl;
+net/minecraft/inventory/IInventory getStackInSlotOnClosing (I)Lnet/minecraft/item/ItemStack; -> qe b (I)Ladl;
+net/minecraft/inventory/IInventory isItemValidForSlot (ILnet/minecraft/item/ItemStack;)Z -> qe b (ILadl;)Z
+net/minecraft/inventory/IInventory isUseableByPlayer (Lnet/minecraft/entity/player/EntityPlayer;)Z -> qe a (Lzo;)Z
 net/minecraft/inventory/IInventory markDirty ()V -> qe r_ ()V
-net/minecraft/inventory/IInventory openInventory (Lnet/minecraft/entity/player/EntityPlayer;)V -> qe b (Lzn;)V
+net/minecraft/inventory/IInventory openInventory (Lnet/minecraft/entity/player/EntityPlayer;)V -> qe b (Lzo;)V
 net/minecraft/inventory/IInventory setField (II)V -> qe b (II)V
-net/minecraft/inventory/IInventory setInventorySlotContents (ILnet/minecraft/item/ItemStack;)V -> qe a (ILadi;)V
-net/minecraft/inventory/Slot canTakeStack (Lnet/minecraft/entity/player/EntityPlayer;)Z -> abl a (Lzn;)Z
-net/minecraft/inventory/Slot decrStackSize (I)Lnet/minecraft/item/ItemStack; -> abl a (I)Ladi;
-net/minecraft/inventory/Slot getHasStack ()Z -> abl e ()Z
-net/minecraft/inventory/Slot getItemStackLimit (Lnet/minecraft/item/ItemStack;)I -> abl b (Ladi;)I
-net/minecraft/inventory/Slot getSlotStackLimit ()I -> abl a ()I
-net/minecraft/inventory/Slot getStack ()Lnet/minecraft/item/ItemStack; -> abl d ()Ladi;
-net/minecraft/inventory/Slot isHere (Lnet/minecraft/inventory/IInventory;I)Z -> abl a (Lqe;I)Z
-net/minecraft/inventory/Slot isItemValid (Lnet/minecraft/item/ItemStack;)Z -> abl a (Ladi;)Z
-net/minecraft/inventory/Slot onCrafting (Lnet/minecraft/item/ItemStack;)V -> abl c (Ladi;)V
-net/minecraft/inventory/Slot onCrafting (Lnet/minecraft/item/ItemStack;I)V -> abl a (Ladi;I)V
-net/minecraft/inventory/Slot onPickupFromSlot (Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)V -> abl a (Lzn;Ladi;)V
-net/minecraft/inventory/Slot onSlotChange (Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)V -> abl a (Ladi;Ladi;)V
-net/minecraft/inventory/Slot onSlotChanged ()V -> abl f ()V
-net/minecraft/inventory/Slot putStack (Lnet/minecraft/item/ItemStack;)V -> abl d (Ladi;)V
-net/minecraft/item/Item getByNameOrId (Ljava/lang/String;)Lnet/minecraft/item/Item; -> adg d (Ljava/lang/String;)Ladg;
-net/minecraft/item/Item getColorFromItemStack (Lnet/minecraft/item/ItemStack;I)I -> adg a (Ladi;I)I
-net/minecraft/item/Item getIdFromItem (Lnet/minecraft/item/Item;)I -> adg b (Ladg;)I
-net/minecraft/item/Item getIdFromItem2 (Lnet/minecraft/item/Item;)I -> adg a (Ladg;)I
-net/minecraft/item/Item getItemById (I)Lnet/minecraft/item/Item; -> adg c (I)Ladg;
-net/minecraft/item/Item getItemEnchantability ()I -> adg c ()I
-net/minecraft/item/Item getItemFromBlock (Lnet/minecraft/block/Block;)Lnet/minecraft/item/Item; -> adg a (Lajj;)Ladg;
-net/minecraft/item/Item getItemStackDisplayName (Lnet/minecraft/item/ItemStack;)Ljava/lang/String; -> adg a (Ladi;)Ljava/lang/String;
-net/minecraft/item/Item getItemUseAction (Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/EnumAction; -> adg f (Ladi;)Laes;
-net/minecraft/item/Item getMaxDamage ()I -> adg l ()I
-net/minecraft/item/Item getMaxItemUseDuration (Lnet/minecraft/item/ItemStack;)I -> adg e (Ladi;)I
-net/minecraft/item/Item getMaxStackSize ()I -> adg j ()I
-net/minecraft/item/Item getUnlocalizedName ()Ljava/lang/String; -> adg a ()Ljava/lang/String;
-net/minecraft/item/Item getUnlocalizedName (Lnet/minecraft/item/ItemStack;)Ljava/lang/String; -> adg e_ (Ladi;)Ljava/lang/String;
-net/minecraft/item/Item getUnlocalizedNameInefficiently (Lnet/minecraft/item/ItemStack;)Ljava/lang/String; -> adg j (Ladi;)Ljava/lang/String;
-net/minecraft/item/Item onBlockDestroyed (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/EntityLivingBase;)Z -> adg a (Ladi;Lahk;Laqr;Lcj;Lrw;)Z
-net/minecraft/item/Item onItemRightClick (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;)Lnet/minecraft/util/ObjectActionHolder; -> adg a (Ladi;Lahk;Lzn;Lqj;)Lqm;
-net/minecraft/item/Item onItemUse (Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/ItemUseResult; -> adg a (Ladi;Lzn;Lahk;Lcj;Lqj;Lcq;FFF)Lql;
-net/minecraft/item/Item onItemUseFinish (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/item/ItemStack; -> adg a (Ladi;Lahk;Lrw;)Ladi;
-net/minecraft/item/Item onPlayerStoppedUsing (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;I)V -> adg a (Ladi;Lahk;Lrw;I)V
-net/minecraft/item/Item registerItem (ILjava/lang/String;Lnet/minecraft/item/Item;)V -> adg a (ILjava/lang/String;Ladg;)V
-net/minecraft/item/Item registerItem (ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/item/Item;)V -> adg a (ILkl;Ladg;)V
-net/minecraft/item/Item registerItemBlock (Lnet/minecraft/block/Block;)V -> adg c (Lajj;)V
-net/minecraft/item/Item registerItemBlock (Lnet/minecraft/block/Block;Lnet/minecraft/item/Item;)V -> adg a (Lajj;Ladg;)V
-net/minecraft/item/Item registerItems ()V -> adg t ()V
-net/minecraft/item/Item setCreativeTab (Lnet/minecraft/creativetab/CreativeTabs;)Lnet/minecraft/item/Item; -> adg a (Laci;)Ladg;
-net/minecraft/item/Item setHasSubtypes (Z)Lnet/minecraft/item/Item; -> adg a (Z)Ladg;
-net/minecraft/item/Item setMaxDamage (I)Lnet/minecraft/item/Item; -> adg e (I)Ladg;
-net/minecraft/item/Item setMaxStackSize (I)Lnet/minecraft/item/Item; -> adg d (I)Ladg;
-net/minecraft/item/Item setUnlocalizedName (Ljava/lang/String;)Lnet/minecraft/item/Item; -> adg c (Ljava/lang/String;)Ladg;
-net/minecraft/item/ItemStack copy ()Lnet/minecraft/item/ItemStack; -> adi k ()Ladi;
-net/minecraft/item/ItemStack damageItem (ILnet/minecraft/entity/EntityLivingBase;)V -> adi a (ILrw;)V
-net/minecraft/item/ItemStack getDisplayName ()Ljava/lang/String; -> adi q ()Ljava/lang/String;
-net/minecraft/item/ItemStack getItem ()Lnet/minecraft/item/Item; -> adi b ()Ladg;
-net/minecraft/item/ItemStack getItemDamage ()I -> adi h ()I
-net/minecraft/item/ItemStack getMaxDamage ()I -> adi j ()I
-net/minecraft/item/ItemStack getMetadata ()I -> adi i ()I
-net/minecraft/item/ItemStack getTagCompound ()Lnet/minecraft/nbt/NBTTagCompound; -> adi o ()Ldn;
-net/minecraft/item/ItemStack getUnlocalizedName ()Ljava/lang/String; -> adi a ()Ljava/lang/String;
-net/minecraft/item/ItemStack hasTagCompound ()Z -> adi n ()Z
-net/minecraft/item/ItemStack isDamageableItemEqual (Lnet/minecraft/item/ItemStack;)Z -> adi b (Ladi;)Z
-net/minecraft/item/ItemStack isItemEnchanted ()Z -> adi w ()Z
-net/minecraft/item/ItemStack isItemEqual (Lnet/minecraft/item/ItemStack;)Z -> adi a (Ladi;)Z
-net/minecraft/item/ItemStack isItemStackDamageable ()Z -> adi e ()Z
-net/minecraft/item/ItemStack isItemStackEqual (Lnet/minecraft/item/ItemStack;)Z -> adi e (Ladi;)Z
-net/minecraft/item/ItemStack loadItemStackFromNBT (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/item/ItemStack; -> adi a (Ldn;)Ladi;
-net/minecraft/item/ItemStack readFromNBT (Lnet/minecraft/nbt/NBTTagCompound;)V -> adi c (Ldn;)V
-net/minecraft/item/ItemStack setItemDamage (I)V -> adi b (I)V
-net/minecraft/item/ItemStack setTagCompound (Lnet/minecraft/nbt/NBTTagCompound;)V -> adi d (Ldn;)V
-net/minecraft/item/ItemStack setTagInfo (Ljava/lang/String;Lnet/minecraft/nbt/NBTBase;)V -> adi a (Ljava/lang/String;Leb;)V
-net/minecraft/item/ItemStack splitStack (I)Lnet/minecraft/item/ItemStack; -> adi a (I)Ladi;
-net/minecraft/item/ItemStack writeToNBT (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound; -> adi b (Ldn;)Ldn;
-net/minecraft/item/crafting/CraftingManager addRecipe (Lnet/minecraft/item/ItemStack;[Ljava/lang/Object;)Lnet/minecraft/item/crafting/ShapedRecipes; -> afn a (Ladi;[Ljava/lang/Object;)Lafp;
-net/minecraft/item/crafting/CraftingManager addRecipe (Lnet/minecraft/item/crafting/IRecipe;)V -> afn a (Lafm;)V
-net/minecraft/item/crafting/CraftingManager addShapelessRecipe (Lnet/minecraft/item/ItemStack;[Ljava/lang/Object;)V -> afn b (Ladi;[Ljava/lang/Object;)V
-net/minecraft/item/crafting/CraftingManager getInstance ()Lnet/minecraft/item/crafting/CraftingManager; -> afn a ()Lafn;
-net/minecraft/item/crafting/CraftingManager getRecipeList ()Ljava/util/List; -> afn b ()Ljava/util/List;
-net/minecraft/item/crafting/IRecipe getCraftingResult (Lnet/minecraft/inventory/InventoryCrafting;)Lnet/minecraft/item/ItemStack; -> afm a (Laau;)Ladi;
-net/minecraft/item/crafting/IRecipe getRecipeOutput ()Lnet/minecraft/item/ItemStack; -> afm b ()Ladi;
-net/minecraft/item/crafting/IRecipe getRecipeSize ()I -> afm a ()I
-net/minecraft/item/crafting/IRecipe getRemainingItems (Lnet/minecraft/inventory/InventoryCrafting;)[Lnet/minecraft/item/ItemStack; -> afm b (Laau;)[Ladi;
-net/minecraft/item/crafting/IRecipe matches (Lnet/minecraft/inventory/InventoryCrafting;Lnet/minecraft/world/World;)Z -> afm a (Laau;Lahk;)Z
+net/minecraft/inventory/IInventory setInventorySlotContents (ILnet/minecraft/item/ItemStack;)V -> qe a (ILadl;)V
+net/minecraft/inventory/Slot canTakeStack (Lnet/minecraft/entity/player/EntityPlayer;)Z -> abn a (Lzo;)Z
+net/minecraft/inventory/Slot decrStackSize (I)Lnet/minecraft/item/ItemStack; -> abn a (I)Ladl;
+net/minecraft/inventory/Slot getHasStack ()Z -> abn e ()Z
+net/minecraft/inventory/Slot getItemStackLimit (Lnet/minecraft/item/ItemStack;)I -> abn b (Ladl;)I
+net/minecraft/inventory/Slot getSlotStackLimit ()I -> abn a ()I
+net/minecraft/inventory/Slot getStack ()Lnet/minecraft/item/ItemStack; -> abn d ()Ladl;
+net/minecraft/inventory/Slot isHere (Lnet/minecraft/inventory/IInventory;I)Z -> abn a (Lqe;I)Z
+net/minecraft/inventory/Slot isItemValid (Lnet/minecraft/item/ItemStack;)Z -> abn a (Ladl;)Z
+net/minecraft/inventory/Slot onCrafting (Lnet/minecraft/item/ItemStack;)V -> abn c (Ladl;)V
+net/minecraft/inventory/Slot onCrafting (Lnet/minecraft/item/ItemStack;I)V -> abn a (Ladl;I)V
+net/minecraft/inventory/Slot onPickupFromSlot (Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)V -> abn a (Lzo;Ladl;)V
+net/minecraft/inventory/Slot onSlotChange (Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)V -> abn a (Ladl;Ladl;)V
+net/minecraft/inventory/Slot onSlotChanged ()V -> abn f ()V
+net/minecraft/inventory/Slot putStack (Lnet/minecraft/item/ItemStack;)V -> abn d (Ladl;)V
+net/minecraft/item/Item getByNameOrId (Ljava/lang/String;)Lnet/minecraft/item/Item; -> adj d (Ljava/lang/String;)Ladj;
+net/minecraft/item/Item getColorFromItemStack (Lnet/minecraft/item/ItemStack;I)I -> adj a (Ladl;I)I
+net/minecraft/item/Item getIdFromItem (Lnet/minecraft/item/Item;)I -> adj b (Ladj;)I
+net/minecraft/item/Item getIdFromItem2 (Lnet/minecraft/item/Item;)I -> adj a (Ladj;)I
+net/minecraft/item/Item getItemById (I)Lnet/minecraft/item/Item; -> adj c (I)Ladj;
+net/minecraft/item/Item getItemEnchantability ()I -> adj c ()I
+net/minecraft/item/Item getItemFromBlock (Lnet/minecraft/block/Block;)Lnet/minecraft/item/Item; -> adj a (Lajn;)Ladj;
+net/minecraft/item/Item getItemStackDisplayName (Lnet/minecraft/item/ItemStack;)Ljava/lang/String; -> adj a (Ladl;)Ljava/lang/String;
+net/minecraft/item/Item getItemUseAction (Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/EnumAction; -> adj f (Ladl;)Laev;
+net/minecraft/item/Item getMaxDamage ()I -> adj l ()I
+net/minecraft/item/Item getMaxItemUseDuration (Lnet/minecraft/item/ItemStack;)I -> adj e (Ladl;)I
+net/minecraft/item/Item getMaxStackSize ()I -> adj j ()I
+net/minecraft/item/Item getUnlocalizedName ()Ljava/lang/String; -> adj a ()Ljava/lang/String;
+net/minecraft/item/Item getUnlocalizedName (Lnet/minecraft/item/ItemStack;)Ljava/lang/String; -> adj f_ (Ladl;)Ljava/lang/String;
+net/minecraft/item/Item getUnlocalizedNameInefficiently (Lnet/minecraft/item/ItemStack;)Ljava/lang/String; -> adj j (Ladl;)Ljava/lang/String;
+net/minecraft/item/Item onBlockDestroyed (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/EntityLivingBase;)Z -> adj a (Ladl;Laho;Laqv;Lcj;Lrx;)Z
+net/minecraft/item/Item onItemRightClick (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;)Lnet/minecraft/util/ObjectActionHolder; -> adj a (Ladl;Laho;Lzo;Lqk;)Lqn;
+net/minecraft/item/Item onItemUse (Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/ItemUseResult; -> adj a (Ladl;Lzo;Laho;Lcj;Lqk;Lcq;FFF)Lqm;
+net/minecraft/item/Item onItemUseFinish (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/item/ItemStack; -> adj a (Ladl;Laho;Lrx;)Ladl;
+net/minecraft/item/Item onPlayerStoppedUsing (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;I)V -> adj a (Ladl;Laho;Lrx;I)V
+net/minecraft/item/Item registerItem (ILjava/lang/String;Lnet/minecraft/item/Item;)V -> adj a (ILjava/lang/String;Ladj;)V
+net/minecraft/item/Item registerItem (ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/item/Item;)V -> adj a (ILkl;Ladj;)V
+net/minecraft/item/Item registerItemBlock (Lnet/minecraft/block/Block;)V -> adj c (Lajn;)V
+net/minecraft/item/Item registerItemBlock (Lnet/minecraft/block/Block;Lnet/minecraft/item/Item;)V -> adj a (Lajn;Ladj;)V
+net/minecraft/item/Item registerItems ()V -> adj t ()V
+net/minecraft/item/Item setCreativeTab (Lnet/minecraft/creativetab/CreativeTabs;)Lnet/minecraft/item/Item; -> adj a (Lack;)Ladj;
+net/minecraft/item/Item setHasSubtypes (Z)Lnet/minecraft/item/Item; -> adj a (Z)Ladj;
+net/minecraft/item/Item setMaxDamage (I)Lnet/minecraft/item/Item; -> adj e (I)Ladj;
+net/minecraft/item/Item setMaxStackSize (I)Lnet/minecraft/item/Item; -> adj d (I)Ladj;
+net/minecraft/item/Item setUnlocalizedName (Ljava/lang/String;)Lnet/minecraft/item/Item; -> adj c (Ljava/lang/String;)Ladj;
+net/minecraft/item/ItemStack copy ()Lnet/minecraft/item/ItemStack; -> adl k ()Ladl;
+net/minecraft/item/ItemStack damageItem (ILnet/minecraft/entity/EntityLivingBase;)V -> adl a (ILrx;)V
+net/minecraft/item/ItemStack getDisplayName ()Ljava/lang/String; -> adl q ()Ljava/lang/String;
+net/minecraft/item/ItemStack getItem ()Lnet/minecraft/item/Item; -> adl b ()Ladj;
+net/minecraft/item/ItemStack getItemDamage ()I -> adl h ()I
+net/minecraft/item/ItemStack getMaxDamage ()I -> adl j ()I
+net/minecraft/item/ItemStack getMetadata ()I -> adl i ()I
+net/minecraft/item/ItemStack getTagCompound ()Lnet/minecraft/nbt/NBTTagCompound; -> adl o ()Ldn;
+net/minecraft/item/ItemStack getUnlocalizedName ()Ljava/lang/String; -> adl a ()Ljava/lang/String;
+net/minecraft/item/ItemStack hasTagCompound ()Z -> adl n ()Z
+net/minecraft/item/ItemStack isDamageableItemEqual (Lnet/minecraft/item/ItemStack;)Z -> adl b (Ladl;)Z
+net/minecraft/item/ItemStack isItemEnchanted ()Z -> adl w ()Z
+net/minecraft/item/ItemStack isItemEqual (Lnet/minecraft/item/ItemStack;)Z -> adl a (Ladl;)Z
+net/minecraft/item/ItemStack isItemStackDamageable ()Z -> adl e ()Z
+net/minecraft/item/ItemStack isItemStackEqual (Lnet/minecraft/item/ItemStack;)Z -> adl e (Ladl;)Z
+net/minecraft/item/ItemStack loadItemStackFromNBT (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/item/ItemStack; -> adl a (Ldn;)Ladl;
+net/minecraft/item/ItemStack readFromNBT (Lnet/minecraft/nbt/NBTTagCompound;)V -> adl c (Ldn;)V
+net/minecraft/item/ItemStack setItemDamage (I)V -> adl b (I)V
+net/minecraft/item/ItemStack setTagCompound (Lnet/minecraft/nbt/NBTTagCompound;)V -> adl d (Ldn;)V
+net/minecraft/item/ItemStack setTagInfo (Ljava/lang/String;Lnet/minecraft/nbt/NBTBase;)V -> adl a (Ljava/lang/String;Leb;)V
+net/minecraft/item/ItemStack splitStack (I)Lnet/minecraft/item/ItemStack; -> adl a (I)Ladl;
+net/minecraft/item/ItemStack writeToNBT (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound; -> adl b (Ldn;)Ldn;
+net/minecraft/item/crafting/CraftingManager addRecipe (Lnet/minecraft/item/ItemStack;[Ljava/lang/Object;)Lnet/minecraft/item/crafting/ShapedRecipes; -> afr a (Ladl;[Ljava/lang/Object;)Laft;
+net/minecraft/item/crafting/CraftingManager addRecipe (Lnet/minecraft/item/crafting/IRecipe;)V -> afr a (Lafq;)V
+net/minecraft/item/crafting/CraftingManager addShapelessRecipe (Lnet/minecraft/item/ItemStack;[Ljava/lang/Object;)V -> afr b (Ladl;[Ljava/lang/Object;)V
+net/minecraft/item/crafting/CraftingManager getInstance ()Lnet/minecraft/item/crafting/CraftingManager; -> afr a ()Lafr;
+net/minecraft/item/crafting/CraftingManager getRecipeList ()Ljava/util/List; -> afr b ()Ljava/util/List;
+net/minecraft/item/crafting/IRecipe getCraftingResult (Lnet/minecraft/inventory/InventoryCrafting;)Lnet/minecraft/item/ItemStack; -> afq a (Laaw;)Ladl;
+net/minecraft/item/crafting/IRecipe getRecipeOutput ()Lnet/minecraft/item/ItemStack; -> afq b ()Ladl;
+net/minecraft/item/crafting/IRecipe getRecipeSize ()I -> afq a ()I
+net/minecraft/item/crafting/IRecipe getRemainingItems (Lnet/minecraft/inventory/InventoryCrafting;)[Lnet/minecraft/item/ItemStack; -> afq b (Laaw;)[Ladl;
+net/minecraft/item/crafting/IRecipe matches (Lnet/minecraft/inventory/InventoryCrafting;Lnet/minecraft/world/World;)Z -> afq a (Laaw;Laho;)Z
 net/minecraft/nbt/NBTBase createNewByType (B)Lnet/minecraft/nbt/NBTBase; -> eb a (B)Leb;
 net/minecraft/nbt/NBTBase hashCode ()I -> eb hashCode ()I
 net/minecraft/nbt/NBTTagCompound getByte (Ljava/lang/String;)B -> dn f (Ljava/lang/String;)B
@@ -1034,24 +1060,24 @@ net/minecraft/network/play/server/S2DPacketOpenWindow getWindowTitle ()Lnet/mine
 net/minecraft/network/play/server/S2DPacketOpenWindow hasSlots ()Z -> gc f ()Z
 net/minecraft/server/MinecraftServer createNewCommandManager ()Lnet/minecraft/command/ServerCommandManager; -> net/minecraft/server/MinecraftServer i ()Lbd;
 net/minecraft/server/MinecraftServer getCommandManager ()Lnet/minecraft/command/ICommandManager; -> net/minecraft/server/MinecraftServer N ()Ll;
-net/minecraft/server/MinecraftServer loadAllWorlds (Ljava/lang/String;Ljava/lang/String;JLnet/minecraft/world/WorldType;Ljava/lang/String;)V -> net/minecraft/server/MinecraftServer a (Ljava/lang/String;Ljava/lang/String;JLahp;Ljava/lang/String;)V
-net/minecraft/tileentity/TileEntity addInfoToCrashReport (Lnet/minecraft/crash/CrashReportCategory;)V -> apl a (Lc;)V
-net/minecraft/tileentity/TileEntity addMapping (Ljava/lang/Class;Ljava/lang/String;)V -> apl a (Ljava/lang/Class;Ljava/lang/String;)V
-net/minecraft/tileentity/TileEntity createAndLoadEntity (Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/tileentity/TileEntity; -> apl b (Lnet/minecraft/server/MinecraftServer;Ldn;)Lapl;
-net/minecraft/tileentity/TileEntity getBlockMetadata ()I -> apl u ()I
-net/minecraft/tileentity/TileEntity getBlockType ()Lnet/minecraft/block/Block; -> apl w ()Lajj;
-net/minecraft/tileentity/TileEntity getDescriptionPacket ()Lnet/minecraft/network/Packet; -> apl A_ ()Lff;
-net/minecraft/tileentity/TileEntity getPos ()Lnet/minecraft/util/BlockPos; -> apl v ()Lcj;
-net/minecraft/tileentity/TileEntity getWorld ()Lnet/minecraft/world/World; -> apl C ()Lahk;
-net/minecraft/tileentity/TileEntity invalidate ()V -> apl y ()V
-net/minecraft/tileentity/TileEntity markDirty ()V -> apl r_ ()V
-net/minecraft/tileentity/TileEntity readFromNBT (Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/nbt/NBTTagCompound;)V -> apl a (Lnet/minecraft/server/MinecraftServer;Ldn;)V
-net/minecraft/tileentity/TileEntity receiveClientEvent (II)Z -> apl c (II)Z
-net/minecraft/tileentity/TileEntity setPos (Lnet/minecraft/util/BlockPos;)V -> apl a (Lcj;)V
-net/minecraft/tileentity/TileEntity setWorldObj (Lnet/minecraft/world/World;)V -> apl a (Lahk;)V
-net/minecraft/tileentity/TileEntity updateContainingBlockInfo ()V -> apl A ()V
-net/minecraft/tileentity/TileEntity validate ()V -> apl z ()V
-net/minecraft/tileentity/TileEntity writeToNBT (Lnet/minecraft/nbt/NBTTagCompound;)V -> apl a (Ldn;)V
+net/minecraft/server/MinecraftServer loadAllWorlds (Ljava/lang/String;Ljava/lang/String;JLnet/minecraft/world/WorldType;Ljava/lang/String;)V -> net/minecraft/server/MinecraftServer a (Ljava/lang/String;Ljava/lang/String;JLaht;Ljava/lang/String;)V
+net/minecraft/tileentity/TileEntity addInfoToCrashReport (Lnet/minecraft/crash/CrashReportCategory;)V -> app a (Lc;)V
+net/minecraft/tileentity/TileEntity addMapping (Ljava/lang/Class;Ljava/lang/String;)V -> app a (Ljava/lang/Class;Ljava/lang/String;)V
+net/minecraft/tileentity/TileEntity createAndLoadEntity (Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/tileentity/TileEntity; -> app b (Lnet/minecraft/server/MinecraftServer;Ldn;)Lapp;
+net/minecraft/tileentity/TileEntity getBlockMetadata ()I -> app u ()I
+net/minecraft/tileentity/TileEntity getBlockType ()Lnet/minecraft/block/Block; -> app w ()Lajn;
+net/minecraft/tileentity/TileEntity getDescriptionPacket ()Lnet/minecraft/network/Packet; -> app A_ ()Lff;
+net/minecraft/tileentity/TileEntity getPos ()Lnet/minecraft/util/BlockPos; -> app v ()Lcj;
+net/minecraft/tileentity/TileEntity getWorld ()Lnet/minecraft/world/World; -> app B ()Laho;
+net/minecraft/tileentity/TileEntity invalidate ()V -> app y ()V
+net/minecraft/tileentity/TileEntity markDirty ()V -> app r_ ()V
+net/minecraft/tileentity/TileEntity readFromNBT (Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/nbt/NBTTagCompound;)V -> app a (Lnet/minecraft/server/MinecraftServer;Ldn;)V
+net/minecraft/tileentity/TileEntity receiveClientEvent (II)Z -> app c (II)Z
+net/minecraft/tileentity/TileEntity setPos (Lnet/minecraft/util/BlockPos;)V -> app a (Lcj;)V
+net/minecraft/tileentity/TileEntity setWorldObj (Lnet/minecraft/world/World;)V -> app a (Laho;)V
+net/minecraft/tileentity/TileEntity updateContainingBlockInfo ()V -> app A ()V
+net/minecraft/tileentity/TileEntity validate ()V -> app z ()V
+net/minecraft/tileentity/TileEntity writeToNBT (Lnet/minecraft/nbt/NBTTagCompound;)V -> app a (Ldn;)V
 net/minecraft/util/BlockPos add (III)Lnet/minecraft/util/BlockPos; -> cj a (III)Lcj;
 net/minecraft/util/BlockPos down ()Lnet/minecraft/util/BlockPos; -> cj b ()Lcj;
 net/minecraft/util/BlockPos down (I)Lnet/minecraft/util/BlockPos; -> cj c (I)Lcj;
@@ -1080,27 +1106,27 @@ net/minecraft/util/RegistryNamespaced register (ILjava/lang/Object;Ljava/lang/Ob
 net/minecraft/util/Vec3i getX ()I -> df p ()I
 net/minecraft/util/Vec3i getY ()I -> df q ()I
 net/minecraft/util/Vec3i getZ ()I -> df r ()I
-net/minecraft/world/Explosion doExplosionA ()V -> ahg a ()V
-net/minecraft/world/Explosion doExplosionB (Z)V -> ahg a (Z)V
-net/minecraft/world/IBlockAccess getBlockState (Lnet/minecraft/util/BlockPos;)Lnet/minecraft/block/state/IBlockState; -> aho o (Lcj;)Laqr;
-net/minecraft/world/IBlockAccess getStrongPower (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)I -> aho a (Lcj;Lcq;)I
-net/minecraft/world/IBlockAccess getTileEntity (Lnet/minecraft/util/BlockPos;)Lnet/minecraft/tileentity/TileEntity; -> aho r (Lcj;)Lapl;
-net/minecraft/world/IBlockAccess isAirBlock (Lnet/minecraft/util/BlockPos;)Z -> aho d (Lcj;)Z
-net/minecraft/world/IInteractionObject createContainer (Lnet/minecraft/entity/player/InventoryPlayer;Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/inventory/Container; -> qk a (Lzm;Lzn;)Laan;
-net/minecraft/world/IInteractionObject getGuiID ()Ljava/lang/String; -> qk k ()Ljava/lang/String;
-net/minecraft/world/IWorldNameable getDisplayName ()Lnet/minecraft/util/IChatComponent; -> qq i_ ()Leu;
-net/minecraft/world/IWorldNameable getName ()Ljava/lang/String; -> qq h_ ()Ljava/lang/String;
-net/minecraft/world/IWorldNameable hasCustomName ()Z -> qq n_ ()Z
-net/minecraft/world/World addBlockEvent (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;II)V -> ahk c (Lcj;Lajj;II)V
-net/minecraft/world/World createExplosion (Lnet/minecraft/entity/Entity;DDDFZ)Lnet/minecraft/world/Explosion; -> ahk a (Lrn;DDDFZ)Lahg;
-net/minecraft/world/World getCollidingBoundingBoxes (Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List; -> ahk a (Lrn;Lbav;)Ljava/util/List;
-net/minecraft/world/World getEntitiesInAABBexcluding (Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;Lcom/google/common/base/Predicate;)Ljava/util/List; -> ahk a (Lrn;Lbav;Lcom/google/common/base/Predicate;)Ljava/util/List;
-net/minecraft/world/World getEntitiesWithinAABBExcludingEntity (Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List; -> ahk b (Lrn;Lbav;)Ljava/util/List;
-net/minecraft/world/World getGameRules ()Lnet/minecraft/world/GameRules; -> ahk U ()Lahi;
-net/minecraft/world/World isAreaLoaded (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/BlockPos;)Z -> ahk a (Lcj;Lcj;)Z
-net/minecraft/world/World markBlockRangeForRenderUpdate (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/BlockPos;)V -> ahk b (Lcj;Lcj;)V
-net/minecraft/world/World markChunkDirty (Lnet/minecraft/util/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V -> ahk b (Lcj;Lapl;)V
-net/minecraft/world/World playAuxSFXAtEntity (Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/BlockPos;I)V -> ahk a (Lzn;ILcj;I)V
-net/minecraft/world/World playSoundEffect (DDDLnet/minecraft/util/Sound;FF)V -> ahk a (DDDLng;FF)V
-net/minecraft/world/World setBlockState (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z -> ahk a (Lcj;Laqr;I)Z
-net/minecraft/world/World setTileEntity (Lnet/minecraft/util/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V -> ahk a (Lcj;Lapl;)V
+net/minecraft/world/Explosion doExplosionA ()V -> ahk a ()V
+net/minecraft/world/Explosion doExplosionB (Z)V -> ahk a (Z)V
+net/minecraft/world/IBlockAccess getBlockState (Lnet/minecraft/util/BlockPos;)Lnet/minecraft/block/state/IBlockState; -> ahs o (Lcj;)Laqv;
+net/minecraft/world/IBlockAccess getStrongPower (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)I -> ahs a (Lcj;Lcq;)I
+net/minecraft/world/IBlockAccess getTileEntity (Lnet/minecraft/util/BlockPos;)Lnet/minecraft/tileentity/TileEntity; -> ahs r (Lcj;)Lapp;
+net/minecraft/world/IBlockAccess isAirBlock (Lnet/minecraft/util/BlockPos;)Z -> ahs d (Lcj;)Z
+net/minecraft/world/IInteractionObject createContainer (Lnet/minecraft/entity/player/InventoryPlayer;Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/inventory/Container; -> ql a (Lzn;Lzo;)Laao;
+net/minecraft/world/IInteractionObject getGuiID ()Ljava/lang/String; -> ql k ()Ljava/lang/String;
+net/minecraft/world/IWorldNameable getDisplayName ()Lnet/minecraft/util/IChatComponent; -> qr i_ ()Leu;
+net/minecraft/world/IWorldNameable getName ()Ljava/lang/String; -> qr h_ ()Ljava/lang/String;
+net/minecraft/world/IWorldNameable hasCustomName ()Z -> qr n_ ()Z
+net/minecraft/world/World addBlockEvent (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;II)V -> aho c (Lcj;Lajn;II)V
+net/minecraft/world/World createExplosion (Lnet/minecraft/entity/Entity;DDDFZ)Lnet/minecraft/world/Explosion; -> aho a (Lro;DDDFZ)Lahk;
+net/minecraft/world/World getCollidingBoundingBoxes (Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List; -> aho a (Lro;Lbbc;)Ljava/util/List;
+net/minecraft/world/World getEntitiesInAABBexcluding (Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;Lcom/google/common/base/Predicate;)Ljava/util/List; -> aho a (Lro;Lbbc;Lcom/google/common/base/Predicate;)Ljava/util/List;
+net/minecraft/world/World getEntitiesWithinAABBExcludingEntity (Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List; -> aho b (Lro;Lbbc;)Ljava/util/List;
+net/minecraft/world/World getGameRules ()Lnet/minecraft/world/GameRules; -> aho U ()Lahm;
+net/minecraft/world/World isAreaLoaded (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/BlockPos;)Z -> aho a (Lcj;Lcj;)Z
+net/minecraft/world/World markBlockRangeForRenderUpdate (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/BlockPos;)V -> aho b (Lcj;Lcj;)V
+net/minecraft/world/World markChunkDirty (Lnet/minecraft/util/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V -> aho b (Lcj;Lapp;)V
+net/minecraft/world/World playAuxSFXAtEntity (Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/BlockPos;I)V -> aho a (Lzo;ILcj;I)V
+net/minecraft/world/World playSoundEffect (DDDLnet/minecraft/util/Sound;FF)V -> aho a (DDDLng;FF)V
+net/minecraft/world/World setBlockState (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z -> aho a (Lcj;Laqv;I)Z
+net/minecraft/world/World setTileEntity (Lnet/minecraft/util/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V -> aho a (Lcj;Lapp;)V

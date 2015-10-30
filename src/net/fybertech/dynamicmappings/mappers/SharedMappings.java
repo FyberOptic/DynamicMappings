@@ -2113,18 +2113,40 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/BlockStaticLiquid",
 			"net/minecraft/block/BlockOldLog",
 			"net/minecraft/block/BlockWorkbench",
-			"net/minecraft/block/BlockWorkbench$InterfaceCraftingTable"			
+			"net/minecraft/block/BlockWorkbench$InterfaceCraftingTable",
+			"net/minecraft/block/BlockAir"
+			},
+			providesFields={
+			"net/minecraft/block/Block AIR_ID Lnet/minecraft/util/ResourceLocation;"
 			},
 			dependsMethods={
 			"net/minecraft/block/Block registerBlocks ()V"
 			},
 			depends={
-			"net/minecraft/block/Block"
+			"net/minecraft/block/Block",
+			"net/minecraft/util/ResourceLocation"
 			})
 	public boolean discoverBlocks()
 	{
 		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
-		if (block == null) return false;
+		ClassNode resourceLocation = getClassNodeFromMapping("net/minecraft/util/ResourceLocation");
+		if (block == null || resourceLocation == null) return false;
+		
+		
+		// Get Block.AIR_ID field
+		String air_id_name = null;
+		int count = 0;
+		for (FieldNode field : block.fields) {
+			if (field.desc.equals("L" + resourceLocation.name + ";")) {
+				air_id_name = field.name;
+				count++;
+			}
+		}
+		if (air_id_name != null && count == 1) {
+			addFieldMapping("net/minecraft/block/Block AIR_ID Lnet/minecraft/util/ResourceLocation;",
+					block.name + " " + air_id_name + " L" + resourceLocation.name + ";");
+		}
+		
 		
 		MethodNode registerBlocks = getMethodNodeFromMapping(block, "net/minecraft/block/Block registerBlocks ()V");
 		if (registerBlocks == null) return false;
@@ -2134,10 +2156,26 @@ public class SharedMappings extends MappingsBase {
 		String className;
 		String blockName = null;
 		
+		boolean foundAir = false;
+		
 		// Create a map if the block names and their respective classes.
 		// Note: May still just be the generic Block class.
 		for (AbstractInsnNode insn = registerBlocks.instructions.getFirst(); insn != null; insn = insn.getNext()) 
 		{
+			if (!foundAir && air_id_name != null) {
+				if (insn.getOpcode() == Opcodes.GETSTATIC) {
+					FieldInsnNode fn = (FieldInsnNode)insn;
+					if (fn.owner.equals(block.name) && fn.name.equals(air_id_name)) {
+						AbstractInsnNode nextInsn = getNextRealOpcode(insn.getNext());
+						if (nextInsn.getOpcode() == Opcodes.NEW) {
+							String blockAir = ((TypeInsnNode)nextInsn).desc;
+							addClassMapping("net/minecraft/block/BlockAir", blockAir);
+							foundAir = true;
+						}
+					}
+				}
+			}
+			
 			String ldcString = getLdcString(insn);
 			if (ldcString != null) { blockName = ldcString; continue; }
 			
@@ -2209,6 +2247,157 @@ public class SharedMappings extends MappingsBase {
 		return true;
 	}
 	
+	
+	
+	@Mapping(provides="net/minecraft/block/EnumRenderType",
+			providesFields={
+			"net/minecraft/block/material/Material air Lnet/minecraft/block/material/Material;"
+			},
+			providesMethods={
+			"net/minecraft/block/Block getCollisionBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
+			"net/minecraft/block/Block isOpaqueCube (Lnet/minecraft/block/state/IBlockState;)Z",
+			"net/minecraft/block/Block canCollideCheck (Lnet/minecraft/block/state/IBlockState;Z)Z",
+			"net/minecraft/block/Block isReplaceable (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Z",
+			"net/minecraft/block/Block getRenderType ()Lnet/minecraft/block/EnumRenderType;"
+			},
+			depends={
+			"net/minecraft/block/Block",
+			"net/minecraft/block/BlockAir",
+			"net/minecraft/world/World",
+			"net/minecraft/util/BlockPos",
+			"net/minecraft/block/state/IBlockState",
+			"net/minecraft/block/material/Material",
+			"net/minecraft/util/AxisAlignedBB"
+			})
+	public boolean processBlockAirClass()
+	{
+		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
+		ClassNode blockAir = getClassNodeFromMapping("net/minecraft/block/BlockAir");
+		ClassNode world = getClassNodeFromMapping("net/minecraft/world/World");
+		ClassNode blockPos = getClassNodeFromMapping("net/minecraft/util/BlockPos");
+		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
+		ClassNode material = getClassNodeFromMapping("net/minecraft/block/material/Material");
+		ClassNode aabb = getClassNodeFromMapping("net/minecraft/util/AxisAlignedBB");
+		if (!MeddleUtil.notNull(block, blockAir, world, blockPos, iBlockState, material, aabb)) return false;
+		
+		List<FieldInsnNode> fieldNodes = getAllInsnNodesOfType(blockAir, FieldInsnNode.class);
+		for (Iterator<FieldInsnNode> it = fieldNodes.iterator(); it.hasNext();) {
+			if (!it.next().desc.equals("L" + material.name + ";")) it.remove();
+		}
+		if (fieldNodes.size() == 1) {
+			addFieldMapping("net/minecraft/block/material/Material air Lnet/minecraft/block/material/Material;",
+					material.name + " " + fieldNodes.get(0).name + " " + fieldNodes.get(0).desc);
+		}
+		
+		
+		// public AxisAlignedBB getCollisionBoundingBox(IBlockState state, World worldIn, BlockPos pos)
+		List<MethodNode> methods = getMatchingMethods(blockAir, null, assembleDescriptor("(", iBlockState, world, blockPos, ")", aabb));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block getCollisionBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public boolean isOpaqueCube(IBlockState state)
+		methods = getMatchingMethods(blockAir, null, assembleDescriptor("(", iBlockState, ")Z"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block isOpaqueCube (Lnet/minecraft/block/state/IBlockState;)Z",
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public boolean canCollideCheck(IBlockState state, boolean hitIfLiquid)
+		methods = getMatchingMethods(blockAir, null, assembleDescriptor("(", iBlockState, "Z)Z"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block canCollideCheck (Lnet/minecraft/block/state/IBlockState;Z)Z",
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public boolean isReplaceable(World worldIn, BlockPos pos)
+		methods = getMatchingMethods(blockAir, null, assembleDescriptor("(", world, blockPos, ")Z"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block isReplaceable (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Z",
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public EnumRenderType getRenderType()
+		methods.clear();
+		for (MethodNode method : blockAir.methods) {
+			if (method.desc.startsWith("(L" + iBlockState.name + ";)L")) methods.add(method);
+		}
+		if (methods.size() == 1) {
+			String renderType = Type.getMethodType(methods.get(0).desc).getReturnType().getClassName();
+			if (searchConstantPoolForStrings(renderType, "INVISIBLE", "LIQUID")) {
+				addClassMapping("net/minecraft/block/EnumRenderType", renderType);
+				addMethodMapping("net/minecraft/block/Block getRenderType ()Lnet/minecraft/block/EnumRenderType;",
+						block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			}
+		}
+		
+		return true;
+	}
+	
+	
+	
+	@Mapping(providesFields={
+			"net/minecraft/block/EnumRenderType INVISIBLE Lnet/minecraft/block/EnumRenderType;",
+			"net/minecraft/block/EnumRenderType LIQUID Lnet/minecraft/block/EnumRenderType;",
+			"net/minecraft/block/EnumRenderType ENTITYBLOCK_ANIMATED Lnet/minecraft/block/EnumRenderType;",
+			"net/minecraft/block/EnumRenderType MODEL Lnet/minecraft/block/EnumRenderType;"
+			},
+			depends="net/minecraft/block/EnumRenderType")
+	public boolean processEnumRenderTypeClass()
+	{
+		ClassNode renderType = getClassNodeFromMapping("net/minecraft/block/EnumRenderType");
+		if (renderType == null) return false;
+		
+		Map<String, FieldInsnNode> map = new HashMap<>();
+		
+		MethodNode clinit = getMethodNode(renderType, "--- <clinit> ()V");
+		if (clinit == null) return false;
+		
+		// Extract LDC strings and the PUTSTATICs that follow them, into a map
+		String lastString = null;
+		for (AbstractInsnNode insn = clinit.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+			String string = getLdcString(insn);
+			if (string != null) {
+				lastString = string;
+				continue;
+			}			
+			
+			if (insn.getOpcode() != Opcodes.PUTSTATIC || lastString == null) continue;
+			
+			FieldInsnNode fn = (FieldInsnNode)insn;
+			if (fn.owner.equals(renderType.name) && fn.desc.equals("L" + renderType.name + ";")) {
+				if (lastString.equals("INVISIBLE")) {
+					addFieldMapping("net/minecraft/block/EnumRenderType INVISIBLE Lnet/minecraft/block/EnumRenderType;",
+							renderType.name + " " + fn.name + " " + fn.desc);
+				}
+				else if (lastString.equals("LIQUID")) {
+					addFieldMapping("net/minecraft/block/EnumRenderType LIQUID Lnet/minecraft/block/EnumRenderType;",
+							renderType.name + " " + fn.name + " " + fn.desc);
+				}
+				else if (lastString.equals("ENTITYBLOCK_ANIMATED")) {
+					addFieldMapping("net/minecraft/block/EnumRenderType ENTITYBLOCK_ANIMATED Lnet/minecraft/block/EnumRenderType;",
+							renderType.name + " " + fn.name + " " + fn.desc);
+				}
+				else if (lastString.equals("MODEL")) {
+					addFieldMapping("net/minecraft/block/EnumRenderType MODEL Lnet/minecraft/block/EnumRenderType;",
+							renderType.name + " " + fn.name + " " + fn.desc);
+				}
+				
+				lastString = null;
+			}
+			 
+		}
+		
+		
+		
+		
+		return true;
+	}
 	
 	
 	@Mapping(provides={
@@ -4438,11 +4627,166 @@ public class SharedMappings extends MappingsBase {
 					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}		
 		
-		
+				
 		return true;
 	}
 	
 	
+	@Mapping(provides={
+			"net/minecraft/block/EnumBlockRotation",
+			"net/minecraft/block/EnumBlockMirroring"
+			},
+			providesFields={
+			"net/minecraft/block/Block blockMaterial Lnet/minecraft/block/material/Material;",
+			"net/minecraft/block/Block mapColor Lnet/minecraft/block/material/MapColor;",
+			"net/minecraft/block/Block lightOpacity I"
+			},
+			providesMethods={
+			"net/minecraft/block/Block getMaterial (Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/block/material/Material;",
+			"net/minecraft/block/Block getMapColor (Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/block/material/MapColor;",
+			"net/minecraft/block/Block getStateFromRotation (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/EnumBlockRotation;)Lnet/minecraft/block/state/IBlockState;",
+			"net/minecraft/block/Block getStateFromMirroring (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/EnumBlockMirroring;)Lnet/minecraft/block/state/IBlockState;",
+			"net/minecraft/block/Block setLightOpacity (I)Lnet/minecraft/block/Block;",
+			"net/minecraft/block/Block setLightLevel (F)Lnet/minecraft/block/Block;",
+			"net/minecraft/block/Block setResistance (F)Lnet/minecraft/block/Block;"
+			},
+			depends={
+			"net/minecraft/block/Block",
+			"net/minecraft/item/Item",
+			"net/minecraft/block/state/IBlockState",
+			"net/minecraft/block/state/BlockState",
+			"net/minecraft/util/BlockPos",
+			"net/minecraft/world/World",
+			"net/minecraft/world/IBlockAccess",
+			"net/minecraft/creativetab/CreativeTabs",
+			"net/minecraft/entity/player/EntityPlayer",
+			"net/minecraft/tileentity/TileEntity",
+			"net/minecraft/item/ItemStack",
+			"net/minecraft/block/material/Material",
+			"net/minecraft/block/material/MapColor"
+			})
+	public boolean processBlockClass3()
+	{
+		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
+		ClassNode item = getClassNodeFromMapping("net/minecraft/item/Item");
+		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
+		ClassNode blockState = getClassNodeFromMapping("net/minecraft/block/state/BlockState");
+		ClassNode blockPos = getClassNodeFromMapping("net/minecraft/util/BlockPos");
+		ClassNode world = getClassNodeFromMapping("net/minecraft/world/World");
+		ClassNode iBlockAccess = getClassNodeFromMapping("net/minecraft/world/IBlockAccess");
+		ClassNode creativeTabs = getClassNodeFromMapping("net/minecraft/creativetab/CreativeTabs");
+		ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
+		ClassNode tileEntity = getClassNodeFromMapping("net/minecraft/tileentity/TileEntity");
+		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
+		ClassNode material = getClassNodeFromMapping("net/minecraft/block/material/Material");
+		ClassNode mapColor = getClassNodeFromMapping("net/minecraft/block/material/MapColor");
+		if (!MeddleUtil.notNull(block, item, iBlockState, blockState, blockPos, world, iBlockAccess, creativeTabs,
+				entityPlayer, tileEntity, itemStack, material, mapColor)) return false;
+		
+		
+		// public Material getMaterial(IBlockState)
+		List<MethodNode> methods = getMatchingMethods(block, null, assembleDescriptor("(", iBlockState, ")", material));		
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block getMaterial (Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/block/material/Material;",
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			
+			List<FieldInsnNode> nodes = getAllInsnNodesOfType(methods.get(0), FieldInsnNode.class);
+			if (nodes.size() == 1 && nodes.get(0).owner.equals(block.name) && nodes.get(0).desc.equals("L" + material.name + ";")) {
+				addFieldMapping("net/minecraft/block/Block blockMaterial Lnet/minecraft/block/material/Material;",
+						block.name + " " + nodes.get(0).name + " " + nodes.get(0).desc);
+			}
+		}
+		
+		
+		// public MapColor getMapColor(IBlockState state)
+		methods = getMatchingMethods(block, null, assembleDescriptor("(", iBlockState, ")", mapColor));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block getMapColor (Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/block/material/MapColor;",
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			
+			List<FieldInsnNode> nodes = getAllInsnNodesOfType(methods.get(0), FieldInsnNode.class);
+			if (nodes.size() == 1 && nodes.get(0).owner.equals(block.name) && nodes.get(0).desc.equals("L" + mapColor.name + ";")) {
+				addFieldMapping("net/minecraft/block/Block mapColor Lnet/minecraft/block/material/MapColor;",
+						block.name + " " + nodes.get(0).name + " " + nodes.get(0).desc);
+			}
+		}
+		
+		
+		// public IBlockState getStateFromRotation(IBlockState param0, EnumBlockRotation param1)
+		// public IBlockState getStateFromMirroring(IBlockState param0, EnumBlockMirroring param1)
+		methods.clear();
+		for (MethodNode method : block.methods) {
+			if (method.desc.startsWith("(L" + iBlockState.name + ";L") && 
+					method.desc.endsWith(";)L" + iBlockState.name + ";") && 
+					Type.getMethodType(method.desc).getArgumentTypes().length == 2) methods.add(method);			
+		}
+		if (methods.size() == 2 && !methods.get(0).desc.equals(methods.get(1).desc)) {
+			for (MethodNode method : methods) {
+				String className = Type.getMethodType(method.desc).getArgumentTypes()[1].getClassName();
+				if (searchConstantPoolForStrings(className, "rotate_0", "rotate_90")) {
+					addClassMapping("net/minecraft/block/EnumBlockRotation", className);
+					addMethodMapping("net/minecraft/block/Block getStateFromRotation (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/EnumBlockRotation;)Lnet/minecraft/block/state/IBlockState;",
+							block.name + " " + method.name + " " + method.desc);
+				}
+				else if (searchConstantPoolForStrings(className, "no_mirror", "mirror_left_right")) {
+					addClassMapping("net/minecraft/block/EnumBlockMirroring", className);
+					addMethodMapping("net/minecraft/block/Block getStateFromMirroring (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/EnumBlockMirroring;)Lnet/minecraft/block/state/IBlockState;",
+							block.name + " " + method.name + " " + method.desc);
+				}
+			}
+		}
+		
+		
+		// protected Block setLightOpacity(int opacity)
+		methods = getMatchingMethods(block, null, "(I)L" + block.name + ";");
+		methods = removeMethodsWithFlags(methods, Opcodes.ACC_STATIC);
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block setLightOpacity (I)Lnet/minecraft/block/Block;",
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			
+			List<FieldInsnNode> nodes = getAllInsnNodesOfType(methods.get(0), FieldInsnNode.class);
+			if (nodes.size() == 1 && nodes.get(0).owner.equals(block.name) && nodes.get(0).desc.equals("I")) {
+				addFieldMapping("net/minecraft/block/Block lightOpacity I",
+						block.name + " " + nodes.get(0).name + " " + nodes.get(0).desc);
+			}
+		}
+		
+		
+		// protected Block setLightLevel(float value)
+		// public Block setResistance(float resistance)
+		methods = getMatchingMethods(block, null, "(F)L" + block.name + ";");
+		int setLightLevel_num = -1;
+		int setResistance_num = -1;
+		for (int n = 0; n < methods.size(); n++) {
+			MethodNode method = methods.get(n);
+			for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				if (isLdcWithFloat(insn, 15F)) {
+					if (setLightLevel_num == -1) setLightLevel_num = n;
+					else setLightLevel_num = -2;
+				}
+				else if (isLdcWithFloat(insn, 3F)) {
+					if (setResistance_num == -1) setResistance_num = n;
+					else setResistance_num = -2;
+				}
+			}
+		}
+		if (setLightLevel_num >= 0) {
+			addMethodMapping("net/minecraft/block/Block setLightLevel (F)Lnet/minecraft/block/Block;",
+					block.name + " " + methods.get(setLightLevel_num).name + " " + methods.get(setLightLevel_num).desc);
+			// TODO - get lightValue
+		}
+		if (setResistance_num >= 0) {
+			addMethodMapping("net/minecraft/block/Block setResistance (F)Lnet/minecraft/block/Block;",
+					block.name + " " + methods.get(setResistance_num).name + " " + methods.get(setResistance_num).desc);
+			// TODO - get blockResistance
+		}
+		
+		
+		//methods = getMatchingMethods(block, null, "(L" + iBlockState.name + ";)Z");
+		//for (MethodNode method : methods) System.out.println(method.name);
+		
+		return true;
+	}
 	
 	
 	
