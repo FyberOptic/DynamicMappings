@@ -151,7 +151,7 @@ public class MappingsBase
 	public AbstractInsnNode[] getOpcodeSequenceArray(AbstractInsnNode insn, int...opcodes)
 	{
 		return DynamicMappings.getOpcodeSequenceArray(insn, opcodes);
-	}
+	}		
 	
 	@SuppressWarnings("unchecked")
 	public AbstractInsnNode[] getInsnNodeSequenceArray(AbstractInsnNode insn, Class<? extends AbstractInsnNode>...nodeClasses)
@@ -256,5 +256,12 @@ public class MappingsBase
 		}
 		return output;
 	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public boolean matchInsnNodeSequence(AbstractInsnNode insn, Class<? extends AbstractInsnNode>...nodeClasses)
+	{
+		return DynamicMappings.matchInsnNodeSequence(insn, nodeClasses);
+	}	
 	
 }

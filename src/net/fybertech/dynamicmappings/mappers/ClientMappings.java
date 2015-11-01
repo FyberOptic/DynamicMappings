@@ -2764,13 +2764,29 @@ public class ClientMappings extends MappingsBase
 	
 	
 	@Mapping(providesMethods={
-			"net/minecraft/block/Block getMixedBrightnessForBlock (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)I"
+			"net/minecraft/block/Block getMixedBrightnessForBlock (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)I",
+			"net/minecraft/block/Block getSelectedBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
+			"net/minecraft/block/Block shouldSideBeRendered (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z",
+			"net/minecraft/block/Block randomDisplayTick (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Ljava/util/Random;)V",
+			"net/minecraft/block/Block getSubBlocks (Lnet/minecraft/item/Item;Lnet/minecraft/creativetab/CreativeTabs;Ljava/util/List;)V",
+			"net/minecraft/block/Block getCreativeTabToDisplayOn ()Lnet/minecraft/creativetab/CreativeTabs;",
+			"net/minecraft/block/Block getBlockLayer ()Lnet/minecraft/util/EnumWorldBlockLayer;",
+			"net/minecraft/block/Block colorMultiplier (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;I)I"
+			},
+			dependsMethods={
+			"net/minecraft/block/Block getCollisionBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;"
 			},
 			depends={
 			"net/minecraft/block/Block",
 			"net/minecraft/world/IBlockAccess",
 			"net/minecraft/util/BlockPos",
-			"net/minecraft/block/state/IBlockState"
+			"net/minecraft/block/state/IBlockState",
+			"net/minecraft/world/World",
+			"net/minecraft/util/AxisAlignedBB",
+			"net/minecraft/util/EnumFacing",
+			"net/minecraft/item/Item",
+			"net/minecraft/creativetab/CreativeTabs",
+			"net/minecraft/util/EnumWorldBlockLayer"
 			})
 	public boolean processBlockClass()
 	{
@@ -2778,7 +2794,14 @@ public class ClientMappings extends MappingsBase
 		ClassNode iBlockAccess = getClassNodeFromMapping("net/minecraft/world/IBlockAccess");
 		ClassNode blockPos = getClassNodeFromMapping("net/minecraft/util/BlockPos");
 		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
-		if (!MeddleUtil.notNull(block, iBlockAccess, blockPos)) return false;
+		ClassNode world = getClassNodeFromMapping("net/minecraft/world/World");
+		ClassNode aabb = getClassNodeFromMapping("net/minecraft/util/AxisAlignedBB");
+		ClassNode enumFacing = getClassNodeFromMapping("net/minecraft/util/EnumFacing");
+		ClassNode item = getClassNodeFromMapping("net/minecraft/item/Item");
+		ClassNode creativeTabs = getClassNodeFromMapping("net/minecraft/creativetab/CreativeTabs");
+		ClassNode enumWorldBlockLayer = getClassNodeFromMapping("net/minecraft/util/EnumWorldBlockLayer");
+		if (!MeddleUtil.notNull(block, iBlockAccess, blockPos, world, aabb, enumFacing, item, creativeTabs,
+				enumWorldBlockLayer)) return false;
 		
 		// public int getMixedBrightnessForBlock(IBlockState state, IBlockAccess worldIn, BlockPos pos)
 		List<MethodNode> methods = DynamicMappings.getMatchingMethods(block, null, DynamicMappings.assembleDescriptor("(", iBlockState, iBlockAccess, blockPos, ")I"));
@@ -2788,8 +2811,127 @@ public class ClientMappings extends MappingsBase
 		}
 		
 		
+		MethodNode getCollisionBoundingBox = getMethodNodeFromMapping(block, "net/minecraft/block/Block getCollisionBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;");
+		
+		// public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World worldIn, BlockPos pos)
+		methods = getMatchingMethods(block, null, assembleDescriptor("(", iBlockState, world, blockPos, ")", aabb));
+		if (methods.size() == 2 && getCollisionBoundingBox != null) {
+			for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
+				MethodNode method = it.next();
+				if (method.name.equals(getCollisionBoundingBox.name)) it.remove();
+			}
+			if (methods.size() == 1) {
+				addMethodMapping("net/minecraft/block/Block getSelectedBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
+						block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			}
+		}
+		
+		
+		// public boolean shouldSideBeRendered(IBlockState param0, IBlockAccess param1, BlockPos param2, EnumFacing param3)
+		methods = getMatchingMethods(block, null, assembleDescriptor("(", iBlockState, iBlockAccess, blockPos, enumFacing, ")Z"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block shouldSideBeRendered (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z",
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public void randomDisplayTick(IBlockState param0, World param1, BlockPos param2, Random param3)
+		methods = getMatchingMethods(block, null, assembleDescriptor("(", iBlockState, world, blockPos, "Ljava/util/Random;)V"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block randomDisplayTick (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Ljava/util/Random;)V",
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public void getSubBlocks(Item itemIn, CreativeTabs tab, List list)
+		methods = getMatchingMethods(block, null, assembleDescriptor("(", item, creativeTabs, "Ljava/util/List;)V"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block getSubBlocks (Lnet/minecraft/item/Item;Lnet/minecraft/creativetab/CreativeTabs;Ljava/util/List;)V",
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public CreativeTabs getCreativeTabToDisplayOn()
+		methods = getMatchingMethods(block, null, assembleDescriptor("()", creativeTabs));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block getCreativeTabToDisplayOn ()Lnet/minecraft/creativetab/CreativeTabs;",
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public EnumWorldBlockLayer getBlockLayer()
+		methods = getMatchingMethods(block, null, "()L" + enumWorldBlockLayer.name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block getBlockLayer ()Lnet/minecraft/util/EnumWorldBlockLayer;",
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public int colorMultiplier(IBlockAccess worldIn, BlockPos pos, int renderPass)
+		methods = getMatchingMethods(block, null, assembleDescriptor("(", iBlockAccess, blockPos, "I)I"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block colorMultiplier (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;I)I",
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
 		return true;		
 	}
+	
+	
+	
+	@Mapping(provides="net/minecraft/world/ColorizerGrass",
+			providesMethods={
+			"net/minecraft/block/Block getBlockColor ()I",
+			"net/minecraft/block/Block getRenderColor (Lnet/minecraft/block/state/IBlockState;)I",
+			"net/minecraft/world/ColorizerGrass getGrassColor (DD)I"
+			},
+			depends={
+			"net/minecraft/block/Block",
+			"net/minecraft/block/BlockGrass",
+			"net/minecraft/block/state/IBlockState"
+			})
+	public boolean processBlockGrassClass()
+	{
+		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
+		ClassNode grass = getClassNodeFromMapping("net/minecraft/block/BlockGrass");
+		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
+		if (!MeddleUtil.notNull(block, grass, iBlockState)) return false;
+		
+		
+		// public int getBlockColor()
+		List<MethodNode> methods = getMatchingMethods(grass, null, "()I");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block getBlockColor ()I", 
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			
+			// ColorizerGrass.getGrassColor(D, D);
+			List<MethodInsnNode> nodes = getAllInsnNodesOfType(methods.get(0), MethodInsnNode.class);
+			if (nodes.size() == 1 && nodes.get(0).getOpcode() == Opcodes.INVOKESTATIC && nodes.get(0).desc.equals("(DD)I")) {
+				addClassMapping("net/minecraft/world/ColorizerGrass", nodes.get(0).owner);
+				addMethodMapping("net/minecraft/world/ColorizerGrass getGrassColor (DD)I", 
+						nodes.get(0).owner + " " + nodes.get(0).name + " (DD)I");
+			}
+		}
+		
+		
+		// public int getRenderColor(IBlockState state)
+		methods = getMatchingMethods(grass, null, "(L" + iBlockState.name + ";)I");		
+		for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
+			MethodNode method = it.next();
+			// Strip out getMetaFromState
+			if (matchOpcodeSequence(method.instructions.getFirst(), Opcodes.ICONST_0, Opcodes.IRETURN)) it.remove();
+		}
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block getRenderColor (Lnet/minecraft/block/state/IBlockState;)I", 
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		
+		return true;
+	}
+	
 	
 	
 	@Mapping(provides={

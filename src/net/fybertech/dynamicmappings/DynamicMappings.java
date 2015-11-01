@@ -1,7 +1,9 @@
 package net.fybertech.dynamicmappings;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -336,44 +338,63 @@ public class DynamicMappings
 	}
 	
 
-	/** Used for debugging purposes, and to print out a full list */
+	
+	public static void log(boolean toConsole, PrintWriter writer, String text)
+	{
+		if (toConsole) System.out.println(text);
+		if (writer != null) writer.println(text);
+	}
+	
+	
+	/** Used for debugging purposes, and to print out a full list 
+	 * @throws FileNotFoundException */
 	public static void main(String[] args)
 	{
 		// If true, prints out the mappings
 		boolean showMappings = false;		
+		// If true, saves mappings to currentmappings.txt
+		boolean saveMappings = true;
+		
+		PrintWriter writer = null;
+		
+		try {
+			if (saveMappings) writer = new PrintWriter("currentmappings.txt");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}	
 		
 		generateClassMappings();	
 
-		System.out.println("[DynamicMappings] Minecraft version: " + MeddleUtil.findMinecraftVersion());
-		System.out.println("[DynamicMappings] Minecraft jar type: " + (MeddleUtil.isClientJar() ? "client" : "server"));		
+		log(true, writer, "[DynamicMappings] Minecraft version: " + MeddleUtil.findMinecraftVersion());
+		log(true, writer, "[DynamicMappings] Minecraft jar type: " + (MeddleUtil.isClientJar() ? "client" : "server"));		
 
-		if (!showMappings) return;
+		if (!showMappings && !saveMappings) return;	
 
-		System.out.println("\nCLASSES:");	
+		log(showMappings, writer, "\nCLASSES:");	
 
 		List<String> sorted = new ArrayList<String>();
 		sorted.addAll(classMappings.keySet());
 		Collections.sort(sorted);
 		for (String s : sorted) {
-			System.out.println(s + " -> " + classMappings.get(s));
+			log(showMappings, writer, s + " -> " + classMappings.get(s));
 		}
 
-		System.out.println("\nFIELDS:");
+		log(showMappings, writer, "\nFIELDS:");
 
 		sorted.clear();
 		sorted.addAll(fieldMappings.keySet());
 		Collections.sort(sorted);
 		for (String s : sorted) {
-			System.out.println(s + " -> " + fieldMappings.get(s));
+			log(showMappings, writer, s + " -> " + fieldMappings.get(s));
 		}
 
-		System.out.println("\nMETHODS:");
+		log(showMappings, writer, "\nMETHODS:");
 
 		sorted.clear();
 		sorted.addAll(methodMappings.keySet());
 		Collections.sort(sorted);
 		for (String s : sorted) {
-			System.out.println(s + " -> " + methodMappings.get(s));
+			log(showMappings, writer, s + " -> " + methodMappings.get(s));
 		}
 	}
 	
@@ -825,6 +846,20 @@ public class DynamicMappings
 	
 	
 	@SuppressWarnings("unchecked")
+	public static boolean matchInsnNodeSequence(AbstractInsnNode insn, Class<? extends AbstractInsnNode>...nodeClasses)
+	{
+		for (Class<? extends AbstractInsnNode> nodeClass : nodeClasses) {
+			insn = getNextRealOpcode(insn);
+			if (insn == null) return false;
+			if (nodeClass != insn.getClass()) return false;		
+			insn = insn.getNext();
+		}
+
+		return true;
+	}
+	
+	
+	@SuppressWarnings("unchecked")
 	public static AbstractInsnNode[] getInsnNodeSequenceArray(AbstractInsnNode insn, Class<? extends AbstractInsnNode>...nodeClasses)
 	{
 		AbstractInsnNode[] outNodes = new AbstractInsnNode[nodeClasses.length];
@@ -840,6 +875,9 @@ public class DynamicMappings
 
 		return outNodes;
 	}
+	
+	
+	
 	
 	
 	/**
