@@ -3964,7 +3964,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/item/ItemBow",
 			"net/minecraft/item/ItemRecord",
 			"net/minecraft/item/ItemAxe",
-			"net/minecraft/item/ItemTool"
+			"net/minecraft/item/ItemTool",
+			"net/minecraft/item/ItemPickaxe"
 			},
 			providesMethods={
 			"net/minecraft/item/Item registerItems ()V"
@@ -4045,6 +4046,20 @@ public class SharedMappings extends MappingsBase {
 				}
 			}
 		}
+		
+		className = itemClassMap.get("iron_pickaxe");
+		if (className != null) {			
+			ClassNode axe = getClassNode(className);
+			if (axe != null) {
+				ClassNode tool = getClassNode(axe.superName);
+				if (tool != null) {
+					if (tool.superName.equals(itemClass.name) && searchConstantPoolForStrings(tool.name, "Tool modifier")) {
+						addClassMapping("net/minecraft/item/ItemPickaxe", axe.name);
+					}
+				}
+			}
+		}
+		
 		
 
 		return true;
@@ -7941,7 +7956,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/init/Items ender_pearl Lnet/minecraft/item/Item;",
 			"net/minecraft/init/Items iron_ingot Lnet/minecraft/item/Item;",
 			"net/minecraft/init/Items stick Lnet/minecraft/item/Item;",
-			"net/minecraft/init/Items iron_axe Lnet/minecraft/item/Item;"
+			"net/minecraft/init/Items iron_axe Lnet/minecraft/item/Item;",
+			"net/minecraft/init/Items iron_pickaxe Lnet/minecraft/item/Item;"
 			},
 			depends={
 			"net/minecraft/init/Items",
@@ -8009,6 +8025,9 @@ public class SharedMappings extends MappingsBase {
 		if (fieldName != null) addFieldMapping("net/minecraft/init/Items iron_axe Lnet/minecraft/item/Item;", 
 				itemsClass.name + " " + fieldName + " L" + itemClass.name + ";");
 
+		fieldName = itemsFields.get("iron_pickaxe");
+		if (fieldName != null) addFieldMapping("net/minecraft/init/Items iron_pickaxe Lnet/minecraft/item/Item;", 
+				itemsClass.name + " " + fieldName + " L" + itemClass.name + ";");
 		
 		
 		// TODO - Other items
