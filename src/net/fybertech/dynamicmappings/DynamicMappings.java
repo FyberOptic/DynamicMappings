@@ -396,6 +396,8 @@ public class DynamicMappings
 		for (String s : sorted) {
 			log(showMappings, writer, s + " -> " + methodMappings.get(s));
 		}
+		
+		writer.close();
 	}
 	
 	
