@@ -2203,17 +2203,27 @@ public class SharedMappings extends MappingsBase {
 	
 	
 	@Mapping(provides={
+			"net/minecraft/block/BlockAir",
+			"net/minecraft/block/BlockStone",
+			"net/minecraft/block/BlockGrass",
+			"net/minecraft/block/BlockDirt",
+			"net/minecraft/block/BlockSapling",
+			"net/minecraft/block/BlockDynamicLiquid",
+			"net/minecraft/block/BlockStaticLiquid",
+			"net/minecraft/block/BlockSand",
+			"net/minecraft/block/BlockGravel",
+			"net/minecraft/block/BlockOre",
+			"net/minecraft/block/BlockOldLog",
+			"net/minecraft/block/BlockOldLeaf",
+			"net/minecraft/block/BlockSponge",
+			"net/minecraft/block/BlockGlass",
 			"net/minecraft/block/BlockAnvil",
 			"net/minecraft/block/BlockDoor",
 			"net/minecraft/block/BlockBed",
 			"net/minecraft/block/BlockFenceGate",
 			"net/minecraft/block/BlockPane",
-			"net/minecraft/block/BlockDynamicLiquid",
-			"net/minecraft/block/BlockStaticLiquid",
-			"net/minecraft/block/BlockOldLog",
 			"net/minecraft/block/BlockWorkbench",
 			"net/minecraft/block/BlockWorkbench$InterfaceCraftingTable",
-			"net/minecraft/block/BlockAir",
 			"net/minecraft/block/BlockTNT"
 			},
 			providesFields={
@@ -2251,7 +2261,7 @@ public class SharedMappings extends MappingsBase {
 		MethodNode registerBlocks = getMethodNodeFromMapping(block, "net/minecraft/block/Block registerBlocks ()V");
 		if (registerBlocks == null) return false;
 		
-		Map<String, String> blockClasses = new HashMap<>();
+		Map<String, String> blockClassMap = new HashMap<>();
 		
 		String className;
 		String blockName = null;
@@ -2281,54 +2291,51 @@ public class SharedMappings extends MappingsBase {
 			
 			if (blockName != null && insn.getOpcode() == Opcodes.NEW) {
 				TypeInsnNode tn = (TypeInsnNode)insn;
-				blockClasses.put(blockName, tn.desc);				
+				blockClassMap.put(blockName, tn.desc);
 				blockName = null;
 			}			
 		}
 		
-		className = blockClasses.get("anvil");
-		if (className != null && searchConstantPoolForStrings(className, "damage"))
-		{
-			// TODO - Better detection method
-			addClassMapping("net/minecraft/block/BlockAnvil", className);
+		Map<String, String> blockTypes = new HashMap<>();
+		blockTypes.put("stone", "net/minecraft/block/BlockStone");		// 1 - stone
+		blockTypes.put("grass", "net/minecraft/block/BlockGrass");		// 2 - grass
+		blockTypes.put("dirt", "net/minecraft/block/BlockDirt");		// 3 - dirt
+		// 4 - cobblestone - Block
+		// 5 - planks - needs special handling
+		blockTypes.put("sapling", "net/minecraft/block/BlockSapling");	// 6 - sapling
+		// 7 - bedrock - Block
+		blockTypes.put("flowing_water", "net/minecraft/block/BlockDynamicLiquid");	// 8 - flowing water
+		blockTypes.put("water", "net/minecraft/block/BlockStaticLiquid");		// 9 - water
+		// 10 - flowing_lava - BlockDynamicLiquid
+		// 11 - lava - BlockStaticLiquid
+		blockTypes.put("sand", "net/minecraft/block/BlockSand");	// 12 - sand
+		blockTypes.put("gravel", "net/minecraft/block/BlockGravel");	// 13 - gravel
+		blockTypes.put("gold_ore", "net/minecraft/block/BlockOre");	// 14 - gold_ore
+		// 15 - iron_ore - BlockOre
+		// 16 - coal_ore - BlockOre
+		blockTypes.put("log", "net/minecraft/block/BlockOldLog");	// 17 - log
+		blockTypes.put("leaves", "net/minecraft/block/BlockOldLeaf");	// 18 - leaves
+		blockTypes.put("sponge", "net/minecraft/block/BlockSponge");	// 19 - sponge
+		blockTypes.put("glass", "net/minecraft/block/BlockGlass");		// 20 - glass
+		
+		blockTypes.put("anvil", "net/minecraft/block/BlockAnvil");
+		blockTypes.put("wooden_door", "net/minecraft/block/BlockDoor");
+		blockTypes.put("bed", "net/minecraft/block/BlockBed");
+		blockTypes.put("fence_gate", "net/minecraft/block/BlockFenceGate");
+		blockTypes.put("glass_pane", "net/minecraft/block/BlockPane");
+		blockTypes.put("tnt", "net/minecraft/block/BlockTNT");
+		
+		String obsfClass;
+		String blockClass;
+		for (String blockType : blockTypes.keySet()) {
+			blockClass = blockTypes.get(blockType);
+			obsfClass = blockClassMap.get(blockType);
+			if (obsfClass != null) {
+				addClassMapping(blockClass, obsfClass);
+			}
 		}
 		
-		className = blockClasses.get("wooden_door");
-		if (className != null && searchConstantPoolForStrings(className, "hinge")) {
-			addClassMapping("net/minecraft/block/BlockDoor", className);
-		}
-		
-		className = blockClasses.get("bed");
-		if (className != null && searchConstantPoolForStrings(className, "occupied", "tile.bed.occupied")) {
-			addClassMapping("net/minecraft/block/BlockBed", className);
-		}
-		
-		className = blockClasses.get("fence_gate");
-		if (className != null && searchConstantPoolForStrings(className, "in_wall")) {
-			addClassMapping("net/minecraft/block/BlockFenceGate", className);
-		}
-		
-		className = blockClasses.get("glass_pane");
-		if (className != null && searchConstantPoolForStrings(className, "north", "south", "east", "west")) {
-			addClassMapping("net/minecraft/block/BlockPane", className);
-		}
-		
-		className = blockClasses.get("flowing_water");
-		if (className != null) { // TODO - Better detection
-			addClassMapping("net/minecraft/block/BlockDynamicLiquid", className);
-		}
-        
-		className = blockClasses.get("water");
-		if (className != null && searchConstantPoolForStrings(className, "doFireTick")) {
-			addClassMapping("net/minecraft/block/BlockStaticLiquid", className);
-		}
-		
-		className = blockClasses.get("log");
-		if (className != null && searchConstantPoolForStrings(className, "variant")) {
-			addClassMapping("net/minecraft/block/BlockOldLog", className);
-		}
-		
-		className = blockClasses.get("crafting_table");
+		className = blockClassMap.get("crafting_table");
 		if (className != null) {
 			ClassNode workbench = getClassNode(className);
 			if (workbench != null) {
@@ -2342,12 +2349,6 @@ public class SharedMappings extends MappingsBase {
 				}			
 			}
 		}
-		
-		className = blockClasses.get("tnt");
-		if (className != null && searchConstantPoolForStrings(className, "explode")) {
-			addClassMapping("net/minecraft/block/BlockTNT", className);
-		}
-			
 		
 		return true;
 	}
