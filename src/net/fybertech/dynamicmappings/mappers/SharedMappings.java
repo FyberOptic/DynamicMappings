@@ -2291,7 +2291,8 @@ public class SharedMappings extends MappingsBase {
 			
 			if (blockName != null && insn.getOpcode() == Opcodes.NEW) {
 				TypeInsnNode tn = (TypeInsnNode)insn;
-				blockClassMap.put(blockName, tn.desc);
+				if (!blockClassMap.containsKey(blockName))
+					blockClassMap.put(blockName, tn.desc);
 				blockName = null;
 			}			
 		}
