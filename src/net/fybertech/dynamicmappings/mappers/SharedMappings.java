@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import net.fybertech.dynamicmappings.DynamicMappings;
 import net.fybertech.dynamicmappings.Mapping;
@@ -18,8 +19,12 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FieldNode;
+import org.objectweb.asm.tree.FrameNode;
+import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
+import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TableSwitchInsnNode;
@@ -2207,6 +2212,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/BlockStone",
 			"net/minecraft/block/BlockGrass",
 			"net/minecraft/block/BlockDirt",
+			"net/minecraft/block/BlockPlanks",
 			"net/minecraft/block/BlockSapling",
 			"net/minecraft/block/BlockDynamicLiquid",
 			"net/minecraft/block/BlockStaticLiquid",
@@ -2226,9 +2232,9 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/BlockWorkbench$InterfaceCraftingTable",
 			"net/minecraft/block/BlockTNT"
 			},
-			providesFields={
+			/*providesFields={
 			"net/minecraft/block/Block AIR_ID Lnet/minecraft/util/ResourceLocation;"
-			},
+			},*/
 			dependsMethods={
 			"net/minecraft/block/Block registerBlocks ()V"
 			},
@@ -2239,119 +2245,234 @@ public class SharedMappings extends MappingsBase {
 	public boolean discoverBlocks()
 	{
 		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
-		ClassNode resourceLocation = getClassNodeFromMapping("net/minecraft/util/ResourceLocation");
-		if (block == null || resourceLocation == null) return false;
-		
-		
-		// Get Block.AIR_ID field
-		String air_id_name = null;
-		int count = 0;
-		for (FieldNode field : block.fields) {
-			if (field.desc.equals("L" + resourceLocation.name + ";")) {
-				air_id_name = field.name;
-				count++;
-			}
-		}
-		if (air_id_name != null && count == 1) {
-			addFieldMapping("net/minecraft/block/Block AIR_ID Lnet/minecraft/util/ResourceLocation;",
-					block.name + " " + air_id_name + " L" + resourceLocation.name + ";");
-		}
-		
-		
 		MethodNode registerBlocks = getMethodNodeFromMapping(block, "net/minecraft/block/Block registerBlocks ()V");
-		if (registerBlocks == null) return false;
+		MethodNode registerBlock1 = getMethodNodeFromMapping(block, "net/minecraft/block/Block registerBlock (ILjava/lang/String;Lnet/minecraft/block/Block;)V");
+		MethodNode registerBlock2 = getMethodNodeFromMapping(block, "net/minecraft/block/Block registerBlock (ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/block/Block;)V");
+		if (registerBlocks == null || registerBlock1 == null || registerBlock2 == null) return false;
 		
-		Map<String, String> blockClassMap = new HashMap<>();
 		
-		String className;
-		String blockName = null;
-		
-		boolean foundAir = false;
-		
-		// Create a map if the block names and their respective classes.
-		// Note: May still just be the generic Block class.
-		for (AbstractInsnNode insn = registerBlocks.instructions.getFirst(); insn != null; insn = insn.getNext()) 
-		{
-			if (!foundAir && air_id_name != null) {
-				if (insn.getOpcode() == Opcodes.GETSTATIC) {
-					FieldInsnNode fn = (FieldInsnNode)insn;
-					if (fn.owner.equals(block.name) && fn.name.equals(air_id_name)) {
-						AbstractInsnNode nextInsn = getNextRealOpcode(insn.getNext());
-						if (nextInsn.getOpcode() == Opcodes.NEW) {
-							String blockAir = ((TypeInsnNode)nextInsn).desc;
-							addClassMapping("net/minecraft/block/BlockAir", blockAir);
-							foundAir = true;
-						}
-					}
-				}
-			}
-			
-			String ldcString = getLdcString(insn);
-			if (ldcString != null) { blockName = ldcString; continue; }
-			
-			if (blockName != null && insn.getOpcode() == Opcodes.NEW) {
-				TypeInsnNode tn = (TypeInsnNode)insn;
-				if (!blockClassMap.containsKey(blockName))
-					blockClassMap.put(blockName, tn.desc);
-				blockName = null;
-			}			
-		}
-		
-		Map<String, String> blockTypes = new HashMap<>();
-		blockTypes.put("stone", "net/minecraft/block/BlockStone");		// 1 - stone
-		blockTypes.put("grass", "net/minecraft/block/BlockGrass");		// 2 - grass
-		blockTypes.put("dirt", "net/minecraft/block/BlockDirt");		// 3 - dirt
+		// Create a map if the block ids and their respective classes.
+		Map<Integer, String> blockClassMap = new HashMap<>();
+		blockClassMap.put(0, "net/minecraft/block/BlockAir");		// 0 - air
+		blockClassMap.put(1, "net/minecraft/block/BlockStone");		// 1 - stone
+		blockClassMap.put(2, "net/minecraft/block/BlockGrass");		// 2 - grass
+		blockClassMap.put(3, "net/minecraft/block/BlockDirt");		// 3 - dirt
 		// 4 - cobblestone - Block
-		// 5 - planks - needs special handling
-		blockTypes.put("sapling", "net/minecraft/block/BlockSapling");	// 6 - sapling
+		blockClassMap.put(5, "net/minecraft/block/BlockPlanks");	// 5 - planks
+		blockClassMap.put(6, "net/minecraft/block/BlockSapling");	// 6 - sapling
 		// 7 - bedrock - Block
-		blockTypes.put("flowing_water", "net/minecraft/block/BlockDynamicLiquid");	// 8 - flowing water
-		blockTypes.put("water", "net/minecraft/block/BlockStaticLiquid");		// 9 - water
+		blockClassMap.put(8, "net/minecraft/block/BlockDynamicLiquid");	// 8 - flowing water
+		blockClassMap.put(9, "net/minecraft/block/BlockStaticLiquid");		// 9 - water
 		// 10 - flowing_lava - BlockDynamicLiquid
 		// 11 - lava - BlockStaticLiquid
-		blockTypes.put("sand", "net/minecraft/block/BlockSand");	// 12 - sand
-		blockTypes.put("gravel", "net/minecraft/block/BlockGravel");	// 13 - gravel
-		blockTypes.put("gold_ore", "net/minecraft/block/BlockOre");	// 14 - gold_ore
+		blockClassMap.put(12, "net/minecraft/block/BlockSand");		// 12 - sand
+		blockClassMap.put(13, "net/minecraft/block/BlockGravel");	// 13 - gravel
+		blockClassMap.put(14, "net/minecraft/block/BlockOre");		// 14 - gold_ore
 		// 15 - iron_ore - BlockOre
 		// 16 - coal_ore - BlockOre
-		blockTypes.put("log", "net/minecraft/block/BlockOldLog");	// 17 - log
-		blockTypes.put("leaves", "net/minecraft/block/BlockOldLeaf");	// 18 - leaves
-		blockTypes.put("sponge", "net/minecraft/block/BlockSponge");	// 19 - sponge
-		blockTypes.put("glass", "net/minecraft/block/BlockGlass");		// 20 - glass
+		blockClassMap.put(17, "net/minecraft/block/BlockOldLog");		// 17 - log
+		blockClassMap.put(18, "net/minecraft/block/BlockOldLeaf");	// 18 - leaves
+		blockClassMap.put(19, "net/minecraft/block/BlockSponge");	// 19 - sponge
+		blockClassMap.put(20, "net/minecraft/block/BlockGlass");		// 20 - glass
+		// 21 - lapis_ore - BlockOre
+		blockClassMap.put(22, "net/minecraft/block/BlockCompressed");		// 22 - lapis block
+		blockClassMap.put(23, "net/minecraft/block/BlockDispenser");		// 23 - dispenser
+		blockClassMap.put(24, "net/minecraft/block/BlockSandStone");		// 24 - sand stone
+		blockClassMap.put(25, "net/minecraft/block/BlockNote");				// 25 - noteblock
 		
-		blockTypes.put("anvil", "net/minecraft/block/BlockAnvil");
-		blockTypes.put("wooden_door", "net/minecraft/block/BlockDoor");
-		blockTypes.put("bed", "net/minecraft/block/BlockBed");
-		blockTypes.put("fence_gate", "net/minecraft/block/BlockFenceGate");
-		blockTypes.put("glass_pane", "net/minecraft/block/BlockPane");
-		blockTypes.put("tnt", "net/minecraft/block/BlockTNT");
+		//blockClassMap.put("anvil", "net/minecraft/block/BlockAnvil");
+		//blockClassMap.put("wooden_door", "net/minecraft/block/BlockDoor");
+		//blockClassMap.put("bed", "net/minecraft/block/BlockBed");
+		//blockClassMap.put("fence_gate", "net/minecraft/block/BlockFenceGate");
+		//blockClassMap.put("glass_pane", "net/minecraft/block/BlockPane");
+		//blockClassMap.put("tnt", "net/minecraft/block/BlockTNT");
 		
-		String obsfClass;
-		String blockClass;
-		for (String blockType : blockTypes.keySet()) {
-			blockClass = blockTypes.get(blockType);
-			obsfClass = blockClassMap.get(blockType);
-			if (obsfClass != null) {
-				addClassMapping(blockClass, obsfClass);
+		
+		// Loop through the contents of registerBlocks and pull out any calls to registerBlock.
+		// Then map the block ids and class names based on the parameters to registerBlock from
+		// the mapping provided above.
+		int index = 0;
+		Object[] vars = new Object[100];	// virtual variable storage
+		Object[] stack = new Object[1000];	// virtual stack
+		int sp = 0;	// stack pointer
+		boolean printWarnings = true;
+		for (AbstractInsnNode insn = registerBlocks.instructions.getFirst(); insn != null; insn = insn.getNext()) 
+		{
+			if (insn instanceof LabelNode || insn instanceof LineNumberNode) {
+				// skip label/line numbers
+				index++;
+				continue;
 			}
-		}
-		
-		className = blockClassMap.get("crafting_table");
-		if (className != null) {
-			ClassNode workbench = getClassNode(className);
-			if (workbench != null) {
-				List<TypeInsnNode> typeNodes = getAllInsnNodesOfType(workbench, TypeInsnNode.class);
-				for (TypeInsnNode tn : typeNodes) {
-					if (tn.desc.startsWith(className + "$") && searchConstantPoolForStrings(tn.desc, "minecraft:crafting_table")) {
-						addClassMapping("net/minecraft/block/BlockWorkbench", className);
-						addClassMapping("net/minecraft/block/BlockWorkbench$InterfaceCraftingTable", tn.desc);						
+			
+			if (insn instanceof InsnNode) {
+				// handle integer / float constants, just push to virtual stack
+				
+				int opCode = ((InsnNode)insn).getOpcode();
+				switch (opCode) {
+					case Opcodes.ICONST_0:
+						stack[sp++] = 0;
 						break;
-					}
-				}			
+					case Opcodes.ICONST_1:
+						stack[sp++] = 1;
+						break;
+					case Opcodes.ICONST_2:
+						stack[sp++] = 2;
+						break;
+					case Opcodes.ICONST_3:
+						stack[sp++] = 3;
+						break;
+					case Opcodes.ICONST_4:
+						stack[sp++] = 4;
+						break;
+					case Opcodes.ICONST_5:
+						stack[sp++] = 5;
+						break;
+					case Opcodes.DUP:		// duplicate top of stack
+						stack[sp] = stack[sp - 1];
+						sp++;
+						break;
+					case Opcodes.FCONST_0:
+						stack[sp++] = 0f;
+						break;
+					case Opcodes.FCONST_1:
+						stack[sp++] = 1f;
+						break;
+					case Opcodes.FCONST_2:
+						stack[sp++] = 2f;
+						break;
+					default:
+						if (printWarnings) System.out.println("WARNING: discoverBlocks Unhandled InsnNode opcode: " + opCode);
+						break;
+				}
+			} else if (insn instanceof FieldInsnNode) {
+				// handle static field references, just push to virtual stack
+				
+				FieldInsnNode fi = (FieldInsnNode)insn;
+				int opCode = fi.getOpcode();
+				switch (opCode) {
+					case Opcodes.GETSTATIC:
+						stack[sp++] = fi.name;
+						break;
+					default:
+						if (printWarnings) System.out.println("WARNING: discoverBlocks Unhandled FieldInsnNode opcode: " + opCode);
+						break;
+				}
+				
+			} else if (insn instanceof TypeInsnNode) {
+				// handle type references, push new instance to virtual stack
+				
+				TypeInsnNode ti = (TypeInsnNode)insn;
+				int opCode = ti.getOpcode();
+				switch (opCode) {
+					case Opcodes.NEW:
+						stack[sp++] = ti.desc;
+						break;
+					default:
+						if (printWarnings) System.out.println("WARNING: discoverBlocks Unhandled TypeInsnNode opcode: " + opCode);
+						break;
+				}
+
+			} else if (insn instanceof MethodInsnNode) {
+				// handle method invocations, pop appropriate number of arguments off of virtual stack
+				// and check if method is registerBlock; if registerBlock is called then check class
+				// mapping and add if block id is found.
+				
+				MethodInsnNode mi = (MethodInsnNode)insn;
+				int argCount = argCount(mi.desc);
+				//if (mi.name.equals("validateKey")) break;	// end parsing when we reach "blockRegistry.validateKey()" method call.
+				if (insn.getOpcode() == Opcodes.INVOKESPECIAL) argCount++;	 // constructor consumes one item from the stack
+				
+				if ((mi.name.equals(registerBlock1.name) && mi.desc.equals(registerBlock1.desc)) ||
+						(mi.name.equals(registerBlock2.name) && mi.desc.equals(registerBlock2.desc))) {
+					int blockId = (Integer)stack[sp - 3];
+					String blockClass = (String)stack[sp - 1];
+					if (blockClassMap.containsKey(blockId))
+						addClassMapping(blockClassMap.get(blockId), blockClass);
+				}
+				
+				sp -= argCount;
+				
+				//System.out.print(index + ": " + mi.name + " (");
+				//for (int i = 0; i < argCount; i++)
+				//	System.out.print(stack[--sp] + ",");
+				//System.out.println(")");
+				
+			} else if (insn instanceof LdcInsnNode) {
+				// handle load constant value references, just push to virtual stack
+				
+				LdcInsnNode li = (LdcInsnNode)insn;
+				stack[sp++] = li.cst;
+				
+			} else if (insn instanceof VarInsnNode) {
+				// handle variable references, if it is a LOAD instruction then push to stack,
+				// if STORE instruction then pop from stack into virtual variable storage
+				
+				VarInsnNode vi = (VarInsnNode)insn;
+				int opCode = vi.getOpcode();
+				switch (opCode) {
+					case Opcodes.ALOAD:
+						stack[sp++] = vars[vi.var];
+						//System.out.println("ALOAD: " + vars[vi.var]);
+						break;
+					case Opcodes.ASTORE:
+						vars[vi.var] = stack[--sp];
+						//System.out.println("var" + vi.var + " = " + stack[sp]);
+						break;
+					default:
+						if (printWarnings) System.out.println("WARNING: discoverBlocks Unhandled VarInsnNode opcode: " + opCode);
+				}
+				
+			} else if (insn instanceof IntInsnNode) {
+				// handle integer types, just push value to virtual stack
+				
+				IntInsnNode ii = (IntInsnNode)insn;
+				int opCode = ii.getOpcode();
+				switch (opCode) {
+					case Opcodes.BIPUSH:
+						stack[sp++] = ii.operand;
+						break;
+					case Opcodes.SIPUSH:
+						stack[sp++] = ii.operand;
+						break;
+					default:
+						if (printWarnings) System.out.println("WARNING: discoverBlocks Unhandled IntInsnNode opcode: " + opCode);
+				}
+				
+			} else if (insn instanceof FrameNode) {
+				// no frame instructions exist in the registerBlock area, so when we
+				// find one it's in the mess at the bottom that can just be ignored
+				
+				break;
+				
+			} else {
+				// unhandled type, display warning for troubleshooting.
+				
+				if (printWarnings) System.out.println("WARNING: Unhandled IsnsNode " + index + ": " + insn.toString());
+				
 			}
 		}
-		
+
 		return true;
+	}
+	
+	
+	public static int argCount(String methodDesc) {
+		int count = 0;
+		boolean complexType = false;
+		for (int i = 1; i < methodDesc.length() && methodDesc.charAt(i) != ')'; i++) {
+			if (complexType) {
+				if (methodDesc.charAt(i) == ';') {
+					complexType = false;
+					count++;
+				}
+				continue;
+			}
+			if (methodDesc.charAt(i) == '[' || methodDesc.charAt(i) == 'L')
+				complexType = true;
+			else
+				count++;
+		}
+		return count;
 	}
 	
 	
