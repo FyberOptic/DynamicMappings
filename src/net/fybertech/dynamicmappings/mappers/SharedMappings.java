@@ -11,6 +11,9 @@ import java.util.Stack;
 
 import net.fybertech.dynamicmappings.DynamicMappings;
 import net.fybertech.dynamicmappings.Mapping;
+import net.fybertech.dynamicmappings.MethodCallIterator;
+import net.fybertech.dynamicmappings.MethodCallIterator.MethodCall;
+import net.fybertech.dynamicmappings.MethodCallVisitor;
 import net.fybertech.meddle.MeddleUtil;
 
 import org.objectweb.asm.Opcodes;
@@ -2223,14 +2226,124 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/BlockOldLeaf",
 			"net/minecraft/block/BlockSponge",
 			"net/minecraft/block/BlockGlass",
-			"net/minecraft/block/BlockAnvil",
-			"net/minecraft/block/BlockDoor",
+			"net/minecraft/block/BlockCompressed",
+			"net/minecraft/block/BlockDispenser",
+			"net/minecraft/block/BlockSandStone",
+			"net/minecraft/block/BlockNote",
 			"net/minecraft/block/BlockBed",
-			"net/minecraft/block/BlockFenceGate",
-			"net/minecraft/block/BlockPane",
+			"net/minecraft/block/BlockRailPowered",
+			"net/minecraft/block/BlockRailDetector",
+			"net/minecraft/block/BlockPistonBase",
+			"net/minecraft/block/BlockWeb",
+			"net/minecraft/block/BlockTallGrass",
+			"net/minecraft/block/BlockDeadBush",
+			"net/minecraft/block/BlockPistonExtension",
+			"net/minecraft/block/BlockColored",
+			"net/minecraft/block/BlockPistonMoving",
+			"net/minecraft/block/BlockYellowFlower",
+			"net/minecraft/block/BlockRedFlower",
+			"net/minecraft/block/BlockMushroom",
+			"net/minecraft/block/BlockDoubleStoneSlab",
+			"net/minecraft/block/BlockHalfStoneSlab",
+			"net/minecraft/block/BlockTNT",
+			"net/minecraft/block/BlockBookshelf",
+			"net/minecraft/block/BlockObsidian",
+			"net/minecraft/block/BlockTorch",
+			"net/minecraft/block/BlockFire",
+			"net/minecraft/block/BlockMobSpawner",
+			"net/minecraft/block/BlockStairs",
+			"net/minecraft/block/BlockChest",
+			"net/minecraft/block/BlockRedstoneWire",
 			"net/minecraft/block/BlockWorkbench",
 			"net/minecraft/block/BlockWorkbench$InterfaceCraftingTable",
-			"net/minecraft/block/BlockTNT"
+			"net/minecraft/block/BlockCrops",
+			"net/minecraft/block/BlockFarmland",
+			"net/minecraft/block/BlockFurnace",
+			"net/minecraft/block/BlockStandingSign",
+			"net/minecraft/block/BlockDoor",
+			"net/minecraft/block/BlockLadder",
+			"net/minecraft/block/BlockRail",
+			"net/minecraft/block/BlockWallSign",
+			"net/minecraft/block/BlockLever",
+			"net/minecraft/block/BlockPressurePlate",
+			"net/minecraft/block/BlockRedstoneOre",
+			"net/minecraft/block/BlockRedstoneTorch",
+			"net/minecraft/block/BlockButtonStone",
+			"net/minecraft/block/BlockSnow",
+			"net/minecraft/block/BlockIce",
+			"net/minecraft/block/BlockSnowBlock",
+			"net/minecraft/block/BlockCactus",
+			"net/minecraft/block/BlockClay",
+			"net/minecraft/block/BlockReed",
+			"net/minecraft/block/BlockJukebox",
+			"net/minecraft/block/BlockFence",
+			"net/minecraft/block/BlockPumpkin",
+			"net/minecraft/block/BlockNetherrack",
+			"net/minecraft/block/BlockSoulSand",
+			"net/minecraft/block/BlockGlowstone",
+			"net/minecraft/block/BlockPortal",
+			"net/minecraft/block/BlockCake",
+			"net/minecraft/block/BlockRedstoneRepeater",
+			"net/minecraft/block/BlockStainedGlass",
+			"net/minecraft/block/BlockTrapDoor",
+			"net/minecraft/block/BlockSilverfish",
+			"net/minecraft/block/BlockStoneBrick",
+			"net/minecraft/block/BlockHugeMushroom",
+			"net/minecraft/block/BlockPane",
+			"net/minecraft/block/BlockMelon",
+			"net/minecraft/block/BlockStem",
+			"net/minecraft/block/BlockVine",
+			"net/minecraft/block/BlockFenceGate",
+			"net/minecraft/block/BlockMycelium",
+			"net/minecraft/block/BlockLilyPad",
+			"net/minecraft/block/BlockNetherBrick",
+			"net/minecraft/block/BlockNetherWart",
+			"net/minecraft/block/BlockEnchantmentTable",
+			"net/minecraft/block/BlockBrewingStand",
+			"net/minecraft/block/BlockCauldron",
+			"net/minecraft/block/BlockEndPortal",
+			"net/minecraft/block/BlockEndPortalFrame",
+			"net/minecraft/block/BlockDragonEgg",
+			"net/minecraft/block/BlockRedstoneLight",
+			"net/minecraft/block/BlockDoubleWoodSlab",
+			"net/minecraft/block/BlockHalfWoodSlab",
+			"net/minecraft/block/BlockCocoa",
+			"net/minecraft/block/BlockEnderChest",
+			"net/minecraft/block/BlockTripWireHook",
+			"net/minecraft/block/BlockTripWire",
+			"net/minecraft/block/BlockCommandBlock",
+			"net/minecraft/block/BlockBeacon",
+			"net/minecraft/block/BlockWall",
+			"net/minecraft/block/BlockFlowerPot",
+			"net/minecraft/block/BlockCarrot",
+			"net/minecraft/block/BlockPotato",
+			"net/minecraft/block/BlockButtonWood",
+			"net/minecraft/block/BlockSkull",
+			"net/minecraft/block/BlockAnvil",
+			"net/minecraft/block/BlockPressurePlateWeighted",
+			"net/minecraft/block/BlockRedstoneComparator",
+			"net/minecraft/block/BlockDaylightDetector",
+			"net/minecraft/block/BlockCompressedPowered",
+			"net/minecraft/block/BlockHopper",
+			"net/minecraft/block/BlockQuartz",
+			"net/minecraft/block/BlockDropper",
+			"net/minecraft/block/BlockStainedGlassPane",
+			"net/minecraft/block/BlockNewLeaf",
+			"net/minecraft/block/BlockNewLog",
+			"net/minecraft/block/BlockSlime",
+			"net/minecraft/block/BlockBarrier",
+			"net/minecraft/block/BlockPrismarine",
+			"net/minecraft/block/BlockSeaLantern",
+			"net/minecraft/block/BlockHay",
+			"net/minecraft/block/BlockCarpet",
+			"net/minecraft/block/BlockHardenedClay",
+			"net/minecraft/block/BlockPackedIce",
+			"net/minecraft/block/BlockDoublePlant",
+			"net/minecraft/block/BlockBanner$BlockBannerStanding",
+			"net/minecraft/block/BlockBanner$BlockBannerHanging",
+			"net/minecraft/block/BlockRedSandstone",
+			"net/minecraft/block/BlockDoubleStoneSlabNew",
+			"net/minecraft/block/BlockHalfStoneSlabNew"
 			},
 			/*providesFields={
 			"net/minecraft/block/Block AIR_ID Lnet/minecraft/util/ResourceLocation;"
@@ -2253,202 +2366,229 @@ public class SharedMappings extends MappingsBase {
 		
 		// Create a map if the block ids and their respective classes.
 		Map<Integer, String> blockClassMap = new HashMap<>();
-		blockClassMap.put(0, "net/minecraft/block/BlockAir");		// 0 - air
-		blockClassMap.put(1, "net/minecraft/block/BlockStone");		// 1 - stone
-		blockClassMap.put(2, "net/minecraft/block/BlockGrass");		// 2 - grass
-		blockClassMap.put(3, "net/minecraft/block/BlockDirt");		// 3 - dirt
-		// 4 - cobblestone - Block
+		blockClassMap.put(0, "net/minecraft/block/BlockAir");	// 0 - AIR_ID
+		blockClassMap.put(1, "net/minecraft/block/BlockStone");	// 1 - stone
+		blockClassMap.put(2, "net/minecraft/block/BlockGrass");	// 2 - grass
+		blockClassMap.put(3, "net/minecraft/block/BlockDirt");	// 3 - dirt
+		// 4 - cobblestone already mapped (Block)
 		blockClassMap.put(5, "net/minecraft/block/BlockPlanks");	// 5 - planks
 		blockClassMap.put(6, "net/minecraft/block/BlockSapling");	// 6 - sapling
-		// 7 - bedrock - Block
-		blockClassMap.put(8, "net/minecraft/block/BlockDynamicLiquid");	// 8 - flowing water
-		blockClassMap.put(9, "net/minecraft/block/BlockStaticLiquid");		// 9 - water
-		// 10 - flowing_lava - BlockDynamicLiquid
-		// 11 - lava - BlockStaticLiquid
-		blockClassMap.put(12, "net/minecraft/block/BlockSand");		// 12 - sand
+		// 7 - bedrock already mapped (Block)
+		blockClassMap.put(8, "net/minecraft/block/BlockDynamicLiquid");	// 8 - flowing_water
+		blockClassMap.put(9, "net/minecraft/block/BlockStaticLiquid");	// 9 - water
+		// 10 - flowing_lava already mapped (BlockDynamicLiquid)
+		// 11 - lava already mapped (BlockStaticLiquid)
+		blockClassMap.put(12, "net/minecraft/block/BlockSand");	// 12 - sand
 		blockClassMap.put(13, "net/minecraft/block/BlockGravel");	// 13 - gravel
-		blockClassMap.put(14, "net/minecraft/block/BlockOre");		// 14 - gold_ore
-		// 15 - iron_ore - BlockOre
-		// 16 - coal_ore - BlockOre
-		blockClassMap.put(17, "net/minecraft/block/BlockOldLog");		// 17 - log
+		blockClassMap.put(14, "net/minecraft/block/BlockOre");	// 14 - gold_ore
+		// 15 - iron_ore already mapped (BlockOre)
+		// 16 - coal_ore already mapped (BlockOre)
+		blockClassMap.put(17, "net/minecraft/block/BlockOldLog");	// 17 - log
 		blockClassMap.put(18, "net/minecraft/block/BlockOldLeaf");	// 18 - leaves
 		blockClassMap.put(19, "net/minecraft/block/BlockSponge");	// 19 - sponge
-		blockClassMap.put(20, "net/minecraft/block/BlockGlass");		// 20 - glass
-		// 21 - lapis_ore - BlockOre
-		blockClassMap.put(22, "net/minecraft/block/BlockCompressed");		// 22 - lapis block
-		blockClassMap.put(23, "net/minecraft/block/BlockDispenser");		// 23 - dispenser
-		blockClassMap.put(24, "net/minecraft/block/BlockSandStone");		// 24 - sand stone
-		blockClassMap.put(25, "net/minecraft/block/BlockNote");				// 25 - noteblock
-		
-		//blockClassMap.put("anvil", "net/minecraft/block/BlockAnvil");
-		//blockClassMap.put("wooden_door", "net/minecraft/block/BlockDoor");
-		//blockClassMap.put("bed", "net/minecraft/block/BlockBed");
-		//blockClassMap.put("fence_gate", "net/minecraft/block/BlockFenceGate");
-		//blockClassMap.put("glass_pane", "net/minecraft/block/BlockPane");
-		//blockClassMap.put("tnt", "net/minecraft/block/BlockTNT");
-		
-		
-		// Loop through the contents of registerBlocks and pull out any calls to registerBlock.
-		// Then map the block ids and class names based on the parameters to registerBlock from
-		// the mapping provided above.
-		int index = 0;
-		Object[] vars = new Object[100];	// virtual variable storage
-		Object[] stack = new Object[1000];	// virtual stack
-		int sp = 0;	// stack pointer
-		boolean printWarnings = true;
-		for (AbstractInsnNode insn = registerBlocks.instructions.getFirst(); insn != null; insn = insn.getNext()) 
-		{
-			if (insn instanceof LabelNode || insn instanceof LineNumberNode) {
-				// skip label/line numbers
-				index++;
-				continue;
-			}
-			
-			if (insn instanceof InsnNode) {
-				// handle integer / float constants, just push to virtual stack
-				
-				int opCode = ((InsnNode)insn).getOpcode();
-				switch (opCode) {
-					case Opcodes.ICONST_0:
-						stack[sp++] = 0;
-						break;
-					case Opcodes.ICONST_1:
-						stack[sp++] = 1;
-						break;
-					case Opcodes.ICONST_2:
-						stack[sp++] = 2;
-						break;
-					case Opcodes.ICONST_3:
-						stack[sp++] = 3;
-						break;
-					case Opcodes.ICONST_4:
-						stack[sp++] = 4;
-						break;
-					case Opcodes.ICONST_5:
-						stack[sp++] = 5;
-						break;
-					case Opcodes.DUP:		// duplicate top of stack
-						stack[sp] = stack[sp - 1];
-						sp++;
-						break;
-					case Opcodes.FCONST_0:
-						stack[sp++] = 0f;
-						break;
-					case Opcodes.FCONST_1:
-						stack[sp++] = 1f;
-						break;
-					case Opcodes.FCONST_2:
-						stack[sp++] = 2f;
-						break;
-					default:
-						if (printWarnings) System.out.println("WARNING: discoverBlocks Unhandled InsnNode opcode: " + opCode);
-						break;
-				}
-			} else if (insn instanceof FieldInsnNode) {
-				// handle static field references, just push to virtual stack
-				
-				FieldInsnNode fi = (FieldInsnNode)insn;
-				int opCode = fi.getOpcode();
-				switch (opCode) {
-					case Opcodes.GETSTATIC:
-						stack[sp++] = fi.name;
-						break;
-					default:
-						if (printWarnings) System.out.println("WARNING: discoverBlocks Unhandled FieldInsnNode opcode: " + opCode);
-						break;
-				}
-				
-			} else if (insn instanceof TypeInsnNode) {
-				// handle type references, push new instance to virtual stack
-				
-				TypeInsnNode ti = (TypeInsnNode)insn;
-				int opCode = ti.getOpcode();
-				switch (opCode) {
-					case Opcodes.NEW:
-						stack[sp++] = ti.desc;
-						break;
-					default:
-						if (printWarnings) System.out.println("WARNING: discoverBlocks Unhandled TypeInsnNode opcode: " + opCode);
-						break;
-				}
+		blockClassMap.put(20, "net/minecraft/block/BlockGlass");	// 20 - glass
+		// 21 - lapis_ore already mapped (BlockOre)
+		blockClassMap.put(22, "net/minecraft/block/BlockCompressed");	// 22 - lapis_block
+		blockClassMap.put(23, "net/minecraft/block/BlockDispenser");	// 23 - dispenser
+		blockClassMap.put(24, "net/minecraft/block/BlockSandStone");	// 24 - sandstone
+		blockClassMap.put(25, "net/minecraft/block/BlockNote");	// 25 - noteblock
+		blockClassMap.put(26, "net/minecraft/block/BlockBed");	// 26 - bed
+		blockClassMap.put(27, "net/minecraft/block/BlockRailPowered");	// 27 - golden_rail
+		blockClassMap.put(28, "net/minecraft/block/BlockRailDetector");	// 28 - detector_rail
+		blockClassMap.put(29, "net/minecraft/block/BlockPistonBase");	// 29 - sticky_piston
+		blockClassMap.put(30, "net/minecraft/block/BlockWeb");	// 30 - web
+		blockClassMap.put(31, "net/minecraft/block/BlockTallGrass");	// 31 - tallgrass
+		blockClassMap.put(32, "net/minecraft/block/BlockDeadBush");	// 32 - deadbush
+		// 33 - piston already mapped (BlockPistonBase)
+		blockClassMap.put(34, "net/minecraft/block/BlockPistonExtension");	// 34 - piston_head
+		blockClassMap.put(35, "net/minecraft/block/BlockColored");	// 35 - wool
+		blockClassMap.put(36, "net/minecraft/block/BlockPistonMoving");	// 36 - piston_extension
+		blockClassMap.put(37, "net/minecraft/block/BlockYellowFlower");	// 37 - yellow_flower
+		blockClassMap.put(38, "net/minecraft/block/BlockRedFlower");	// 38 - red_flower
+		blockClassMap.put(39, "net/minecraft/block/BlockMushroom");	// 39 - brown_mushroom
+		// 40 - red_mushroom already mapped (BlockMushroom)
+		// 41 - gold_block already mapped (BlockCompressed)
+		// 42 - iron_block already mapped (BlockCompressed)
+		blockClassMap.put(43, "net/minecraft/block/BlockDoubleStoneSlab");	// 43 - double_stone_slab
+		blockClassMap.put(44, "net/minecraft/block/BlockHalfStoneSlab");	// 44 - stone_slab
+		// 45 - brick_block already mapped (Block)
+		blockClassMap.put(46, "net/minecraft/block/BlockTNT");	// 46 - tnt
+		blockClassMap.put(47, "net/minecraft/block/BlockBookshelf");	// 47 - bookshelf
+		// 48 - mossy_cobblestone already mapped (Block)
+		blockClassMap.put(49, "net/minecraft/block/BlockObsidian");	// 49 - obsidian
+		blockClassMap.put(50, "net/minecraft/block/BlockTorch");	// 50 - torch
+		blockClassMap.put(51, "net/minecraft/block/BlockFire");	// 51 - fire
+		blockClassMap.put(52, "net/minecraft/block/BlockMobSpawner");	// 52 - mob_spawner
+		blockClassMap.put(53, "net/minecraft/block/BlockStairs");	// 53 - oak_stairs
+		blockClassMap.put(54, "net/minecraft/block/BlockChest");	// 54 - chest
+		blockClassMap.put(55, "net/minecraft/block/BlockRedstoneWire");	// 55 - redstone_wire
+		// 56 - diamond_ore already mapped (BlockOre)
+		// 57 - diamond_block already mapped (BlockCompressed)
+		blockClassMap.put(58, "net/minecraft/block/BlockWorkbench");	// 58 - crafting_table
+		blockClassMap.put(59, "net/minecraft/block/BlockCrops");	// 59 - wheat
+		blockClassMap.put(60, "net/minecraft/block/BlockFarmland");	// 60 - farmland
+		blockClassMap.put(61, "net/minecraft/block/BlockFurnace");	// 61 - furnace
+		// 62 - lit_furnace already mapped (BlockFurnace)
+		blockClassMap.put(63, "net/minecraft/block/BlockStandingSign");	// 63 - standing_sign
+		blockClassMap.put(64, "net/minecraft/block/BlockDoor");	// 64 - wooden_door
+		blockClassMap.put(65, "net/minecraft/block/BlockLadder");	// 65 - ladder
+		blockClassMap.put(66, "net/minecraft/block/BlockRail");	// 66 - rail
+		// 67 - stone_stairs already mapped (BlockStairs)
+		blockClassMap.put(68, "net/minecraft/block/BlockWallSign");	// 68 - wall_sign
+		blockClassMap.put(69, "net/minecraft/block/BlockLever");	// 69 - lever
+		blockClassMap.put(70, "net/minecraft/block/BlockPressurePlate");	// 70 - stone_pressure_plate
+		// 71 - iron_door already mapped (BlockDoor)
+		// 72 - wooden_pressure_plate already mapped (BlockPressurePlate)
+		blockClassMap.put(73, "net/minecraft/block/BlockRedstoneOre");	// 73 - redstone_ore
+		// 74 - lit_redstone_ore already mapped (BlockRedstoneOre)
+		blockClassMap.put(75, "net/minecraft/block/BlockRedstoneTorch");	// 75 - unlit_redstone_torch
+		// 76 - redstone_torch already mapped (BlockRedstoneTorch)
+		blockClassMap.put(77, "net/minecraft/block/BlockButtonStone");	// 77 - stone_button
+		blockClassMap.put(78, "net/minecraft/block/BlockSnow");	// 78 - snow_layer
+		blockClassMap.put(79, "net/minecraft/block/BlockIce");	// 79 - ice
+		blockClassMap.put(80, "net/minecraft/block/BlockSnowBlock");	// 80 - snow
+		blockClassMap.put(81, "net/minecraft/block/BlockCactus");	// 81 - cactus
+		blockClassMap.put(82, "net/minecraft/block/BlockClay");	// 82 - clay
+		blockClassMap.put(83, "net/minecraft/block/BlockReed");	// 83 - reeds
+		blockClassMap.put(84, "net/minecraft/block/BlockJukebox");	// 84 - jukebox
+		blockClassMap.put(85, "net/minecraft/block/BlockFence");	// 85 - fence
+		blockClassMap.put(86, "net/minecraft/block/BlockPumpkin");	// 86 - pumpkin
+		blockClassMap.put(87, "net/minecraft/block/BlockNetherrack");	// 87 - netherrack
+		blockClassMap.put(88, "net/minecraft/block/BlockSoulSand");	// 88 - soul_sand
+		blockClassMap.put(89, "net/minecraft/block/BlockGlowstone");	// 89 - glowstone
+		blockClassMap.put(90, "net/minecraft/block/BlockPortal");	// 90 - portal
+		// 91 - lit_pumpkin already mapped (BlockPumpkin)
+		blockClassMap.put(92, "net/minecraft/block/BlockCake");	// 92 - cake
+		blockClassMap.put(93, "net/minecraft/block/BlockRedstoneRepeater");	// 93 - unpowered_repeater
+		// 94 - powered_repeater already mapped (BlockRedstoneRepeater)
+		blockClassMap.put(95, "net/minecraft/block/BlockStainedGlass");	// 95 - stained_glass
+		blockClassMap.put(96, "net/minecraft/block/BlockTrapDoor");	// 96 - trapdoor
+		blockClassMap.put(97, "net/minecraft/block/BlockSilverfish");	// 97 - monster_egg
+		blockClassMap.put(98, "net/minecraft/block/BlockStoneBrick");	// 98 - stonebrick
+		blockClassMap.put(99, "net/minecraft/block/BlockHugeMushroom");	// 99 - brown_mushroom_block
+		// 100 - red_mushroom_block already mapped (BlockHugeMushroom)
+		blockClassMap.put(101, "net/minecraft/block/BlockPane");	// 101 - iron_bars
+		// 102 - glass_pane already mapped (BlockPane)
+		blockClassMap.put(103, "net/minecraft/block/BlockMelon");	// 103 - melon_block
+		blockClassMap.put(104, "net/minecraft/block/BlockStem");	// 104 - pumpkin_stem
+		// 105 - melon_stem already mapped (BlockStem)
+		blockClassMap.put(106, "net/minecraft/block/BlockVine");	// 106 - vine
+		blockClassMap.put(107, "net/minecraft/block/BlockFenceGate");	// 107 - fence_gate
+		// 108 - brick_stairs already mapped (BlockStairs)
+		// 109 - stone_brick_stairs already mapped (BlockStairs)
+		blockClassMap.put(110, "net/minecraft/block/BlockMycelium");	// 110 - mycelium
+		blockClassMap.put(111, "net/minecraft/block/BlockLilyPad");	// 111 - waterlily
+		blockClassMap.put(112, "net/minecraft/block/BlockNetherBrick");	// 112 - nether_brick
+		// 113 - nether_brick_fence already mapped (BlockFence)
+		// 114 - nether_brick_stairs already mapped (BlockStairs)
+		blockClassMap.put(115, "net/minecraft/block/BlockNetherWart");	// 115 - nether_wart
+		blockClassMap.put(116, "net/minecraft/block/BlockEnchantmentTable");	// 116 - enchanting_table
+		blockClassMap.put(117, "net/minecraft/block/BlockBrewingStand");	// 117 - brewing_stand
+		blockClassMap.put(118, "net/minecraft/block/BlockCauldron");	// 118 - cauldron
+		blockClassMap.put(119, "net/minecraft/block/BlockEndPortal");	// 119 - end_portal
+		blockClassMap.put(120, "net/minecraft/block/BlockEndPortalFrame");	// 120 - end_portal_frame
+		// 121 - end_stone already mapped (Block)
+		blockClassMap.put(122, "net/minecraft/block/BlockDragonEgg");	// 122 - dragon_egg
+		blockClassMap.put(123, "net/minecraft/block/BlockRedstoneLight");	// 123 - redstone_lamp
+		// 124 - lit_redstone_lamp already mapped (BlockRedstoneLight)
+		blockClassMap.put(125, "net/minecraft/block/BlockDoubleWoodSlab");	// 125 - double_wooden_slab
+		blockClassMap.put(126, "net/minecraft/block/BlockHalfWoodSlab");	// 126 - wooden_slab
+		blockClassMap.put(127, "net/minecraft/block/BlockCocoa");	// 127 - cocoa
+		// 128 - sandstone_stairs already mapped (BlockStairs)
+		// 129 - emerald_ore already mapped (BlockOre)
+		blockClassMap.put(130, "net/minecraft/block/BlockEnderChest");	// 130 - ender_chest
+		blockClassMap.put(131, "net/minecraft/block/BlockTripWireHook");	// 131 - tripwire_hook
+		blockClassMap.put(132, "net/minecraft/block/BlockTripWire");	// 132 - tripwire
+		// 133 - emerald_block already mapped (BlockCompressed)
+		// 134 - spruce_stairs already mapped (BlockStairs)
+		// 135 - birch_stairs already mapped (BlockStairs)
+		// 136 - jungle_stairs already mapped (BlockStairs)
+		blockClassMap.put(137, "net/minecraft/block/BlockCommandBlock");	// 137 - command_block
+		blockClassMap.put(138, "net/minecraft/block/BlockBeacon");	// 138 - beacon
+		blockClassMap.put(139, "net/minecraft/block/BlockWall");	// 139 - cobblestone_wall
+		blockClassMap.put(140, "net/minecraft/block/BlockFlowerPot");	// 140 - flower_pot
+		blockClassMap.put(141, "net/minecraft/block/BlockCarrot");	// 141 - carrots
+		blockClassMap.put(142, "net/minecraft/block/BlockPotato");	// 142 - potatoes
+		blockClassMap.put(143, "net/minecraft/block/BlockButtonWood");	// 143 - wooden_button
+		blockClassMap.put(144, "net/minecraft/block/BlockSkull");	// 144 - skull
+		blockClassMap.put(145, "net/minecraft/block/BlockAnvil");	// 145 - anvil
+		// 146 - trapped_chest already mapped (BlockChest)
+		blockClassMap.put(147, "net/minecraft/block/BlockPressurePlateWeighted");	// 147 - light_weighted_pressure_plate
+		// 148 - heavy_weighted_pressure_plate already mapped (BlockPressurePlateWeighted)
+		blockClassMap.put(149, "net/minecraft/block/BlockRedstoneComparator");	// 149 - unpowered_comparator
+		// 150 - powered_comparator already mapped (BlockRedstoneComparator)
+		blockClassMap.put(151, "net/minecraft/block/BlockDaylightDetector");	// 151 - daylight_detector
+		blockClassMap.put(152, "net/minecraft/block/BlockCompressedPowered");	// 152 - redstone_block
+		// 153 - quartz_ore already mapped (BlockOre)
+		blockClassMap.put(154, "net/minecraft/block/BlockHopper");	// 154 - hopper
+		blockClassMap.put(155, "net/minecraft/block/BlockQuartz");	// 155 - quartz_block
+		// 156 - quartz_stairs already mapped (BlockStairs)
+		// 157 - activator_rail already mapped (BlockRailPowered)
+		blockClassMap.put(158, "net/minecraft/block/BlockDropper");	// 158 - dropper
+		// 159 - stained_hardened_clay already mapped (BlockColored)
+		blockClassMap.put(160, "net/minecraft/block/BlockStainedGlassPane");	// 160 - stained_glass_pane
+		blockClassMap.put(161, "net/minecraft/block/BlockNewLeaf");	// 161 - leaves2
+		blockClassMap.put(162, "net/minecraft/block/BlockNewLog");	// 162 - log2
+		// 163 - acacia_stairs already mapped (BlockStairs)
+		// 164 - dark_oak_stairs already mapped (BlockStairs)
+		blockClassMap.put(165, "net/minecraft/block/BlockSlime");	// 165 - slime
+		blockClassMap.put(166, "net/minecraft/block/BlockBarrier");	// 166 - barrier
+		// 167 - iron_trapdoor already mapped (BlockTrapDoor)
+		blockClassMap.put(168, "net/minecraft/block/BlockPrismarine");	// 168 - prismarine
+		blockClassMap.put(169, "net/minecraft/block/BlockSeaLantern");	// 169 - sea_lantern
+		blockClassMap.put(170, "net/minecraft/block/BlockHay");	// 170 - hay_block
+		blockClassMap.put(171, "net/minecraft/block/BlockCarpet");	// 171 - carpet
+		blockClassMap.put(172, "net/minecraft/block/BlockHardenedClay");	// 172 - hardened_clay
+		// 173 - coal_block already mapped (Block)
+		blockClassMap.put(174, "net/minecraft/block/BlockPackedIce");	// 174 - packed_ice
+		blockClassMap.put(175, "net/minecraft/block/BlockDoublePlant");	// 175 - double_plant
+		blockClassMap.put(176, "net/minecraft/block/BlockBanner$BlockBannerStanding");	// 176 - standing_banner
+		blockClassMap.put(177, "net/minecraft/block/BlockBanner$BlockBannerHanging");	// 177 - wall_banner
+		// 178 - daylight_detector_inverted already mapped (BlockDaylightDetector)
+		blockClassMap.put(179, "net/minecraft/block/BlockRedSandstone");	// 179 - red_sandstone
+		// 180 - red_sandstone_stairs already mapped (BlockStairs)
+		blockClassMap.put(181, "net/minecraft/block/BlockDoubleStoneSlabNew");	// 181 - double_stone_slab2
+		blockClassMap.put(182, "net/minecraft/block/BlockHalfStoneSlabNew");	// 182 - stone_slab2
+		// 183 - spruce_fence_gate already mapped (BlockFenceGate)
+		// 184 - birch_fence_gate already mapped (BlockFenceGate)
+		// 185 - jungle_fence_gate already mapped (BlockFenceGate)
+		// 186 - dark_oak_fence_gate already mapped (BlockFenceGate)
+		// 187 - acacia_fence_gate already mapped (BlockFenceGate)
+		// 188 - spruce_fence already mapped (BlockFence)
+		// 189 - birch_fence already mapped (BlockFence)
+		// 190 - jungle_fence already mapped (BlockFence)
+		// 191 - dark_oak_fence already mapped (BlockFence)
+		// 192 - acacia_fence already mapped (BlockFence)
+		// 193 - spruce_door already mapped (BlockDoor)
+		// 194 - birch_door already mapped (BlockDoor)
+		// 195 - jungle_door already mapped (BlockDoor)
+		// 196 - acacia_door already mapped (BlockDoor)
+		// 197 - dark_oak_door already mapped (BlockDoor)
 
-			} else if (insn instanceof MethodInsnNode) {
-				// handle method invocations, pop appropriate number of arguments off of virtual stack
-				// and check if method is registerBlock; if registerBlock is called then check class
-				// mapping and add if block id is found.
-				
-				MethodInsnNode mi = (MethodInsnNode)insn;
-				int argCount = argCount(mi.desc);
-				//if (mi.name.equals("validateKey")) break;	// end parsing when we reach "blockRegistry.validateKey()" method call.
-				if (insn.getOpcode() == Opcodes.INVOKESPECIAL) argCount++;	 // constructor consumes one item from the stack
-				
-				if ((mi.name.equals(registerBlock1.name) && mi.desc.equals(registerBlock1.desc)) ||
-						(mi.name.equals(registerBlock2.name) && mi.desc.equals(registerBlock2.desc))) {
-					int blockId = (Integer)stack[sp - 3];
-					String blockClass = (String)stack[sp - 1];
-					if (blockClassMap.containsKey(blockId))
-						addClassMapping(blockClassMap.get(blockId), blockClass);
+		MethodCallVisitor registerBlocksMethodVisitor = new MethodCallVisitor(registerBlocks, false);
+		for (MethodCall call : registerBlocksMethodVisitor) {
+			MethodInsnNode mi = call.methodNode;
+			
+			if ((mi.name.equals(registerBlock1.name) && mi.desc.equals(registerBlock1.desc)) ||
+					(mi.name.equals(registerBlock2.name) && mi.desc.equals(registerBlock2.desc))) {
+				int blockId = (Integer)call.args[0];
+				String blockClass = (String)call.args[2];
+				if (blockClassMap.containsKey(blockId)) {
+					addClassMapping(blockClassMap.get(blockId), blockClass);
+					
+					if (blockClassMap.get(blockId).equals("net/minecraft/block/BlockWorkbench")) {
+						ClassNode workbench = getClassNode(blockClass);
+						if (workbench != null) {
+							List<TypeInsnNode> typeNodes = getAllInsnNodesOfType(workbench, TypeInsnNode.class);
+							for (TypeInsnNode tn : typeNodes) {
+								if (tn.desc.startsWith(blockClass + "$") && searchConstantPoolForStrings(tn.desc, "minecraft:crafting_table")) {
+									addClassMapping("net/minecraft/block/BlockWorkbench$InterfaceCraftingTable", tn.desc);						
+									break;
+								}
+							}			
+						}
+					}
 				}
-				
-				sp -= argCount;
-				
-				//System.out.print(index + ": " + mi.name + " (");
-				//for (int i = 0; i < argCount; i++)
-				//	System.out.print(stack[--sp] + ",");
-				//System.out.println(")");
-				
-			} else if (insn instanceof LdcInsnNode) {
-				// handle load constant value references, just push to virtual stack
-				
-				LdcInsnNode li = (LdcInsnNode)insn;
-				stack[sp++] = li.cst;
-				
-			} else if (insn instanceof VarInsnNode) {
-				// handle variable references, if it is a LOAD instruction then push to stack,
-				// if STORE instruction then pop from stack into virtual variable storage
-				
-				VarInsnNode vi = (VarInsnNode)insn;
-				int opCode = vi.getOpcode();
-				switch (opCode) {
-					case Opcodes.ALOAD:
-						stack[sp++] = vars[vi.var];
-						//System.out.println("ALOAD: " + vars[vi.var]);
-						break;
-					case Opcodes.ASTORE:
-						vars[vi.var] = stack[--sp];
-						//System.out.println("var" + vi.var + " = " + stack[sp]);
-						break;
-					default:
-						if (printWarnings) System.out.println("WARNING: discoverBlocks Unhandled VarInsnNode opcode: " + opCode);
-				}
-				
-			} else if (insn instanceof IntInsnNode) {
-				// handle integer types, just push value to virtual stack
-				
-				IntInsnNode ii = (IntInsnNode)insn;
-				int opCode = ii.getOpcode();
-				switch (opCode) {
-					case Opcodes.BIPUSH:
-						stack[sp++] = ii.operand;
-						break;
-					case Opcodes.SIPUSH:
-						stack[sp++] = ii.operand;
-						break;
-					default:
-						if (printWarnings) System.out.println("WARNING: discoverBlocks Unhandled IntInsnNode opcode: " + opCode);
-				}
-				
-			} else if (insn instanceof FrameNode) {
-				// no frame instructions exist in the registerBlock area, so when we
-				// find one it's in the mess at the bottom that can just be ignored
-				
-				break;
-				
-			} else {
-				// unhandled type, display warning for troubleshooting.
-				
-				if (printWarnings) System.out.println("WARNING: Unhandled IsnsNode " + index + ": " + insn.toString());
-				
 			}
 		}
 
