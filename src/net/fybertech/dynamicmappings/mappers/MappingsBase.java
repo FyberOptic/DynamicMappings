@@ -172,6 +172,11 @@ public class MappingsBase
 	public String getLdcClass(AbstractInsnNode node)
 	{
 		return DynamicMappings.getLdcClass(node);
+	}	
+	
+	public FieldNode getFieldNode(ClassNode cn, String obfMapping)
+	{
+		return DynamicMappings.getFieldNode(cn, obfMapping);
 	}
 	
 	public FieldNode getFieldNodeFromMapping(ClassNode cn, String deobfMapping)

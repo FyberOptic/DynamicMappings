@@ -1019,6 +1019,23 @@ public class DynamicMappings
 	}
 	
 	
+	public static FieldNode getFieldNode(ClassNode cn, String obfMapping)
+	{
+		if (cn == null || obfMapping == null) return null;
+
+		String[] split = obfMapping.split(" ");
+		if (split.length < 3) return null;
+
+		for (FieldNode field : cn.fields) {
+			if (field.name.equals(split[1]) && field.desc.equals(split[2])) {
+				return field;
+			}
+		}
+
+		return null;
+	}
+	
+	
 	public static FieldNode getFieldNodeFromMapping(ClassNode cn, String deobfMapping)
 	{
 		String mapping = getFieldMapping(deobfMapping);
