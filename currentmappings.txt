@@ -132,6 +132,7 @@ net/minecraft/item/ItemBanner -> abu
 net/minecraft/item/ItemBlock -> abw
 net/minecraft/item/ItemBow -> acb
 net/minecraft/item/ItemDye -> acp
+net/minecraft/item/ItemPickaxe -> adw
 net/minecraft/item/ItemRecord -> aea
 net/minecraft/item/ItemSoup -> acc
 net/minecraft/item/ItemStack -> adl
@@ -216,7 +217,9 @@ net/minecraft/block/Block lightValue I -> ajn o I
 net/minecraft/block/Block mapColor Lnet/minecraft/block/material/MapColor; -> ajn y Lawy;
 net/minecraft/block/Block soundTypeWood Lnet/minecraft/block/Block$SoundType; -> ajn a Laoi;
 net/minecraft/block/Block stepSound Lnet/minecraft/block/BlockSoundType; -> ajn v Laoi;
+net/minecraft/block/Block translucent Z -> ajn n Z
 net/minecraft/block/Block unlocalizedName Ljava/lang/String; -> ajn d Ljava/lang/String;
+net/minecraft/block/Block useNeighborBrightness Z -> ajn p Z
 net/minecraft/block/BlockDirectional FACING Lnet/minecraft/block/properties/PropertyDirection; -> ama B Larh;
 net/minecraft/block/BlockDoor FACING Lnet/minecraft/block/properties/PropertyDirection; -> akp a Larh;
 net/minecraft/block/BlockDoor HALF Lnet/minecraft/block/properties/PropertyEnum; -> akp e Lari;
@@ -703,10 +706,12 @@ net/minecraft/item/EnumAction NONE Lnet/minecraft/item/EnumAction; -> aev a Laev
 net/minecraft/item/Item maxDamage I -> adj o I
 net/minecraft/item/Item maxStackSize I -> adj i I
 net/minecraft/item/Item unlocalizedName Ljava/lang/String; -> adj q Ljava/lang/String;
+net/minecraft/item/ItemPickaxe EFFECTIVE_ON Ljava/util/Set; -> adw l Ljava/util/Set;
 net/minecraft/item/ItemStack item Lnet/minecraft/item/Item; -> adl d Ladj;
 net/minecraft/item/ItemStack itemDamage I -> adl f I
 net/minecraft/item/ItemStack stackSize I -> adl b I
 net/minecraft/item/ItemStack stackTagCompound Lnet/minecraft/nbt/NBTTagCompound; -> adl e Ldn;
+net/minecraft/item/ItemTool efficiencyOnProperMaterial F -> acl a F
 net/minecraft/item/crafting/ShapedRecipes copyIngredientNBT Z -> aft e Z
 net/minecraft/item/crafting/ShapedRecipes recipeHeight I -> aft b I
 net/minecraft/item/crafting/ShapedRecipes recipeItems [Lnet/minecraft/item/ItemStack; -> aft c [Ladl;
@@ -800,10 +805,12 @@ net/minecraft/block/Block getStateId (Lnet/minecraft/block/state/IBlockState;)I 
 net/minecraft/block/Block getStepSound ()Lnet/minecraft/block/BlockSoundType; -> ajn x ()Laoi;
 net/minecraft/block/Block getSubBlocks (Lnet/minecraft/item/Item;Lnet/minecraft/creativetab/CreativeTabs;Ljava/util/List;)V -> ajn a (Ladj;Lack;Ljava/util/List;)V
 net/minecraft/block/Block getUnlocalizedName ()Ljava/lang/String; -> ajn a ()Ljava/lang/String;
+net/minecraft/block/Block getUseNeighborBrightness (Lnet/minecraft/block/state/IBlockState;)Z -> ajn p (Laqv;)Z
 net/minecraft/block/Block harvestBlock (Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/tileentity/TileEntity;Lnet/minecraft/item/ItemStack;)V -> ajn a (Laho;Lzo;Lcj;Laqv;Lapp;Ladl;)V
 net/minecraft/block/Block isAssociatedBlock (Lnet/minecraft/block/Block;)Z -> ajn b (Lajn;)Z
 net/minecraft/block/Block isBlockSolid (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z -> ajn a (Lahs;Lcj;Lcq;)Z
 net/minecraft/block/Block isEqualTo (Lnet/minecraft/block/Block;Lnet/minecraft/block/Block;)Z -> ajn a (Lajn;Lajn;)Z
+net/minecraft/block/Block isFullBlock (Lnet/minecraft/block/state/IBlockState;)Z -> ajn l (Laqv;)Z
 net/minecraft/block/Block isFullCube (Lnet/minecraft/block/state/IBlockState;)Z -> ajn c (Laqv;)Z
 net/minecraft/block/Block isOpaqueCube (Lnet/minecraft/block/state/IBlockState;)Z -> ajn b (Laqv;)Z
 net/minecraft/block/Block isPassable (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)Z -> ajn a (Lahs;Lcj;)Z
@@ -1042,6 +1049,7 @@ net/minecraft/inventory/Slot onPickupFromSlot (Lnet/minecraft/entity/player/Enti
 net/minecraft/inventory/Slot onSlotChange (Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)V -> abn a (Ladl;Ladl;)V
 net/minecraft/inventory/Slot onSlotChanged ()V -> abn f ()V
 net/minecraft/inventory/Slot putStack (Lnet/minecraft/item/ItemStack;)V -> abn d (Ladl;)V
+net/minecraft/item/Item canHarvestBlock (Lnet/minecraft/block/Block;)Z -> adj b (Lajn;)Z
 net/minecraft/item/Item getByNameOrId (Ljava/lang/String;)Lnet/minecraft/item/Item; -> adj d (Ljava/lang/String;)Ladj;
 net/minecraft/item/Item getColorFromItemStack (Lnet/minecraft/item/ItemStack;I)I -> adj a (Ladl;I)I
 net/minecraft/item/Item getHasSubtypes ()Z -> adj k ()Z
@@ -1095,6 +1103,7 @@ net/minecraft/item/ItemStack setTagCompound (Lnet/minecraft/nbt/NBTTagCompound;)
 net/minecraft/item/ItemStack setTagInfo (Ljava/lang/String;Lnet/minecraft/nbt/NBTBase;)V -> adl a (Ljava/lang/String;Leb;)V
 net/minecraft/item/ItemStack splitStack (I)Lnet/minecraft/item/ItemStack; -> adl a (I)Ladl;
 net/minecraft/item/ItemStack writeToNBT (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound; -> adl b (Ldn;)Ldn;
+net/minecraft/item/ItemTool getStrVsBlock (Lnet/minecraft/item/ItemStack;Lnet/minecraft/block/state/IBlockState;)F -> acl a (Ladl;Laqv;)F
 net/minecraft/item/crafting/CraftingManager addRecipe (Lnet/minecraft/item/ItemStack;[Ljava/lang/Object;)Lnet/minecraft/item/crafting/ShapedRecipes; -> afr a (Ladl;[Ljava/lang/Object;)Laft;
 net/minecraft/item/crafting/CraftingManager addRecipe (Lnet/minecraft/item/crafting/IRecipe;)V -> afr a (Lafq;)V
 net/minecraft/item/crafting/CraftingManager addShapelessRecipe (Lnet/minecraft/item/ItemStack;[Ljava/lang/Object;)V -> afr b (Ladl;[Ljava/lang/Object;)V

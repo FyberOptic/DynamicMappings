@@ -4295,6 +4295,8 @@ public class SharedMappings extends MappingsBase {
 			addClassMapping("net/minecraft/item/ItemRecord", className);
 		}
 		
+		String itemTool = null;
+		
 		className = itemClassMap.get("iron_axe");
 		if (className != null) {			
 			ClassNode axe = getClassNode(className);
@@ -4304,8 +4306,17 @@ public class SharedMappings extends MappingsBase {
 					if (tool.superName.equals(itemClass.name) && searchConstantPoolForStrings(tool.name, "Tool modifier")) {
 						addClassMapping("net/minecraft/item/ItemAxe", axe.name);
 						addClassMapping("net/minecraft/item/ItemTool", tool.name);
+						itemTool = tool.name;
 					}
 				}
+			}
+		}		
+		
+		className = itemClassMap.get("iron_pickaxe");
+		if (className != null && itemTool != null) {
+			ClassNode pickaxe = getClassNode(className);
+			if (pickaxe != null && pickaxe.superName != null && pickaxe.superName.equals(itemTool)) {
+				addClassMapping("net/minecraft/item/ItemPickaxe", pickaxe.name);
 			}
 		}
 		
@@ -4327,6 +4338,75 @@ public class SharedMappings extends MappingsBase {
 		return true;
 	}
 
+	
+	
+	@Mapping(providesFields={
+			"net/minecraft/item/ItemPickaxe EFFECTIVE_ON Ljava/util/Set;",
+			"net/minecraft/item/ItemTool efficiencyOnProperMaterial F"
+			},
+			providesMethods={
+			"net/minecraft/item/Item canHarvestBlock (Lnet/minecraft/block/Block;)Z",
+			"net/minecraft/item/ItemTool getStrVsBlock (Lnet/minecraft/item/ItemStack;Lnet/minecraft/block/state/IBlockState;)F"
+			},
+			depends={
+			"net/minecraft/item/ItemPickaxe",
+			"net/minecraft/item/Item",
+			"net/minecraft/item/ItemStack",
+			"net/minecraft/block/Block",
+			"net/minecraft/item/ItemTool",
+			"net/minecraft/block/state/IBlockState"
+			})
+	public boolean processItemPickaxeClass()
+	{
+		ClassNode itemPickaxe = getClassNodeFromMapping("net/minecraft/item/ItemPickaxe");
+		ClassNode item = getClassNodeFromMapping("net/minecraft/item/Item");
+		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
+		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
+		ClassNode itemTool = getClassNodeFromMapping("net/minecraft/item/ItemTool");
+		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
+		if (!MeddleUtil.notNull(itemPickaxe, item, itemStack, block, itemTool, iBlockState)) return false;
+		
+		List<FieldNode> fields = getMatchingFields(itemPickaxe, null, "Ljava/util/Set;");
+		if (fields.size() == 1) {
+			addFieldMapping("net/minecraft/item/ItemPickaxe EFFECTIVE_ON Ljava/util/Set;", 
+					itemPickaxe.name + " " + fields.get(0).name + " " + fields.get(0).desc);
+		}
+		
+		
+		// public boolean canHarvestBlock(Block blockIn)
+		List<MethodNode> methods = getMatchingMethods(itemPickaxe, null, "(L" + block.name + ";)Z");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/item/Item canHarvestBlock (Lnet/minecraft/block/Block;)Z",
+					item.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			
+			// TODO: Get Item.ToolMaterial toolMaterial
+		}
+		
+		
+		// public float getStrVsBlock(ItemStack stack, Block block)
+		methods = getMatchingMethods(itemPickaxe, null, "(L" + itemStack.name + ";L" + iBlockState.name + ";)F");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/item/ItemTool getStrVsBlock (Lnet/minecraft/item/ItemStack;Lnet/minecraft/block/state/IBlockState;)F",
+					itemTool.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			
+			List<FieldInsnNode> nodes = getAllInsnNodesOfType(methods.get(0), FieldInsnNode.class);
+			for (Iterator<FieldInsnNode> it = nodes.iterator(); it.hasNext();) {
+				FieldInsnNode fn = it.next();
+				if (fn.owner.equals(itemPickaxe.name) && fn.desc.equals("F")) continue;
+				else it.remove();
+			}
+			if (nodes.size() == 1) {
+				if (getFieldNode(itemTool, "--- " + nodes.get(0).name + " F") != null) {
+					addFieldMapping("net/minecraft/item/ItemTool efficiencyOnProperMaterial F", 
+							itemTool.name + " " + nodes.get(0).name + " F");
+				}
+			}
+		}
+		
+		return true;
+	}
+	
+	
 	
 	@Mapping(provides={
 			"net/minecraft/util/Sound"
@@ -4652,7 +4732,9 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/Block unlocalizedName Ljava/lang/String;",
 			"net/minecraft/block/Block blockRegistry Lnet/minecraft/util/RegistryNamespacedDefaultedByKey;",
 			"net/minecraft/block/Block BLOCK_STATE_IDS Lnet/minecraft/util/ObjectIntIdentityMap;",
-			"net/minecraft/block/Block defaultBlockState Lnet/minecraft/block/state/IBlockState;"
+			"net/minecraft/block/Block defaultBlockState Lnet/minecraft/block/state/IBlockState;",
+			"net/minecraft/block/Block translucent Z",
+			"net/minecraft/block/Block useNeighborBrightness Z"
 			},
 			providesMethods={
 			"net/minecraft/block/Block getIdFromBlock (Lnet/minecraft/block/Block;)I",
@@ -5024,7 +5106,22 @@ public class SharedMappings extends MappingsBase {
 				}
 			}
 			
+			List<FieldInsnNode> fieldNodes = getAllInsnNodesOfType(methods.get(0), FieldInsnNode.class);
+			List<FieldInsnNode> fieldGets = new ArrayList<FieldInsnNode>();
+			List<FieldInsnNode> fieldPuts = new ArrayList<FieldInsnNode>();
+			for (Iterator<FieldInsnNode> it = fieldNodes.iterator(); it.hasNext();) {
+				FieldInsnNode fn = it.next();
+				if (fn.owner.equals(block.name) && fn.desc.equals("Z")) {
+					if (fn.getOpcode() == Opcodes.GETFIELD) fieldGets.add(fn);
+					else if (fn.getOpcode() == Opcodes.PUTFIELD) fieldPuts.add(fn);
+				}
+				else it.remove();
+			}
 			
+			if (fieldGets.size() == 1 && fieldPuts.size() == 2 && fieldPuts.get(0).name.equals(fieldPuts.get(1).name)) {
+				addFieldMapping("net/minecraft/block/Block translucent Z", block.name + " " + fieldGets.get(0).name + " Z");
+				addFieldMapping("net/minecraft/block/Block useNeighborBrightness Z", block.name + " " + fieldPuts.get(0).name + " Z");
+			}			
 		}		
 		
 		List<FieldNode> fields = getMatchingFields(block, null, "L" + objectIntIdentityMap + ";");		
@@ -9151,7 +9248,13 @@ public class SharedMappings extends MappingsBase {
 
 	@Mapping(providesMethods={
 			"net/minecraft/block/state/IBlockWrapper getMaterial ()Lnet/minecraft/block/material/Material;",
-			"net/minecraft/block/material/Material isSolid ()Z"
+			"net/minecraft/block/material/Material isSolid ()Z",
+			"net/minecraft/block/Block isFullBlock (Lnet/minecraft/block/state/IBlockState;)Z",
+			"net/minecraft/block/Block getUseNeighborBrightness (Lnet/minecraft/block/state/IBlockState;)Z"
+			},
+			dependsFields={
+			"net/minecraft/block/Block fullBlock Z",
+			"net/minecraft/block/Block useNeighborBrightness Z"
 			},
 			dependsMethods={
 			"net/minecraft/block/Block isBlockSolid (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z"
@@ -9189,6 +9292,35 @@ public class SharedMappings extends MappingsBase {
 						material.name + " " + isSolid.get(0).name + " " + isSolid.get(0).desc);
 			}
 		}
+		
+		
+		FieldNode fullBlock = getFieldNodeFromMapping(block, "net/minecraft/block/Block fullBlock Z");
+		FieldNode useNeighborBrightness = getFieldNodeFromMapping(block, "net/minecraft/block/Block useNeighborBrightness Z");
+		
+		List<MethodNode> methods = getMatchingMethods(block, null, "(L" + iBlockState.name + ";)Z");
+		
+		if (fullBlock != null && useNeighborBrightness != null) {
+			List<MethodNode> isFullBlock = new ArrayList<>();
+			List<MethodNode> getUseNeighborBrightness = new ArrayList<>();
+			
+			for (MethodNode method : methods) {
+				AbstractInsnNode[] nodes = getOpcodeSequenceArray(method.instructions.getFirst(), Opcodes.ALOAD, Opcodes.GETFIELD, Opcodes.IRETURN);
+				if (nodes == null) continue;
+				FieldInsnNode fn = (FieldInsnNode)nodes[1];
+				if (fn.name.equals(fullBlock.name)) isFullBlock.add(method);
+				else if (fn.name.equals(useNeighborBrightness.name)) getUseNeighborBrightness.add(method);
+			}
+			
+			if (isFullBlock.size() == 1) {
+				addMethodMapping("net/minecraft/block/Block isFullBlock (Lnet/minecraft/block/state/IBlockState;)Z",
+						block.name + " " + isFullBlock.get(0).name + " " + isFullBlock.get(0).desc);
+			}
+			if (getUseNeighborBrightness.size() == 1) {
+				addMethodMapping("net/minecraft/block/Block getUseNeighborBrightness (Lnet/minecraft/block/state/IBlockState;)Z",
+						block.name + " " + getUseNeighborBrightness.get(0).name + " " + getUseNeighborBrightness.get(0).desc);
+			}
+		}
+		
 		
 		return true;
 	}
