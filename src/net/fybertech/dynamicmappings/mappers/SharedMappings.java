@@ -2226,7 +2226,6 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/BlockOldLeaf",
 			"net/minecraft/block/BlockSponge",
 			"net/minecraft/block/BlockGlass",
-			"net/minecraft/block/BlockCompressed",
 			"net/minecraft/block/BlockDispenser",
 			"net/minecraft/block/BlockSandStone",
 			"net/minecraft/block/BlockNote",
@@ -2388,7 +2387,7 @@ public class SharedMappings extends MappingsBase {
 		blockClassMap.put(19, "net/minecraft/block/BlockSponge");	// 19 - sponge
 		blockClassMap.put(20, "net/minecraft/block/BlockGlass");	// 20 - glass
 		// 21 - lapis_ore already mapped (BlockOre)
-		blockClassMap.put(22, "net/minecraft/block/BlockCompressed");	// 22 - lapis_block
+		// blockClassMap.put(22, "net/minecraft/block/BlockCompressed");	// 22 - lapis_block - now it's a Block
 		blockClassMap.put(23, "net/minecraft/block/BlockDispenser");	// 23 - dispenser
 		blockClassMap.put(24, "net/minecraft/block/BlockSandStone");	// 24 - sandstone
 		blockClassMap.put(25, "net/minecraft/block/BlockNote");	// 25 - noteblock
@@ -5963,7 +5962,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/item/Item onBlockDestroyed (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/EntityLivingBase;)Z"
 			},
 			providesFields={
-			"net/minecraft/item/Item maxStackSize I"
+			"net/minecraft/item/Item maxStackSize I",
+			"net/minecraft/item/Item itemRegistry Lnet/minecraft/util/RegistryNamespaced;"
 			},
 			depends={
 			"net/minecraft/item/Item",
@@ -6082,6 +6082,8 @@ public class SharedMappings extends MappingsBase {
 			// Item.itemRegistry
 			if (searchConstantPoolForClasses(className, "com.google.common.collect.BiMap", "com.google.common.collect.HashBiMap")) {
 				addClassMapping("net/minecraft/util/RegistryNamespaced", className);
+				addFieldMapping("net/minecraft/item/Item itemRegistry Lnet/minecraft/util/RegistryNamespaced;", 
+						item.name + " " + field.name + " " + field.desc);
 				continue;
 			}
 		}
