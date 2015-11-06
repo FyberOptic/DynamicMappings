@@ -130,6 +130,9 @@ public class MethodCallIterator implements Iterator<MethodCallIterator.MethodCal
 					case Opcodes.NEW:
 						stack[sp++] = ti.desc;
 						break;
+					case Opcodes.ANEWARRAY:
+						stack[sp++] = ti.desc;
+						break;
 					default:
 						if (printWarnings) System.out.println("WARNING: discoverBlocks Unhandled TypeInsnNode opcode: " + opCode);
 						break;
