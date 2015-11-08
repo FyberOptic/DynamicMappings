@@ -329,6 +329,7 @@ public class DynamicMappings
 		return outSet;
 	}
 	
+	
 	public static void generateClassLinkages()
 	{
 		System.out.print("[DynamicMappings] Generating linkages...");
@@ -821,7 +822,7 @@ public class DynamicMappings
 	
 
 	/**
-	 * Locates and extracts the specified opcode sequence as an array of
+	 * Identifies and extracts the specified opcode sequence as an array of
 	 * instruction nodes.  Ignores synthetic opcodes added by ASM, such as 
 	 * labels.
 	 * 
@@ -1223,7 +1224,7 @@ public class DynamicMappings
 		if (cn == null) return false;	
 		
 		List<String> classes = new ArrayList<>();		
-		classes.add(cn.superName);
+		if (cn.superName != null) classes.add(cn.superName);
 		classes.addAll(cn.interfaces);		
 		
 		// First pass

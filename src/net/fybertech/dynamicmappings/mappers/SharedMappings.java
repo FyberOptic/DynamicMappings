@@ -9043,6 +9043,41 @@ public class SharedMappings extends MappingsBase {
 	}
 	
 	
+	
+	@Mapping(provides={
+			"net/minecraft/stats/StatBase"
+			},
+			depends={
+			"net/minecraft/stats/StatList"
+			})
+	public boolean processStatListClass()
+	{
+		ClassNode statList = getClassNodeFromMapping("net/minecraft/stats/StatList");
+		if (!MeddleUtil.notNull(statList)) return false;
+		
+		String statBase = null;
+		
+		for (FieldNode field : statList.fields) {
+			// We just want arrays
+			if (!field.desc.startsWith("[")) continue;
+			
+			// And only arrays of objects
+			Type t = Type.getType(field.desc).getElementType();
+			if (t.getSort() != Type.OBJECT) continue;
+			
+			String className = t.getClassName();
+			if (searchConstantPoolForStrings(className, "Duplicate stat id: \"", "Stat{id=")) {
+				addClassMapping("net/minecraft/stats/StatBase", className);
+				statBase = className;
+				break;
+			}
+		}
+		
+		
+		
+		return true;
+	}
+	
 }
 
 

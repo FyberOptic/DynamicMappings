@@ -102,7 +102,7 @@ public class DynamicRemap
 			
 			for (int n = 1; n < split.length; n++) {
 				String inner = split[n];
-				if (originallyUnpackaged && isObfInner(inner) && unpackagedInnerPrefix != null) inner = unpackagedInnerPrefix + inner;
+				if (originallyUnpackaged && isObfInner(inner) && unpackagedInnerPrefix != null) inner = unpackagedInnerPrefix + inner + n;
 				typeName += "$" + inner;				
 			}			
 			
@@ -311,6 +311,39 @@ public class DynamicRemap
 	
 	
 	
+	/**
+	 * Parses the jar to find any unmapped child classes of any of the specified 
+	 * classes, then gives them generic names and repackages them.
+	 * 
+	 * @param mcJar - The obfuscated Minecraft jar
+	 * @param baseClasses - List of deobfuscated class names to discover children for
+	 */
+	public static void remapUnknownChildren(JarFile mcJar, String ... baseClasses )
+	{
+		for (Enumeration<JarEntry> enumerator = mcJar.entries(); enumerator.hasMoreElements();)
+		{
+			JarEntry entry = enumerator.nextElement();
+			String filename = entry.getName();				
+			if (!filename.endsWith(".class")) continue;
+			String className = filename.substring(0, filename.length() - 6);
+			
+			if (className.contains("$")) continue;
+			
+			for (String mappedClass : baseClasses) {
+			
+				String baseClass = DynamicMappings.getClassMapping(mappedClass);
+				String classPrefix = mappedClass + "Unknown_";			
+		
+				if (baseClass != null && DynamicMappings.doesInheritFrom(className, baseClass) && !DynamicMappings.reverseClassMappings.containsKey(className)) {
+					DynamicMappings.addClassMapping(classPrefix + className, className);
+					break;
+				}
+			}
+		}	
+	}
+	
+	
+	
 	public static void main(String[] args)
 	{	
 		ParmParser pp = new ParmParser();
@@ -323,32 +356,15 @@ public class DynamicRemap
 		DynamicMappings.generateClassMappings();
 
 		AccessUtil accessUtil = new AccessUtil();
-		accessUtil.readAllTransformerConfigs();
+		accessUtil.readAllTransformerConfigs();	
 		
-		String blockClass = DynamicMappings.getClassMapping("net/minecraft/block/Block");
-		String itemClass = DynamicMappings.getClassMapping("net/minecraft/item/Item");
 		JarFile mcJar = DynamicMappings.getMinecraftJar();
 		
-		// Moves unmapped blocks and items to the appropriate package 
-		if (mcJar != null) 
-		{
-			for (Enumeration<JarEntry> enumerator = mcJar.entries(); enumerator.hasMoreElements();)
-			{
-				JarEntry entry = enumerator.nextElement();
-				String filename = entry.getName();				
-				if (!filename.endsWith(".class")) continue;
-				String className = filename.substring(0, filename.length() - 6);
-				
-				if (className.contains("$")) continue;
-				
-				if (blockClass != null && DynamicMappings.isSubclassOf(className, blockClass) && !DynamicMappings.reverseClassMappings.containsKey(className)) {
-					DynamicMappings.addClassMapping("net/minecraft/block/BlockUnknown_" + className, className);
-				}
-				
-				else if (itemClass != null && DynamicMappings.isSubclassOf(className, itemClass) && !DynamicMappings.reverseClassMappings.containsKey(className)) {
-					DynamicMappings.addClassMapping("net/minecraft/item/ItemUnknown_" + className, className);
-				}
-			}
+		// Moves unmapped blocks, items, etc to the appropriate packages
+		if (mcJar != null) {			
+			remapUnknownChildren(mcJar, "net/minecraft/block/Block", "net/minecraft/item/Item", "net/minecraft/entity/monster/EntityMob",
+					"net/minecraft/entity/Entity", "net/minecraft/tileentity/TileEntity", "net/minecraft/inventory/Container", 
+					"net/minecraft/client/gui/inventory/GuiContainer", "net/minecraft/client/gui/Gui", "net/minecraft/stats/StatBase");				
 			
 			try {
 				mcJar.close();
