@@ -970,6 +970,12 @@ public class DynamicMappings
 	{
 		deobfClassName = deobfClassName.replace(".", "/");
 		obfClassName = obfClassName.replace(".", "/");
+		
+		if (classMappings.containsKey(deobfClassName) && !classMappings.get(deobfClassName).equals(obfClassName))
+			System.out.println("WARNING: " + deobfClassName + " has been remapped from " + classMappings.get(deobfClassName) + " to " + obfClassName);
+		if (reverseClassMappings.containsKey(obfClassName) && !reverseClassMappings.get(obfClassName).equals(deobfClassName))
+			System.out.println("WARNING: " + obfClassName + " has been remapped from " + reverseClassMappings.get(obfClassName) + " to " + deobfClassName);
+		
 		classMappings.put(deobfClassName, obfClassName);
 		reverseClassMappings.put(obfClassName, deobfClassName);
 	}
@@ -978,6 +984,11 @@ public class DynamicMappings
 	// Both inputs in the format of "class_name method_name method_desc"
 	public static void addMethodMapping(String deobfMethodDesc, String obfMethodDesc)
 	{
+		if (classMappings.containsKey(deobfMethodDesc) && !classMappings.get(deobfMethodDesc).equals(obfMethodDesc))
+			System.out.println("WARNING: " + deobfMethodDesc + " has been remapped from " + classMappings.get(deobfMethodDesc) + " to " + obfMethodDesc);
+		if (reverseClassMappings.containsKey(obfMethodDesc) && !reverseClassMappings.get(obfMethodDesc).equals(deobfMethodDesc))
+			System.out.println("WARNING: " + obfMethodDesc + " has been remapped from " + reverseClassMappings.get(obfMethodDesc) + " to " + deobfMethodDesc);
+		
 		methodMappings.put(deobfMethodDesc, obfMethodDesc);
 		reverseMethodMappings.put(obfMethodDesc, deobfMethodDesc);
 	}
@@ -986,6 +997,11 @@ public class DynamicMappings
 	// Both inputs in the format of "class_name field_name field_desc"
 	public static void addFieldMapping(String deobfFieldDesc, String obfFieldDesc)
 	{
+		if (classMappings.containsKey(deobfFieldDesc) && !classMappings.get(deobfFieldDesc).equals(obfFieldDesc))
+			System.out.println("WARNING: " + deobfFieldDesc + " has been remapped from " + classMappings.get(deobfFieldDesc) + " to " + obfFieldDesc);
+		if (reverseClassMappings.containsKey(obfFieldDesc) && !reverseClassMappings.get(obfFieldDesc).equals(deobfFieldDesc))
+			System.out.println("WARNING: " + obfFieldDesc + " has been remapped from " + reverseClassMappings.get(obfFieldDesc) + " to " + deobfFieldDesc);
+		
 		fieldMappings.put(deobfFieldDesc, obfFieldDesc);
 		reverseFieldMappings.put(obfFieldDesc, deobfFieldDesc);
 	}
