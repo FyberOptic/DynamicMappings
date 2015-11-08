@@ -2343,10 +2343,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/BlockRedSandstone",
 			"net/minecraft/block/BlockDoubleStoneSlabNew",
 			"net/minecraft/block/BlockHalfStoneSlabNew"
-			},
-			/*providesFields={
-			"net/minecraft/block/Block AIR_ID Lnet/minecraft/util/ResourceLocation;"
-			},*/
+			},			
 			dependsMethods={
 			"net/minecraft/block/Block registerBlocks ()V"
 			},
@@ -2365,7 +2362,7 @@ public class SharedMappings extends MappingsBase {
 		
 		// Create a map if the block ids and their respective classes.
 		Map<Integer, String> blockClassMap = new HashMap<>();
-		blockClassMap.put(0, "net/minecraft/block/BlockAir");	// 0 - AIR_ID
+		blockClassMap.put(0, "net/minecraft/block/BlockAir");	// 0 - air
 		blockClassMap.put(1, "net/minecraft/block/BlockStone");	// 1 - stone
 		blockClassMap.put(2, "net/minecraft/block/BlockGrass");	// 2 - grass
 		blockClassMap.put(3, "net/minecraft/block/BlockDirt");	// 3 - dirt
@@ -9246,7 +9243,10 @@ public class SharedMappings extends MappingsBase {
 	}
 	
 
-	@Mapping(providesMethods={
+	@Mapping(providesFields={
+			"net/minecraft/block/Block AIR_ID Lnet/minecraft/util/ResourceLocation;"
+			},
+			providesMethods={
 			"net/minecraft/block/state/IBlockWrapper getMaterial ()Lnet/minecraft/block/material/Material;",
 			"net/minecraft/block/material/Material isSolid ()Z",
 			"net/minecraft/block/Block isFullBlock (Lnet/minecraft/block/state/IBlockState;)Z",
@@ -9254,7 +9254,7 @@ public class SharedMappings extends MappingsBase {
 			},
 			dependsFields={
 			"net/minecraft/block/Block fullBlock Z",
-			"net/minecraft/block/Block useNeighborBrightness Z"
+			"net/minecraft/block/Block useNeighborBrightness Z"			
 			},
 			dependsMethods={
 			"net/minecraft/block/Block isBlockSolid (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z"
@@ -9263,7 +9263,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/Block",
 			"net/minecraft/block/state/IBlockState",
 			"net/minecraft/block/state/IBlockWrapper",
-			"net/minecraft/block/material/Material"
+			"net/minecraft/block/material/Material",
+			"net/minecraft/util/ResourceLocation"
 			})	
 	public boolean processBlockClass4()
 	{
@@ -9271,7 +9272,24 @@ public class SharedMappings extends MappingsBase {
 		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
 		ClassNode iBlockWrapper = getClassNodeFromMapping("net/minecraft/block/state/IBlockWrapper");
 		ClassNode material = getClassNodeFromMapping("net/minecraft/block/material/Material");
-		if (!MeddleUtil.notNull(block, iBlockState, iBlockWrapper, material)) return false;
+		ClassNode resourceLocation = getClassNodeFromMapping("net/minecraft/util/ResourceLocation");
+		if (!MeddleUtil.notNull(block, iBlockState, iBlockWrapper, material, resourceLocation)) return false;
+		
+		
+		// Get Block.AIR_ID field
+		String air_id_name = null;
+		int count = 0;
+		for (FieldNode field : block.fields) {
+			if (field.desc.equals("L" + resourceLocation.name + ";")) {
+				air_id_name = field.name;
+				count++;
+			}
+		}
+		if (air_id_name != null && count == 1) {
+			addFieldMapping("net/minecraft/block/Block AIR_ID Lnet/minecraft/util/ResourceLocation;",
+					block.name + " " + air_id_name + " L" + resourceLocation.name + ";");
+		}
+		
 		
 		MethodNode isBlockSolid = getMethodNodeFromMapping(block, "net/minecraft/block/Block isBlockSolid (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z");
 		if (isBlockSolid != null) {

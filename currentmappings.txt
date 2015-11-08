@@ -6,31 +6,147 @@ net/minecraft/block/Block -> ajm
 net/minecraft/block/BlockAir -> ajc
 net/minecraft/block/BlockAnvil -> ajd
 net/minecraft/block/BlockAnvil$Anvil -> ajd$a
+net/minecraft/block/BlockBanner$BlockBannerHanging -> aje$b
+net/minecraft/block/BlockBanner$BlockBannerStanding -> aje$a
+net/minecraft/block/BlockBarrier -> ajf
+net/minecraft/block/BlockBeacon -> ajj
 net/minecraft/block/BlockBed -> ajk
+net/minecraft/block/BlockBookshelf -> ajp
+net/minecraft/block/BlockBrewingStand -> ajq
+net/minecraft/block/BlockButtonStone -> aor
+net/minecraft/block/BlockButtonWood -> api
+net/minecraft/block/BlockCactus -> ajt
+net/minecraft/block/BlockCake -> aju
+net/minecraft/block/BlockCarpet -> apk
+net/minecraft/block/BlockCarrot -> ajv
+net/minecraft/block/BlockCauldron -> ajw
 net/minecraft/block/BlockChest -> ajx
+net/minecraft/block/BlockClay -> aka
+net/minecraft/block/BlockCocoa -> akb
+net/minecraft/block/BlockColored -> akc
+net/minecraft/block/BlockCommandBlock -> akd
+net/minecraft/block/BlockCompressedPowered -> ane
 net/minecraft/block/BlockContainer -> ajg
+net/minecraft/block/BlockCrops -> akg
+net/minecraft/block/BlockDaylightDetector -> akh
+net/minecraft/block/BlockDeadBush -> aki
 net/minecraft/block/BlockDirectional -> alz
+net/minecraft/block/BlockDirt -> akm
+net/minecraft/block/BlockDispenser -> akn
 net/minecraft/block/BlockDoor -> ako
 net/minecraft/block/BlockDoor$EnumDoorHalf -> ako$a
 net/minecraft/block/BlockDoor$EnumHingePosition -> ako$b
+net/minecraft/block/BlockDoublePlant -> akp
+net/minecraft/block/BlockDoubleStoneSlab -> alj
+net/minecraft/block/BlockDoubleStoneSlabNew -> ali
+net/minecraft/block/BlockDoubleWoodSlab -> alk
+net/minecraft/block/BlockDragonEgg -> akq
+net/minecraft/block/BlockDropper -> akr
 net/minecraft/block/BlockDynamicLiquid -> aks
+net/minecraft/block/BlockEnchantmentTable -> akt
+net/minecraft/block/BlockEndPortal -> akv
+net/minecraft/block/BlockEndPortalFrame -> akw
+net/minecraft/block/BlockEnderChest -> aky
+net/minecraft/block/BlockFarmland -> alb
+net/minecraft/block/BlockFence -> alc
 net/minecraft/block/BlockFenceGate -> ald
 net/minecraft/block/BlockFire -> ale
+net/minecraft/block/BlockFlowerPot -> alg
+net/minecraft/block/BlockFurnace -> all
+net/minecraft/block/BlockGlass -> alm
+net/minecraft/block/BlockGlowstone -> aln
 net/minecraft/block/BlockGrass -> alo
+net/minecraft/block/BlockGravel -> alq
+net/minecraft/block/BlockHalfStoneSlab -> alt
+net/minecraft/block/BlockHalfStoneSlabNew -> alr
+net/minecraft/block/BlockHalfWoodSlab -> alv
+net/minecraft/block/BlockHardenedClay -> alw
+net/minecraft/block/BlockHay -> alx
 net/minecraft/block/BlockHopper -> aly
+net/minecraft/block/BlockHugeMushroom -> ama
+net/minecraft/block/BlockIce -> amb
+net/minecraft/block/BlockJukebox -> amc
+net/minecraft/block/BlockLadder -> amd
 net/minecraft/block/BlockLeaves -> ame
 net/minecraft/block/BlockLeavesBase -> aoy
+net/minecraft/block/BlockLever -> amg
+net/minecraft/block/BlockLilyPad -> apf
 net/minecraft/block/BlockLiquid -> amh
 net/minecraft/block/BlockLog -> ami
+net/minecraft/block/BlockMelon -> amj
+net/minecraft/block/BlockMobSpawner -> aml
+net/minecraft/block/BlockMushroom -> amn
+net/minecraft/block/BlockMycelium -> amo
+net/minecraft/block/BlockNetherBrick -> amp
+net/minecraft/block/BlockNetherWart -> amq
+net/minecraft/block/BlockNetherrack -> amr
+net/minecraft/block/BlockNewLeaf -> ams
+net/minecraft/block/BlockNewLog -> amt
+net/minecraft/block/BlockNote -> amv
+net/minecraft/block/BlockObsidian -> amw
+net/minecraft/block/BlockOldLeaf -> amx
 net/minecraft/block/BlockOldLog -> amy
+net/minecraft/block/BlockOre -> amz
+net/minecraft/block/BlockPackedIce -> ana
 net/minecraft/block/BlockPane -> aov
+net/minecraft/block/BlockPistonBase -> aqm
+net/minecraft/block/BlockPistonExtension -> aqn
+net/minecraft/block/BlockPistonMoving -> aqo
+net/minecraft/block/BlockPlanks -> anb
+net/minecraft/block/BlockPortal -> anc
+net/minecraft/block/BlockPotato -> and
+net/minecraft/block/BlockPressurePlate -> ang
+net/minecraft/block/BlockPressurePlateWeighted -> aph
+net/minecraft/block/BlockPrismarine -> anh
+net/minecraft/block/BlockPumpkin -> ani
+net/minecraft/block/BlockQuartz -> ank
+net/minecraft/block/BlockRail -> anl
+net/minecraft/block/BlockRailDetector -> akj
+net/minecraft/block/BlockRailPowered -> anf
+net/minecraft/block/BlockRedFlower -> anm
+net/minecraft/block/BlockRedSandstone -> ann
+net/minecraft/block/BlockRedstoneComparator -> ake
+net/minecraft/block/BlockRedstoneLight -> anq
+net/minecraft/block/BlockRedstoneOre -> ano
+net/minecraft/block/BlockRedstoneRepeater -> anu
+net/minecraft/block/BlockRedstoneTorch -> anr
+net/minecraft/block/BlockRedstoneWire -> anp
+net/minecraft/block/BlockReed -> ans
 net/minecraft/block/BlockRotatedPillar -> anv
+net/minecraft/block/BlockSand -> anx
+net/minecraft/block/BlockSandStone -> any
+net/minecraft/block/BlockSapling -> anz
+net/minecraft/block/BlockSeaLantern -> aoa
+net/minecraft/block/BlockSilverfish -> amm
+net/minecraft/block/BlockSkull -> aoc
 net/minecraft/block/BlockSlab -> als
+net/minecraft/block/BlockSlime -> aod
+net/minecraft/block/BlockSnow -> aof
+net/minecraft/block/BlockSnowBlock -> aoe
+net/minecraft/block/BlockSoulSand -> aog
 net/minecraft/block/BlockSoundType -> aoh
+net/minecraft/block/BlockSponge -> aoi
+net/minecraft/block/BlockStainedGlass -> aoj
+net/minecraft/block/BlockStainedGlassPane -> aok
+net/minecraft/block/BlockStairs -> aol
+net/minecraft/block/BlockStandingSign -> aom
 net/minecraft/block/BlockStaticLiquid -> aon
+net/minecraft/block/BlockStem -> aoo
+net/minecraft/block/BlockStone -> aop
+net/minecraft/block/BlockStoneBrick -> aoq
 net/minecraft/block/BlockTNT -> aow
+net/minecraft/block/BlockTallGrass -> aou
+net/minecraft/block/BlockTorch -> aox
+net/minecraft/block/BlockTrapDoor -> aoz
+net/minecraft/block/BlockTripWire -> apa
+net/minecraft/block/BlockTripWireHook -> apb
+net/minecraft/block/BlockVine -> apc
+net/minecraft/block/BlockWall -> apd
+net/minecraft/block/BlockWallSign -> ape
+net/minecraft/block/BlockWeb -> apg
 net/minecraft/block/BlockWorkbench -> akf
 net/minecraft/block/BlockWorkbench$InterfaceCraftingTable -> akf$a
+net/minecraft/block/BlockYellowFlower -> apl
 net/minecraft/block/EnumBlockMirroring -> amk
 net/minecraft/block/EnumBlockRotation -> anw
 net/minecraft/block/EnumRenderType -> ant
@@ -204,7 +320,6 @@ net/minecraft/world/WorldSettings -> ahq
 net/minecraft/world/WorldType -> ahs
 
 FIELDS:
-net/minecraft/block/Block AIR_ID Lnet/minecraft/util/ResourceLocation; -> ajm a Lkl;
 net/minecraft/block/Block BLOCK_STATE_IDS Lnet/minecraft/util/ObjectIntIdentityMap; -> ajm i Lct;
 net/minecraft/block/Block blockMaterial Lnet/minecraft/block/material/Material; -> ajm x Laww;
 net/minecraft/block/Block blockRegistry Lnet/minecraft/util/RegistryNamespacedDefaultedByKey; -> ajm h Lco;
@@ -311,6 +426,7 @@ net/minecraft/init/Blocks stone Lnet/minecraft/block/Block; -> ajn b Lajm;
 net/minecraft/init/Items ender_pearl Lnet/minecraft/item/Item; -> adn bB Ladj;
 net/minecraft/init/Items iron_axe Lnet/minecraft/item/Item; -> adn c Ladj;
 net/minecraft/init/Items iron_ingot Lnet/minecraft/item/Item; -> adn l Ladj;
+net/minecraft/init/Items iron_pickaxe Lnet/minecraft/item/Item; -> adn b Ladj;
 net/minecraft/init/Items leather Lnet/minecraft/item/Item; -> adn aM Ladj;
 net/minecraft/init/Items redstone Lnet/minecraft/item/Item; -> adn aE Ladj;
 net/minecraft/init/Items stick Lnet/minecraft/item/Item; -> adn A Ladj;
@@ -724,6 +840,7 @@ net/minecraft/item/EnumAction BOW Lnet/minecraft/item/EnumAction; -> aev e Laev;
 net/minecraft/item/EnumAction DRINK Lnet/minecraft/item/EnumAction; -> aev c Laev;
 net/minecraft/item/EnumAction EAT Lnet/minecraft/item/EnumAction; -> aev b Laev;
 net/minecraft/item/EnumAction NONE Lnet/minecraft/item/EnumAction; -> aev a Laev;
+net/minecraft/item/Item itemRegistry Lnet/minecraft/util/RegistryNamespaced; -> adj f Lcx;
 net/minecraft/item/Item maxDamage I -> adj o I
 net/minecraft/item/Item maxStackSize I -> adj j I
 net/minecraft/item/Item unlocalizedName Ljava/lang/String; -> adj q Ljava/lang/String;
