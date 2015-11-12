@@ -293,6 +293,9 @@ net/minecraft/util/ChatComponentText -> fa
 net/minecraft/util/ChatComponentTranslation -> fb
 net/minecraft/util/DataVersionManager -> pb
 net/minecraft/util/EnumFacing -> cq
+net/minecraft/util/EnumFacing$Axis -> cq$a
+net/minecraft/util/EnumFacing$AxisDirection -> cq$b
+net/minecraft/util/EnumFacing$Plane -> cq$c
 net/minecraft/util/EnumWorldBlockLayer -> ahg
 net/minecraft/util/IChatComponent -> eu
 net/minecraft/util/IStringSerializable -> or
@@ -320,6 +323,7 @@ net/minecraft/world/WorldSettings -> ahq
 net/minecraft/world/WorldType -> ahs
 
 FIELDS:
+net/minecraft/block/Block AIR_ID Lnet/minecraft/util/ResourceLocation; -> ajm a Lkl;
 net/minecraft/block/Block BLOCK_STATE_IDS Lnet/minecraft/util/ObjectIntIdentityMap; -> ajm i Lct;
 net/minecraft/block/Block blockMaterial Lnet/minecraft/block/material/Material; -> ajm x Laww;
 net/minecraft/block/Block blockRegistry Lnet/minecraft/util/RegistryNamespacedDefaultedByKey; -> ajm h Lco;
@@ -346,6 +350,8 @@ net/minecraft/block/BlockDoor$EnumDoorHalf LOWER Lnet/minecraft/block/BlockDoor$
 net/minecraft/block/BlockDoor$EnumDoorHalf UPPER Lnet/minecraft/block/BlockDoor$EnumDoorHalf; -> ako$a a Lako$a;
 net/minecraft/block/BlockDoor$EnumHingePosition LEFT Lnet/minecraft/block/BlockDoor$EnumHingePosition; -> ako$b a Lako$b;
 net/minecraft/block/BlockDoor$EnumHingePosition RIGHT Lnet/minecraft/block/BlockDoor$EnumHingePosition; -> ako$b b Lako$b;
+net/minecraft/block/BlockHopper ENABLED Lnet/minecraft/block/properties/PropertyBool; -> aly b Larf;
+net/minecraft/block/BlockHopper FACING Lnet/minecraft/block/properties/PropertyDirection; -> aly a Larg;
 net/minecraft/block/BlockLiquid LEVEL Lnet/minecraft/block/properties/PropertyInteger; -> amh b Lari;
 net/minecraft/block/BlockPane EAST Lnet/minecraft/block/properties/PropertyBool; -> aov c Larf;
 net/minecraft/block/BlockPane NORTH Lnet/minecraft/block/properties/PropertyBool; -> aov b Larf;
@@ -357,6 +363,7 @@ net/minecraft/block/EnumRenderType INVISIBLE Lnet/minecraft/block/EnumRenderType
 net/minecraft/block/EnumRenderType LIQUID Lnet/minecraft/block/EnumRenderType; -> ant b Lant;
 net/minecraft/block/EnumRenderType MODEL Lnet/minecraft/block/EnumRenderType; -> ant d Lant;
 net/minecraft/block/material/Material air Lnet/minecraft/block/material/Material; -> aww a Laww;
+net/minecraft/block/material/Material iron Lnet/minecraft/block/material/Material; -> aww f Laww;
 net/minecraft/block/material/Material leaves Lnet/minecraft/block/material/Material; -> aww j Laww;
 net/minecraft/block/material/Material wood Lnet/minecraft/block/material/Material; -> aww d Laww;
 net/minecraft/client/Minecraft gameSettings Lnet/minecraft/client/entity/EntityPlayerSP; -> bbz u Lbcb;
@@ -879,6 +886,24 @@ net/minecraft/util/EnumFacing NORTH Lnet/minecraft/util/EnumFacing; -> cq c Lcq;
 net/minecraft/util/EnumFacing SOUTH Lnet/minecraft/util/EnumFacing; -> cq d Lcq;
 net/minecraft/util/EnumFacing UP Lnet/minecraft/util/EnumFacing; -> cq b Lcq;
 net/minecraft/util/EnumFacing WEST Lnet/minecraft/util/EnumFacing; -> cq e Lcq;
+net/minecraft/util/EnumFacing axis Lnet/minecraft/util/EnumFacing$Axis; -> cq k Lcq$a;
+net/minecraft/util/EnumFacing axisDirection Lnet/minecraft/util/EnumFacing$AxisDirection; -> cq l Lcq$b;
+net/minecraft/util/EnumFacing directionVec Lnet/minecraft/util/Vec3i; -> cq m Ldf;
+net/minecraft/util/EnumFacing horizontalIndex I -> cq i I
+net/minecraft/util/EnumFacing index I -> cq g I
+net/minecraft/util/EnumFacing name Ljava/lang/String; -> cq j Ljava/lang/String;
+net/minecraft/util/EnumFacing opposite I -> cq h I
+net/minecraft/util/EnumFacing$Axis X Lnet/minecraft/util/EnumFacing$Axis; -> cq$a a Lcq$a;
+net/minecraft/util/EnumFacing$Axis Y Lnet/minecraft/util/EnumFacing$Axis; -> cq$a b Lcq$a;
+net/minecraft/util/EnumFacing$Axis Z Lnet/minecraft/util/EnumFacing$Axis; -> cq$a c Lcq$a;
+net/minecraft/util/EnumFacing$AxisDirection NEGATIVE Lnet/minecraft/util/EnumFacing$AxisDirection; -> cq$b b Lcq$b;
+net/minecraft/util/EnumFacing$AxisDirection POSITIVE Lnet/minecraft/util/EnumFacing$AxisDirection; -> cq$b a Lcq$b;
+net/minecraft/util/EnumFacing$Plane HORIZONTAL Lnet/minecraft/util/EnumFacing$Plane; -> cq$c a Lcq$c;
+net/minecraft/util/EnumFacing$Plane VERTICAL Lnet/minecraft/util/EnumFacing$Plane; -> cq$c b Lcq$c;
+net/minecraft/util/EnumWorldBlockLayer CUTOUT Lnet/minecraft/util/EnumWorldBlockLayer; -> ahg c Lahg;
+net/minecraft/util/EnumWorldBlockLayer CUTOUT_MIPPED Lnet/minecraft/util/EnumWorldBlockLayer; -> ahg b Lahg;
+net/minecraft/util/EnumWorldBlockLayer SOLID Lnet/minecraft/util/EnumWorldBlockLayer; -> ahg a Lahg;
+net/minecraft/util/EnumWorldBlockLayer TRANSLUCENT Lnet/minecraft/util/EnumWorldBlockLayer; -> ahg d Lahg;
 net/minecraft/util/ItemUseResult FAIL Lnet/minecraft/util/ItemUseResult; -> qm c Lqm;
 net/minecraft/util/ItemUseResult PASS Lnet/minecraft/util/ItemUseResult; -> qm b Lqm;
 net/minecraft/util/ItemUseResult SUCCESS Lnet/minecraft/util/ItemUseResult; -> qm a Lqm;
@@ -945,6 +970,7 @@ net/minecraft/block/Block getSubBlocks (Lnet/minecraft/item/Item;Lnet/minecraft/
 net/minecraft/block/Block getUnlocalizedName ()Ljava/lang/String; -> ajm a ()Ljava/lang/String;
 net/minecraft/block/Block getUseNeighborBrightness (Lnet/minecraft/block/state/IBlockState;)Z -> ajm p (Laqu;)Z
 net/minecraft/block/Block harvestBlock (Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/tileentity/TileEntity;Lnet/minecraft/item/ItemStack;)V -> ajm a (Lahn;Lzo;Lcj;Laqu;Lapo;Ladl;)V
+net/minecraft/block/Block hasComparatorInputOverride (Lnet/minecraft/block/state/IBlockState;)Z -> ajm w (Laqu;)Z
 net/minecraft/block/Block isAssociatedBlock (Lnet/minecraft/block/Block;)Z -> ajm b (Lajm;)Z
 net/minecraft/block/Block isBlockSolid (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z -> ajm a (Lahr;Lcj;Lcq;)Z
 net/minecraft/block/Block isEqualTo (Lnet/minecraft/block/Block;Lnet/minecraft/block/Block;)Z -> ajm a (Lajm;Lajm;)Z
@@ -998,6 +1024,7 @@ net/minecraft/block/material/Material getMaterialMapColor ()Lnet/minecraft/block
 net/minecraft/block/material/Material isSolid ()Z -> aww a ()Z
 net/minecraft/block/properties/PropertyBool create (Ljava/lang/String;)Lnet/minecraft/block/properties/PropertyBool; -> arf a (Ljava/lang/String;)Larf;
 net/minecraft/block/properties/PropertyDirection create (Ljava/lang/String;)Lnet/minecraft/block/properties/PropertyDirection; -> arg a (Ljava/lang/String;)Larg;
+net/minecraft/block/properties/PropertyDirection create (Ljava/lang/String;Lcom/google/common/base/Predicate;)Lnet/minecraft/block/properties/PropertyDirection; -> arg a (Ljava/lang/String;Lcom/google/common/base/Predicate;)Larg;
 net/minecraft/block/properties/PropertyEnum create (Ljava/lang/String;Ljava/lang/Class;)Lnet/minecraft/block/properties/PropertyEnum; -> arh a (Ljava/lang/String;Ljava/lang/Class;)Larh;
 net/minecraft/block/properties/PropertyInteger create (Ljava/lang/String;II)Lnet/minecraft/block/properties/PropertyInteger; -> ari a (Ljava/lang/String;II)Lari;
 net/minecraft/block/state/BlockState getAllowedValues ()Ljava/util/List; -> aqv e ()Ljava/util/List;
@@ -1228,6 +1255,7 @@ net/minecraft/item/ItemStack getMaxDamage ()I -> adl j ()I
 net/minecraft/item/ItemStack getMetadata ()I -> adl i ()I
 net/minecraft/item/ItemStack getTagCompound ()Lnet/minecraft/nbt/NBTTagCompound; -> adl o ()Ldn;
 net/minecraft/item/ItemStack getUnlocalizedName ()Ljava/lang/String; -> adl a ()Ljava/lang/String;
+net/minecraft/item/ItemStack hasDisplayName ()Z -> adl s ()Z
 net/minecraft/item/ItemStack hasTagCompound ()Z -> adl n ()Z
 net/minecraft/item/ItemStack isDamageableItemEqual (Lnet/minecraft/item/ItemStack;)Z -> adl b (Ladl;)Z
 net/minecraft/item/ItemStack isItemEnchanted ()Z -> adl w ()Z
@@ -1312,6 +1340,13 @@ net/minecraft/util/BlockPos up ()Lnet/minecraft/util/BlockPos; -> cj a ()Lcj;
 net/minecraft/util/BlockPos up (I)Lnet/minecraft/util/BlockPos; -> cj b (I)Lcj;
 net/minecraft/util/BlockPos west ()Lnet/minecraft/util/BlockPos; -> cj e ()Lcj;
 net/minecraft/util/BlockPos west (I)Lnet/minecraft/util/BlockPos; -> cj f (I)Lcj;
+net/minecraft/util/EnumFacing getHorizontalIndex ()I -> cq b ()I
+net/minecraft/util/EnumFacing getIndex ()I -> cq a ()I
+net/minecraft/util/EnumFacing getOpposite ()Lnet/minecraft/util/EnumFacing; -> cq d ()Lcq;
+net/minecraft/util/EnumFacing$AxisDirection getOffset ()I -> cq$b a ()I
+net/minecraft/util/EnumFacing$Plane apply (Lnet/minecraft/util/EnumFacing;)Z -> cq$c a (Lcq;)Z
+net/minecraft/util/EnumFacing$Plane facings ()[Lnet/minecraft/util/EnumFacing; -> cq$c a ()[Lcq;
+net/minecraft/util/EnumFacing$Plane random (Ljava/util/Random;)Lnet/minecraft/util/EnumFacing; -> cq$c a (Ljava/util/Random;)Lcq;
 net/minecraft/util/IStringSerializable getName ()Ljava/lang/String; -> or l ()Ljava/lang/String;
 net/minecraft/util/IThreadListener addScheduledTask (Ljava/lang/Runnable;)Lcom/google/common/util/concurrent/ListenableFuture; -> qa a (Ljava/lang/Runnable;)Lcom/google/common/util/concurrent/ListenableFuture;
 net/minecraft/util/IThreadListener isCallingFromMinecraftThread ()Z -> qa aE ()Z
@@ -1344,6 +1379,7 @@ net/minecraft/world/World getEntitiesInAABBexcluding (Lnet/minecraft/entity/Enti
 net/minecraft/world/World getEntitiesWithinAABBExcludingEntity (Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List; -> ahn b (Lro;Lbbb;)Ljava/util/List;
 net/minecraft/world/World getGameRules ()Lnet/minecraft/world/GameRules; -> ahn U ()Lahl;
 net/minecraft/world/World isAreaLoaded (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/BlockPos;)Z -> ahn a (Lcj;Lcj;)Z
+net/minecraft/world/World markBlockForUpdate (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/state/IBlockState;I)V -> ahn a (Lcj;Laqu;Laqu;I)V
 net/minecraft/world/World markBlockRangeForRenderUpdate (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/BlockPos;)V -> ahn b (Lcj;Lcj;)V
 net/minecraft/world/World markChunkDirty (Lnet/minecraft/util/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V -> ahn b (Lcj;Lapo;)V
 net/minecraft/world/World playAuxSFXAtEntity (Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/BlockPos;I)V -> ahn a (Lzo;ILcj;I)V

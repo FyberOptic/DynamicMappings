@@ -13,6 +13,7 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FieldNode;
+import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
 public class MappingsBase 
@@ -65,6 +66,11 @@ public class MappingsBase
 	public void addMethodMapping(String deobfMethodDesc, String obfMethodDesc)
 	{
 		DynamicMappings.addMethodMapping(deobfMethodDesc, obfMethodDesc);
+	}
+	
+	public void addMethodMapping(String deobfMethodDesc, MethodInsnNode obfMethod)
+	{
+		DynamicMappings.addMethodMapping(deobfMethodDesc, obfMethod.owner + " " + obfMethod.name + " " + obfMethod.desc);
 	}
 	
 	public boolean matchOpcodeSequence(AbstractInsnNode insn, int...opcodes)
@@ -267,6 +273,30 @@ public class MappingsBase
 	public boolean matchInsnNodeSequence(AbstractInsnNode insn, Class<? extends AbstractInsnNode>...nodeClasses)
 	{
 		return DynamicMappings.matchInsnNodeSequence(insn, nodeClasses);
-	}	
+	}
+	
+	
+	public List<FieldInsnNode> filterFieldInsnNodes(List<FieldInsnNode> list, String owner, String desc)
+	{
+		List<FieldInsnNode> output = new ArrayList<>();
+		for (FieldInsnNode fn : list) {
+			if (owner != null && !fn.owner.equals(owner)) continue;
+			if (desc != null && !fn.desc.equals(desc)) continue;
+			output.add(fn);
+		}
+		return output;
+	}
+	
+	
+	public List<MethodInsnNode> filterMethodInsnNodes(List<MethodInsnNode> list, String owner, String desc)
+	{
+		List<MethodInsnNode> output = new ArrayList<>();
+		for (MethodInsnNode mn : list) {
+			if (owner != null && !mn.owner.equals(owner)) continue;
+			if (desc != null && !mn.desc.equals(desc)) continue;
+			output.add(mn);
+		}
+		return output;
+	}
 	
 }

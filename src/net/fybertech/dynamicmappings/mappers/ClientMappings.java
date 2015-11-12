@@ -3160,5 +3160,40 @@ public class ClientMappings extends MappingsBase
 	}
 
 
+	@Mapping(providesFields={
+			"net/minecraft/util/EnumWorldBlockLayer SOLID Lnet/minecraft/util/EnumWorldBlockLayer;",
+			"net/minecraft/util/EnumWorldBlockLayer CUTOUT_MIPPED Lnet/minecraft/util/EnumWorldBlockLayer;",
+			"net/minecraft/util/EnumWorldBlockLayer CUTOUT Lnet/minecraft/util/EnumWorldBlockLayer;",
+			"net/minecraft/util/EnumWorldBlockLayer TRANSLUCENT Lnet/minecraft/util/EnumWorldBlockLayer;"
+			},
+			depends={
+			"net/minecraft/util/EnumWorldBlockLayer"
+			})
+	public boolean processEnumWorldBlockLayerClass()
+	{
+		ClassNode blockLayer = getClassNodeFromMapping("net/minecraft/util/EnumWorldBlockLayer");
+		if (blockLayer == null) return false;
+		
+		MethodNode clinit = getMethodNode(blockLayer, "--- <clinit> ()V");
+		if (clinit != null) {
+			String name = null;
+			for (AbstractInsnNode insn = clinit.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				String temp = getLdcString(insn);
+				if (name == null && temp != null) { name = temp; continue; }
+				
+				if (name != null && insn.getOpcode() == Opcodes.PUTSTATIC) {
+					FieldInsnNode fn = (FieldInsnNode)insn;
+					if (!fn.desc.equals("L" + blockLayer.name + ";")) continue;
+					addFieldMapping("net/minecraft/util/EnumWorldBlockLayer " + name + " Lnet/minecraft/util/EnumWorldBlockLayer;",
+							blockLayer.name + " " + fn.name + " " + fn.desc);
+					name = null;
+				}
+			}
+		}
+		
+		return true;
+	}
+	
+	
 }
 
