@@ -305,20 +305,36 @@ public class SharedMappings extends MappingsBase {
 		if (block == null) return false;
 
 		List<MethodNode> methods = getMatchingMethods(block, null, null);
-		removeMethodsWithoutFlags(methods, Opcodes.ACC_STATIC);
+		methods = removeMethodsWithoutFlags(methods, Opcodes.ACC_STATIC);
 		
-		for (MethodNode method : methods) {
-			if (!method.desc.startsWith("(I)L")) continue;
-			Type t = Type.getMethodType(method.desc).getReturnType();		
+		// Identify method: IBlockState getStateById(int param0)
+		for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
+			MethodNode method = it.next();
+			if (method.desc.equals("(I)L" + block.name + ";")) {}
+			else if (method.desc.startsWith("(I)L")) continue;
 			
-			ClassNode cn = getClassNode(t.getClassName());
-			if (((cn.access & Opcodes.ACC_INTERFACE) > 0) && cn.methods.size() == 6) {
-				addClassMapping("net/minecraft/block/state/IBlockState", cn.name);
-				return true;
-			}
+			it.remove();
 		}
 		
-		return false;
+		if (methods.size() == 1) {		
+			MethodNode method = methods.get(0);
+			Type t = Type.getMethodType(method.desc).getReturnType();		
+			
+			// Make sure it's an interface
+			ClassNode cn = getClassNode(t.getClassName());
+			if ((cn.access & Opcodes.ACC_INTERFACE) == 0) return false;
+			
+			// Not the best test, but see if the getBlock() method exists
+			boolean check = false;
+			for (MethodNode m : cn.methods) {
+				if (m.desc.equals("()L" + block.name + ";")) check = true;
+			}
+			
+			if (check) addClassMapping("net/minecraft/block/state/IBlockState", cn.name);
+			else return false;
+		}
+		
+		return true;
 	}
 
 	
@@ -1123,22 +1139,25 @@ public class SharedMappings extends MappingsBase {
 	@Mapping(provides="net/minecraft/block/BlockLeavesBase",
 			providesMethods={
 			"net/minecraft/block/Block setTickRandomly (Z)Lnet/minecraft/block/Block;",
-			"net/minecraft/block/Block isVisuallyOpaque ()Z"
+			"net/minecraft/block/Block isVisuallyOpaque ()Z",
+			"net/minecraft/block/Block isOpaqueCube (Lnet/minecraft/block/state/IBlockState;)Z"
 			},
 			depends={
 			"net/minecraft/block/Block", 
-			"net/minecraft/block/BlockLeaves"
+			"net/minecraft/block/BlockLeaves",
+			"net/minecraft/block/state/IBlockState"
 			})
 	public boolean processBlockLeavesClass()
 	{
 		ClassNode blockLeaves = getClassNode(getClassMapping("net/minecraft/block/BlockLeaves"));
-		ClassNode blockClass = getClassNode(getClassMapping("net/minecraft/block/Block"));
-		if (blockClass == null || blockLeaves == null) return false;
+		ClassNode block = getClassNode(getClassMapping("net/minecraft/block/Block"));
+		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
+		if (!MeddleUtil.notNull(block, blockLeaves, iBlockState)) return false;
 
 		// BlockLeaves extends BlockLeavesBase, which extends Block
 		ClassNode blockLeavesBase = getClassNode(blockLeaves.superName);
 		if (blockLeavesBase != null && blockLeavesBase.superName != null) {
-			if (blockClass.name.equals(blockLeavesBase.superName))
+			if (block.name.equals(blockLeavesBase.superName))
 				addClassMapping("net/minecraft/block/BlockLeavesBase", blockLeavesBase);
 		}
 		
@@ -1149,12 +1168,12 @@ public class SharedMappings extends MappingsBase {
 			List<MethodInsnNode> nodes = getAllInsnNodesOfType(init, MethodInsnNode.class);
 			for (Iterator<MethodInsnNode> it = nodes.iterator(); it.hasNext();) {
 				MethodInsnNode mn = it.next();
-				if (mn.owner.equals(blockLeaves.name) && mn.desc.equals("(Z)L" + blockClass.name + ";")) continue;
+				if (mn.owner.equals(blockLeaves.name) && mn.desc.equals("(Z)L" + block.name + ";")) continue;
 				it.remove();
 			}
 			if (nodes.size() == 1) {
 				addMethodMapping("net/minecraft/block/Block setTickRandomly (Z)Lnet/minecraft/block/Block;",
-						blockClass.name + " " + nodes.get(0).name + " " + nodes.get(0).desc);
+						block.name + " " + nodes.get(0).name + " " + nodes.get(0).desc);
 			}
 		}
 		
@@ -1162,8 +1181,17 @@ public class SharedMappings extends MappingsBase {
 		// public boolean isVisuallyOpaque()
 		List<MethodNode> methods = getMatchingMethods(blockLeaves, null, "()Z");
 		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/block/Block isVisuallyOpaque ()Z", blockClass.name + " " + methods.get(0).name + " ()Z");
+			addMethodMapping("net/minecraft/block/Block isVisuallyOpaque ()Z", block.name + " " + methods.get(0).name + " ()Z");
 		}
+		
+		
+		// public boolean isOpaqueCube(IBlockState state)
+		methods = getMatchingMethods(blockLeaves, null, assembleDescriptor("(", iBlockState, ")Z"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block isOpaqueCube (Lnet/minecraft/block/state/IBlockState;)Z",
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+				
 		
 		
 		return true;
@@ -2968,7 +2996,7 @@ public class SharedMappings extends MappingsBase {
 			},
 			providesMethods={
 			"net/minecraft/block/Block getCollisionBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
-			"net/minecraft/block/Block isOpaqueCube (Lnet/minecraft/block/state/IBlockState;)Z",
+			//"net/minecraft/block/Block isOpaqueCube (Lnet/minecraft/block/state/IBlockState;)Z",
 			"net/minecraft/block/Block canCollideCheck (Lnet/minecraft/block/state/IBlockState;Z)Z",
 			"net/minecraft/block/Block isReplaceable (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Z",
 			"net/minecraft/block/Block getRenderType ()Lnet/minecraft/block/EnumRenderType;"
@@ -3012,11 +3040,11 @@ public class SharedMappings extends MappingsBase {
 		
 		
 		// public boolean isOpaqueCube(IBlockState state)
-		methods = getMatchingMethods(blockAir, null, assembleDescriptor("(", iBlockState, ")Z"));
+		/*methods = getMatchingMethods(blockAir, null, assembleDescriptor("(", iBlockState, ")Z"));
 		if (methods.size() == 1) {
 			addMethodMapping("net/minecraft/block/Block isOpaqueCube (Lnet/minecraft/block/state/IBlockState;)Z",
 					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-		}
+		}*/
 		
 		
 		// public boolean canCollideCheck(IBlockState state, boolean hitIfLiquid)
