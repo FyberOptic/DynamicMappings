@@ -13,6 +13,7 @@ net/minecraft/block/BlockBeacon -> aji
 net/minecraft/block/BlockBed -> ajj
 net/minecraft/block/BlockBookshelf -> ajo
 net/minecraft/block/BlockBrewingStand -> ajp
+net/minecraft/block/BlockBush -> ajq
 net/minecraft/block/BlockButtonStone -> aoq
 net/minecraft/block/BlockButtonWood -> aph
 net/minecraft/block/BlockCactus -> ajs
@@ -222,6 +223,7 @@ net/minecraft/entity/monster/EntityEnderman -> yn
 net/minecraft/entity/monster/EntityMob -> yu
 net/minecraft/entity/monster/EntityZombie -> ze
 net/minecraft/entity/passive/EntityAnimal -> vr
+net/minecraft/entity/passive/EntityOcelot -> vw
 net/minecraft/entity/passive/EntitySheep -> vz
 net/minecraft/entity/passive/EntityVillager -> zi
 net/minecraft/entity/player/EntityPlayer -> zn
@@ -303,6 +305,7 @@ net/minecraft/util/IThreadListener -> pz
 net/minecraft/util/ItemUseResult -> ql
 net/minecraft/util/MainOrOffHand -> qj
 net/minecraft/util/MovingObjectPosition -> bbb
+net/minecraft/util/MovingObjectPosition$MovingObjectType -> bbb$a
 net/minecraft/util/ObjectActionHolder -> qm
 net/minecraft/util/ObjectIntIdentityMap -> ct
 net/minecraft/util/RegistryNamespaced -> cx
@@ -909,6 +912,14 @@ net/minecraft/util/ItemUseResult PASS Lnet/minecraft/util/ItemUseResult; -> ql b
 net/minecraft/util/ItemUseResult SUCCESS Lnet/minecraft/util/ItemUseResult; -> ql a Lql;
 net/minecraft/util/MainOrOffHand MAIN_HAND Lnet/minecraft/util/MainOrOffHand; -> qj a Lqj;
 net/minecraft/util/MainOrOffHand OFF_HAND Lnet/minecraft/util/MainOrOffHand; -> qj b Lqj;
+net/minecraft/util/MovingObjectPosition blockPos Lnet/minecraft/util/BlockPos; -> bbb e Lcj;
+net/minecraft/util/MovingObjectPosition entityHit Lnet/minecraft/entity/Entity; -> bbb d Lrn;
+net/minecraft/util/MovingObjectPosition hitVec Lnet/minecraft/util/Vec3; -> bbb c Lbbc;
+net/minecraft/util/MovingObjectPosition sideHit Lnet/minecraft/util/EnumFacing; -> bbb b Lcq;
+net/minecraft/util/MovingObjectPosition typeOfHit Lnet/minecraft/util/MovingObjectPosition$MovingObjectType; -> bbb a Lbbb$a;
+net/minecraft/util/MovingObjectPosition$MovingObjectType BLOCK Lnet/minecraft/util/MovingObjectPosition$MovingObjectType; -> bbb$a b Lbbb$a;
+net/minecraft/util/MovingObjectPosition$MovingObjectType ENTITY Lnet/minecraft/util/MovingObjectPosition$MovingObjectType; -> bbb$a c Lbbb$a;
+net/minecraft/util/MovingObjectPosition$MovingObjectType MISS Lnet/minecraft/util/MovingObjectPosition$MovingObjectType; -> bbb$a a Lbbb$a;
 net/minecraft/util/Vec3 xCoord D -> bbc b D
 net/minecraft/util/Vec3 yCoord D -> bbc c D
 net/minecraft/util/Vec3 zCoord D -> bbc d D
@@ -950,6 +961,7 @@ net/minecraft/block/Block getCreativeTabToDisplayOn ()Lnet/minecraft/creativetab
 net/minecraft/block/Block getDefaultState ()Lnet/minecraft/block/state/IBlockState; -> ajl v ()Laqt;
 net/minecraft/block/Block getExplosionResistance (Lnet/minecraft/entity/Entity;)F -> ajl a (Lrn;)F
 net/minecraft/block/Block getIdFromBlock (Lnet/minecraft/block/Block;)I -> ajl a (Lajl;)I
+net/minecraft/block/Block getItem (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/item/ItemStack; -> ajl a (Lahm;Lcj;Laqt;)Ladk;
 net/minecraft/block/Block getItemDropped (Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;I)Lnet/minecraft/item/Item; -> ajl a (Laqt;Ljava/util/Random;I)Ladi;
 net/minecraft/block/Block getLocalizedName ()Ljava/lang/String; -> ajl c ()Ljava/lang/String;
 net/minecraft/block/Block getMapColor (Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/block/material/MapColor; -> ajl r (Laqt;)Laww;
@@ -1015,6 +1027,11 @@ net/minecraft/block/Block shouldSideBeRendered (Lnet/minecraft/block/state/IBloc
 net/minecraft/block/Block spawnAsEntity (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/item/ItemStack;)V -> ajl a (Lahm;Lcj;Ladk;)V
 net/minecraft/block/Block tickRate (Lnet/minecraft/world/World;)I -> ajl a (Lahm;)I
 net/minecraft/block/Block updateTick (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V -> ajl b (Lahm;Lcj;Laqt;Ljava/util/Random;)V
+net/minecraft/block/BlockBush canBlockStay (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z -> ajq f (Lahm;Lcj;Laqt;)Z
+net/minecraft/block/BlockBush canPlaceBlockOn (Lnet/minecraft/block/state/IBlockState;)Z -> ajq j (Laqt;)Z
+net/minecraft/block/BlockChest isBelowSolidBlock (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Z -> ajw j (Lahm;Lcj;)Z
+net/minecraft/block/BlockChest isBlocked (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Z -> ajw f (Lahm;Lcj;)Z
+net/minecraft/block/BlockChest isOcelotSittingOnChest (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Z -> ajw k (Lahm;Lcj;)Z
 net/minecraft/block/BlockTNT explode (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/EntityLivingBase;)V -> aov a (Lahm;Lcj;Laqt;Lrw;)V
 net/minecraft/block/IGrowable canGrow (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Z)Z -> ajn a (Lahm;Lcj;Laqt;Z)Z
 net/minecraft/block/IGrowable canUseBonemeal (Lnet/minecraft/world/World;Ljava/util/Random;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z -> ajn a (Lahm;Ljava/util/Random;Lcj;Laqt;)Z
@@ -1042,6 +1059,7 @@ net/minecraft/block/state/IBlockState getValue (Lnet/minecraft/block/properties/
 net/minecraft/block/state/IBlockState withProperty (Lnet/minecraft/block/properties/IProperty;Ljava/lang/Comparable;)Lnet/minecraft/block/state/IBlockState; -> aqt a (Lari;Ljava/lang/Comparable;)Laqt;
 net/minecraft/block/state/IBlockWrapper getCollisionBoundingBox (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB; -> aqs d (Lahm;Lcj;)Lbba;
 net/minecraft/block/state/IBlockWrapper getMaterial ()Lnet/minecraft/block/material/Material; -> aqs a ()Lawv;
+net/minecraft/block/state/IBlockWrapper isNormalCube ()Z -> aqs l ()Z
 net/minecraft/client/Minecraft displayGuiScreen (Lnet/minecraft/client/gui/GuiScreen;)V -> bby a (Lbeo;)V
 net/minecraft/client/Minecraft getIntegratedServer ()Lnet/minecraft/server/integrated/IntegratedServer; -> bby E ()Lbxw;
 net/minecraft/client/Minecraft getMinecraft ()Lnet/minecraft/client/Minecraft; -> bby y ()Lbby;
@@ -1350,6 +1368,7 @@ net/minecraft/util/EnumFacing$Plane random (Ljava/util/Random;)Lnet/minecraft/ut
 net/minecraft/util/IStringSerializable getName ()Ljava/lang/String; -> oq l ()Ljava/lang/String;
 net/minecraft/util/IThreadListener addScheduledTask (Ljava/lang/Runnable;)Lcom/google/common/util/concurrent/ListenableFuture; -> pz a (Ljava/lang/Runnable;)Lcom/google/common/util/concurrent/ListenableFuture;
 net/minecraft/util/IThreadListener isCallingFromMinecraftThread ()Z -> pz aE ()Z
+net/minecraft/util/MovingObjectPosition getBlockPos ()Lnet/minecraft/util/BlockPos; -> bbb a ()Lcj;
 net/minecraft/util/ObjectIntIdentityMap put (Ljava/lang/Object;I)V -> ct a (Ljava/lang/Object;I)V
 net/minecraft/util/RegistryNamespaced containsKey (Ljava/lang/Object;)Z -> cx d (Ljava/lang/Object;)Z
 net/minecraft/util/RegistryNamespaced getIDForObject (Ljava/lang/Object;)I -> cx a (Ljava/lang/Object;)I

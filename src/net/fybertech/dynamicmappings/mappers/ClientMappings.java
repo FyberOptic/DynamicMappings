@@ -360,7 +360,8 @@ public class ClientMappings extends MappingsBase
 
 
 	@Mapping(providesMethods={
-			"net/minecraft/client/Minecraft startGame ()V"			
+			"net/minecraft/client/Minecraft startGame ()V",
+			"net/minecraft/client/Minecraft getBlockRendererDispatcher ()Lnet/minecraft/client/renderer/BlockRendererDispatcher;"
 			},
 			provides={
 			"net/minecraft/client/gui/GuiMainMenu",  
@@ -371,7 +372,7 @@ public class ClientMappings extends MappingsBase
 			"net/minecraft/client/renderer/texture/TextureMap"
 			},
 			depends="net/minecraft/client/Minecraft")
-	public boolean getGuiMainMenuClass()
+	public boolean processMinecraftClass2()
 	{
 		ClassNode minecraft = getClassNodeFromMapping("net/minecraft/client/Minecraft");
 		if (minecraft == null) return false;
@@ -467,8 +468,17 @@ public class ClientMappings extends MappingsBase
 			addClassMapping("net/minecraft/client/renderer/texture/TextureMap", textureMap);
 		}
 		
-		if (blockRendererDispatcher != null)
+		if (blockRendererDispatcher != null) {
 			addClassMapping("net/minecraft/client/renderer/BlockRendererDispatcher", blockRendererDispatcher);
+			
+			// public BlockRendererDispatcher getBlockRendererDispatcher()
+			methods = getMatchingMethods(minecraft, null, "()L" + blockRendererDispatcher + ";");
+			if (methods.size() == 1) {
+				addMethodMapping("net/minecraft/client/Minecraft getBlockRendererDispatcher ()Lnet/minecraft/client/renderer/BlockRendererDispatcher;",
+						minecraft.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			}
+		}
+			
 
 		if (guiMainMenu != null)
 			addClassMapping("net/minecraft/client/gui/GuiMainMenu", guiMainMenu);
@@ -2006,10 +2016,15 @@ public class ClientMappings extends MappingsBase
 	
 	
 	@Mapping(provides={
-			"net/minecraft/client/renderer/WorldRenderer"
+			"net/minecraft/client/renderer/WorldRenderer",
+			"net/minecraft/client/renderer/BlockModelShapes"
+			},
+			providesFields={
+			"net/minecraft/client/renderer/BlockRendererDispatcher blockModelShapes Lnet/minecraft/client/renderer/BlockModelShapes;"
 			},
 			providesMethods={
-			"net/minecraft/client/renderer/BlockRendererDispatcher renderBlock (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/BlockPos;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/client/renderer/WorldRenderer;)Z"
+			"net/minecraft/client/renderer/BlockRendererDispatcher renderBlock (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/BlockPos;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/client/renderer/WorldRenderer;)Z",
+			"net/minecraft/client/renderer/BlockRendererDispatcher getBlockModelShapes ()Lnet/minecraft/client/renderer/BlockModelShapes;"
 			},
 			depends={
 			"net/minecraft/client/renderer/BlockRendererDispatcher",
@@ -2025,12 +2040,38 @@ public class ClientMappings extends MappingsBase
 		ClassNode iBlockAccess = getClassNodeFromMapping("net/minecraft/world/IBlockAccess");		
 		if (!MeddleUtil.notNull(blockRenderer, iBlockState, blockPos, iBlockAccess)) return false;
 		
+		String blockModelShapes_name = null;
 		
-		List<MethodNode> methods = new ArrayList<>();
+		for (FieldNode field : blockRenderer.fields) {
+			Type t = Type.getType(field.desc);
+			if (t.getSort() != Type.OBJECT) continue;			
+			String className = t.getClassName();
+			
+			if (blockModelShapes_name == null && searchConstantPoolForStrings(className, "minecraft:blocks/planks_oak", "minecraft:items/barrier")) {
+				addClassMapping("net/minecraft/client/renderer/BlockModelShapes", className);
+				blockModelShapes_name = className;
+				
+				if (countFieldsWithDesc(blockRenderer, "L" + blockModelShapes_name + ";") == 1) {
+					addFieldMapping("net/minecraft/client/renderer/BlockRendererDispatcher blockModelShapes Lnet/minecraft/client/renderer/BlockModelShapes;",
+							blockRenderer.name + " " + field.name + " " + field.desc);
+				}
+			}
+		}
+		
+		
+		// public BlockModelShapes getBlockModelShapes()
+		List<MethodNode> methods = getMatchingMethods(blockRenderer, null, "()L" + blockModelShapes_name + ";");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/client/renderer/BlockRendererDispatcher getBlockModelShapes ()Lnet/minecraft/client/renderer/BlockModelShapes;",
+					blockRenderer.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}		
+		
+		
 		String worldRenderer_name = null;
 		
 		// public boolean renderBlock(IBlockState state, BlockPos pos, IBlockAccess blockAccess, WorldRenderer worldRendererIn)
 		String desc_front = DynamicMappings.assembleDescriptor("(", iBlockState, blockPos, iBlockAccess);
+		methods.clear();
 		for (MethodNode method : blockRenderer.methods) {
 			if (method.desc.startsWith(desc_front) && method.desc.endsWith(";)Z")) {
 				methods.add(method);

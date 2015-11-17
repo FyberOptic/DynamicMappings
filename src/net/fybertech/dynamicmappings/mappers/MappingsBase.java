@@ -128,6 +128,12 @@ public class MappingsBase
 		return DynamicMappings.getMethodNode(cn, obfMapping);
 	}
 	
+	public MethodNode getMethodNode(ClassNode cn, MethodInsnNode obfMethod)
+	{
+		if (obfMethod == null) return null;
+		return DynamicMappings.getMethodNode(cn, obfMethod.owner + " " + obfMethod.name + " " + obfMethod.desc);
+	}
+	
 	public MethodNode getMethodNodeFromMapping(ClassNode cn, String deobfMapping)
 	{
 		return DynamicMappings.getMethodNodeFromMapping(cn, deobfMapping);
@@ -288,15 +294,36 @@ public class MappingsBase
 	}
 	
 	
-	public List<MethodInsnNode> filterMethodInsnNodes(List<MethodInsnNode> list, String owner, String desc)
+	public List<MethodInsnNode> filterMethodInsnNodes(List<MethodInsnNode> list, String owner, String name, String desc)
 	{
 		List<MethodInsnNode> output = new ArrayList<>();
 		for (MethodInsnNode mn : list) {
 			if (owner != null && !mn.owner.equals(owner)) continue;
+			if (name != null && !mn.name.equals(name)) continue;
 			if (desc != null && !mn.desc.equals(desc)) continue;
 			output.add(mn);
 		}
 		return output;
+	}
+	
+	public List<MethodInsnNode> filterMethodInsnNodes(List<MethodInsnNode> list, String owner, String desc)
+	{
+		return filterMethodInsnNodes(list, owner, null, desc);
+	}
+	
+	public List<MethodInsnNode> filterMethodInsnNodes(List<MethodInsnNode> list, String owner, MethodNode node)
+	{
+		return filterMethodInsnNodes(list, owner, node.name, node.desc);
+	}
+	
+	
+	public int countFieldsWithDesc(ClassNode cn, String obfDesc)
+	{
+		int count = 0;
+		for (FieldNode fn : cn.fields) {
+			if (fn.desc.equals(obfDesc)) count++;
+		}
+		return count;
 	}
 	
 }
