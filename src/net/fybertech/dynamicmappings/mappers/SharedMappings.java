@@ -3006,7 +3006,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/Block getCollisionBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
 			//"net/minecraft/block/Block isOpaqueCube (Lnet/minecraft/block/state/IBlockState;)Z",
 			"net/minecraft/block/Block canCollideCheck (Lnet/minecraft/block/state/IBlockState;Z)Z",
-			"net/minecraft/block/Block isReplaceable (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Z",
+			"net/minecraft/block/Block isReplaceable (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)Z",
 			"net/minecraft/block/Block getRenderType ()Lnet/minecraft/block/EnumRenderType;"
 			},
 			depends={
@@ -3016,7 +3016,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/util/BlockPos",
 			"net/minecraft/block/state/IBlockState",
 			"net/minecraft/block/material/Material",
-			"net/minecraft/util/AxisAlignedBB"
+			"net/minecraft/util/AxisAlignedBB",
+			"net/minecraft/world/IBlockAccess"
 			})
 	public boolean processBlockAirClass()
 	{
@@ -3027,7 +3028,8 @@ public class SharedMappings extends MappingsBase {
 		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
 		ClassNode material = getClassNodeFromMapping("net/minecraft/block/material/Material");
 		ClassNode aabb = getClassNodeFromMapping("net/minecraft/util/AxisAlignedBB");
-		if (!MeddleUtil.notNull(block, blockAir, world, blockPos, iBlockState, material, aabb)) return false;
+		ClassNode iBlockAccess = getClassNodeFromMapping("net/minecraft/world/IBlockAccess");
+		if (!MeddleUtil.notNull(block, blockAir, world, blockPos, iBlockState, material, aabb, iBlockAccess)) return false;
 		
 		List<FieldInsnNode> fieldNodes = getAllInsnNodesOfType(blockAir, FieldInsnNode.class);
 		for (Iterator<FieldInsnNode> it = fieldNodes.iterator(); it.hasNext();) {
@@ -3063,10 +3065,10 @@ public class SharedMappings extends MappingsBase {
 		}
 		
 		
-		// public boolean isReplaceable(World worldIn, BlockPos pos)
-		methods = getMatchingMethods(blockAir, null, assembleDescriptor("(", world, blockPos, ")Z"));
+		// public boolean isReplaceable(IBlockAccess worldIn, BlockPos pos)
+		methods = getMatchingMethods(blockAir, null, assembleDescriptor("(", iBlockAccess, blockPos, ")Z"));
 		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/block/Block isReplaceable (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Z",
+			addMethodMapping("net/minecraft/block/Block isReplaceable (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)Z",
 					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
@@ -4508,7 +4510,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/item/ItemTool efficiencyOnProperMaterial F"
 			},
 			providesMethods={
-			"net/minecraft/item/Item canHarvestBlock (Lnet/minecraft/block/Block;)Z",
+			"net/minecraft/item/Item canHarvestBlock (Lnet/minecraft/block/state/IBlockState;)Z",
 			"net/minecraft/item/ItemTool getStrVsBlock (Lnet/minecraft/item/ItemStack;Lnet/minecraft/block/state/IBlockState;)F"
 			},
 			depends={
@@ -4537,9 +4539,9 @@ public class SharedMappings extends MappingsBase {
 		
 		
 		// public boolean canHarvestBlock(Block blockIn)
-		List<MethodNode> methods = getMatchingMethods(itemPickaxe, null, "(L" + block.name + ";)Z");
+		List<MethodNode> methods = getMatchingMethods(itemPickaxe, null, "(L" + iBlockState.name + ";)Z");
 		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/item/Item canHarvestBlock (Lnet/minecraft/block/Block;)Z",
+			addMethodMapping("net/minecraft/item/Item canHarvestBlock (Lnet/minecraft/block/state/IBlockState;)Z",
 					item.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 			
 			// TODO: Get Item.ToolMaterial toolMaterial
@@ -5609,7 +5611,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/Block getExplosionResistance (Lnet/minecraft/entity/Entity;)F",
 			"net/minecraft/block/Block dropXpOnBlockBreak (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;I)V",
 			"net/minecraft/block/Block getPlayerRelativeBlockHardness (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)F",
-			"net/minecraft/entity/player/EntityPlayer canHarvestBlock (Lnet/minecraft/block/Block;)Z",
+			"net/minecraft/entity/player/EntityPlayer canHarvestBlock (Lnet/minecraft/block/state/IBlockState;)Z",
 			"net/minecraft/entity/player/EntityPlayer getToolDigEfficiency (Lnet/minecraft/block/state/IBlockState;)F",
 			"net/minecraft/block/Block getItemDropped (Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;I)Lnet/minecraft/item/Item;",
 			"net/minecraft/block/Block randomTick (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V",
@@ -5949,7 +5951,7 @@ public class SharedMappings extends MappingsBase {
 			for (MethodInsnNode mn : nodes) {
 				//if (mn.owner.equals(iBlockState.name) && mn.desc.equals(assembleDescriptor("(", world, blockPos, ")F"))) getBlockHardness.add(mn);
 				if (mn.owner.equals(entityPlayer.name)) {
-					if (mn.desc.equals(assembleDescriptor("(", block, ")Z"))) canHarvestBlock.add(mn);
+					if (mn.desc.equals(assembleDescriptor("(", iBlockState, ")Z"))) canHarvestBlock.add(mn);
 					else if (mn.desc.equals(assembleDescriptor("(", iBlockState, ")F"))) getToolDigEfficiency.add(mn);
 				}
 			}
@@ -5959,7 +5961,7 @@ public class SharedMappings extends MappingsBase {
 						iBlockState.name + " " + getBlockHardness.get(0).name + " " + getBlockHardness.get(0).desc);
 			}*/
 			if (canHarvestBlock.size() == 1) {
-				addMethodMapping("net/minecraft/entity/player/EntityPlayer canHarvestBlock (Lnet/minecraft/block/Block;)Z",
+				addMethodMapping("net/minecraft/entity/player/EntityPlayer canHarvestBlock (Lnet/minecraft/block/state/IBlockState;)Z",
 						entityPlayer.name + " " + canHarvestBlock.get(0).name + " " + canHarvestBlock.get(0).desc);
 			}
 			if (getToolDigEfficiency.size() == 2 && getToolDigEfficiency.get(0).name.equals(getToolDigEfficiency.get(1).name)) {
