@@ -1001,7 +1001,7 @@ public class SharedMappings extends MappingsBase {
 			providesMethods={
 			"net/minecraft/block/properties/PropertyDirection create (Ljava/lang/String;Lcom/google/common/base/Predicate;)Lnet/minecraft/block/properties/PropertyDirection;",
 			"net/minecraft/item/ItemStack hasDisplayName ()Z",
-			"net/minecraft/block/Block hasComparatorInputOverride (Lnet/minecraft/block/state/IBlockState;)Z",
+			//"net/minecraft/block/Block hasComparatorInputOverride (Lnet/minecraft/block/state/IBlockState;)Z",
 			"net/minecraft/util/EnumFacing getOpposite ()Lnet/minecraft/util/EnumFacing;"
 			},
 			dependsMethods={
@@ -1104,18 +1104,22 @@ public class SharedMappings extends MappingsBase {
 		MethodNode isFullCube = getMethodNodeFromMapping(blockHopper, "net/minecraft/block/Block isFullCube (Lnet/minecraft/block/state/IBlockState;)Z");
 		MethodNode isOpaqueCube = getMethodNodeFromMapping(blockHopper, "net/minecraft/block/Block isOpaqueCube (Lnet/minecraft/block/state/IBlockState;)Z");
 		
-		methods = getMatchingMethods(blockHopper, null, "(L" + iBlockState.name + ";)Z");
+		
+		// public boolean hasComparatorInputOverride(IBlockState param0)
+		// Removed as of 15w49a, find elsewhere
+		/*methods = getMatchingMethods(blockHopper, null, "(L" + iBlockState.name + ";)Z");
 		if (methods.size() > 0 && isFullCube != null && isOpaqueCube != null) {
 			for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
 				MethodNode mn = it.next();
 				if (mn.name.equals(isFullCube.name)) it.remove();
 				if (mn.name.equals(isOpaqueCube.name)) it.remove();
 			}
+			
 			if (methods.size() == 1) {
 				addMethodMapping("net/minecraft/block/Block hasComparatorInputOverride (Lnet/minecraft/block/state/IBlockState;)Z",
 						block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 			}
-		}
+		}*/
 		
 		
 		// Parse onBlockPlaced to find: 
@@ -1260,12 +1264,15 @@ public class SharedMappings extends MappingsBase {
 		
 		// public boolean isFullCube(IBlockState state)
 		MethodNode isOpaqueCube = getMethodNodeFromMapping(block, "net/minecraft/block/Block isOpaqueCube (Lnet/minecraft/block/state/IBlockState;)Z");
-		methods = getMatchingMethods(blockSlab, null, "(L" + iBlockState.name + ";)Z");
+		methods = getMatchingMethods(blockSlab, null, "(L" + iBlockState.name + ";)Z");		
 		methods = removeMethodsWithFlags(methods, Opcodes.ACC_STATIC);
-		if (methods.size() == 2 && isOpaqueCube != null) {
+		// Changed from 2 to 3 for 15w49a
+		if (methods.size() == 3 && isOpaqueCube != null) {
 			for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
 				MethodNode method = it.next();
 				if (method.name.equals(isOpaqueCube.name) && method.desc.equals(isOpaqueCube.desc)) it.remove();
+				// Added for 15w49a to filter out new k(IBlockState)Z method; might not be the most reliable in the future
+				if (!matchOpcodeSequence(method.instructions.getFirst(), Opcodes.ALOAD, Opcodes.INVOKEVIRTUAL, Opcodes.IRETURN)) it.remove();
 			}
 			if (methods.size() == 1) {
 				addMethodMapping("net/minecraft/block/Block isFullCube (Lnet/minecraft/block/state/IBlockState;)Z",
@@ -2301,7 +2308,9 @@ public class SharedMappings extends MappingsBase {
 		}
 				
 		
-		List<MethodNode> methods = getMatchingMethods(entityEnderman, null, "(L" + entityLivingBase.name + ";DDD)Z");
+		/*
+		 * Removed for 15w49a, moved elsewhere
+		 * List<MethodNode> methods = getMatchingMethods(entityEnderman, null, "(L" + entityLivingBase.name + ";DDD)Z");
 		if (methods.size() == 1) {			
 			
 			Set<String> methodNames = new HashSet<>();
@@ -2319,7 +2328,7 @@ public class SharedMappings extends MappingsBase {
 				String name = methodNames.iterator().next();
 				addMethodMapping("net/minecraft/entity/Entity setPositionAndUpdate (DDD)V", entity.name + " " + name + " (DDD)V");
 			}			
-		}
+		}*/
 		
 		
 		// TODO
@@ -2789,7 +2798,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/world/World setBlockToAir (Lnet/minecraft/util/BlockPos;)Z",
 			"net/minecraft/block/BlockTNT explode (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/EntityLivingBase;)V",
 			"net/minecraft/world/World spawnEntityInWorld (Lnet/minecraft/entity/Entity;)Z",
-			"net/minecraft/world/World playSoundAtEntity (Lnet/minecraft/entity/Entity;Lnet/minecraft/util/Sound;FF)V"
+			//"net/minecraft/world/World playSoundAtEntity (Lnet/minecraft/entity/Entity;Lnet/minecraft/util/Sound;FF)V"
 			},
 			depends={
 			"net/minecraft/block/Block",
@@ -2890,11 +2899,11 @@ public class SharedMappings extends MappingsBase {
 			
 			List<MethodInsnNode> nodes = getAllInsnNodesOfType(methods.get(0), MethodInsnNode.class);
 			List<MethodInsnNode> spawnEntityInWorld = new ArrayList<>();
-			List<MethodInsnNode> playSoundAtEntity = new ArrayList<>();
+			//List<MethodInsnNode> playSoundAtEntity = new ArrayList<>();
 			for (MethodInsnNode mn : nodes) {
 				if (mn.owner.equals(world.name)) {
 					if (mn.desc.equals("(L" + entity.name + ";)Z")) spawnEntityInWorld.add(mn);
-					else if (mn.desc.equals("(L" + entity.name + ";L" + sound.name + ";FF)V")) playSoundAtEntity.add(mn);
+					//else if (mn.desc.equals("(L" + entity.name + ";L" + sound.name + ";FF)V")) playSoundAtEntity.add(mn);
 				}
 			}
 			
@@ -2902,10 +2911,12 @@ public class SharedMappings extends MappingsBase {
 				addMethodMapping("net/minecraft/world/World spawnEntityInWorld (Lnet/minecraft/entity/Entity;)Z",
 						world.name + " " + spawnEntityInWorld.get(0).name + " " + spawnEntityInWorld.get(0).desc);
 			}
-			if (playSoundAtEntity.size() == 1) {
+			/*
+			 * 15w49a changed to playSoundEffect, so remove this
+			 * if (playSoundAtEntity.size() == 1) {
 				addMethodMapping("net/minecraft/world/World playSoundAtEntity (Lnet/minecraft/entity/Entity;Lnet/minecraft/util/Sound;FF)V",
 						world.name + " " + playSoundAtEntity.get(0).name + " " + playSoundAtEntity.get(0).desc);
-			}			
+			}*/			
 		}
 		
 		return true;
@@ -6887,7 +6898,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/Block onBlockEventReceived (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;II)Z",
 			"net/minecraft/world/World setTileEntity (Lnet/minecraft/util/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
 			"net/minecraft/world/World markChunkDirty (Lnet/minecraft/util/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
-			"net/minecraft/world/World playSoundEffect (DDDLnet/minecraft/util/Sound;FF)V",
+			"net/minecraft/world/World playSoundEffect (Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/Sound;FF)V",
 			"net/minecraft/world/World getEntitiesInAABBexcluding (Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;Lcom/google/common/base/Predicate;)Ljava/util/List;",
 			"net/minecraft/world/World getEntitiesWithinAABBExcludingEntity (Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;",
 			"net/minecraft/world/World getCollidingBoundingBoxes (Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;"
@@ -7025,9 +7036,11 @@ public class SharedMappings extends MappingsBase {
 		}
 		
 		// public void playSoundEffect(double x, double y, double z, Sound sound, float volume, float pitch)
-		methods = getMatchingMethods(world, null, "(DDDL" + sound.name + ";FF)V");
+		// As of 15w49a: 
+		//   public void playSoundEffect(EntityPlayer player, double x, double y, double z, Sound sound, float volume, float pitch)
+		methods = getMatchingMethods(world, null, "(L" + entityPlayer.name + ";DDDL" + sound.name + ";FF)V");
 		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/world/World playSoundEffect (DDDLnet/minecraft/util/Sound;FF)V",
+			addMethodMapping("net/minecraft/world/World playSoundEffect (Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/Sound;FF)V",
 					world.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
@@ -9665,19 +9678,22 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/entity/EntityLivingBase getHeldItem (Lnet/minecraft/util/MainOrOffHand;)Lnet/minecraft/item/ItemStack;",
 			"net/minecraft/entity/EntityLivingBase getHeldMainHandItem ()Lnet/minecraft/item/ItemStack;",
 			"net/minecraft/entity/EntityLivingBase getHeldOffHandItem ()Lnet/minecraft/item/ItemStack;",
-			"net/minecraft/entity/EntityLivingBase setHeldItem (Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/item/ItemStack;)V"
-			},
+			"net/minecraft/entity/EntityLivingBase setHeldItem (Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/item/ItemStack;)V",
+			"net/minecraft/entity/Entity setPositionAndUpdate (DDD)V"
+			},			
 			depends={
+			"net/minecraft/entity/Entity",
 			"net/minecraft/entity/EntityLivingBase",
 			"net/minecraft/item/ItemStack",
 			"net/minecraft/util/MainOrOffHand"
 			})
 	public boolean processEntityLivingBase()
 	{
+		ClassNode entity = getClassNodeFromMapping("net/minecraft/entity/Entity");
 		ClassNode entityLivingBase = getClassNodeFromMapping("net/minecraft/entity/EntityLivingBase");
 		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
 		ClassNode mainOrOffHand = getClassNodeFromMapping("net/minecraft/util/MainOrOffHand");
-		if (!MeddleUtil.notNull(entityLivingBase, itemStack, mainOrOffHand)) return false;
+		if (!MeddleUtil.notNull(entity, entityLivingBase, itemStack, mainOrOffHand)) return false;
 		
 		String enumEquipSlot_name = null;
 		
@@ -9750,6 +9766,33 @@ public class SharedMappings extends MappingsBase {
 		if (methods.size() == 1) {
 			addMethodMapping("net/minecraft/entity/EntityLivingBase setHeldItem (Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/item/ItemStack;)V",
 					entityLivingBase.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		
+		// public boolean EntityLivingBase.teleportTo(double param0, double param1, double param2)  (Added in 15w49a)		
+		methods = getMatchingMethods(entityLivingBase, null, "(DDD)Z");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/entity/EntityLivingBase teleportTo (DDD)Z",
+					entityLivingBase.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			
+			
+			// public void Entity.setPositionAndUpdate(double, double, double)
+			List<MethodInsnNode> mnodes = getAllInsnNodesOfType(methods.get(0), MethodInsnNode.class);			
+			List<String> mnames = new ArrayList<>();
+			
+			for (Iterator<MethodInsnNode> it = mnodes.iterator(); it.hasNext();) {
+				MethodInsnNode mn = it.next();
+				if (!mn.owner.equals(entityLivingBase.name) || !mn.desc.equals("(DDD)V")) { it.remove(); continue; }
+				if (getMethodNode(entity, "--- " + mn.name + " (DDD)V") == null) { it.remove(); continue; }
+				// Remove duplicate method invocations
+				if (mnames.contains(mn.name)) { it.remove(); continue; }
+				
+				mnames.add(mn.name);
+			}
+			
+			if (mnodes.size() == 1) {
+				addMethodMapping("net/minecraft/entity/Entity setPositionAndUpdate (DDD)V", entity.name + " " + mnodes.get(0).name + " (DDD)V");
+			}
 		}
 		
 		return true;
@@ -10168,6 +10211,31 @@ public class SharedMappings extends MappingsBase {
 	
 	
 	
+	@Mapping(providesMethods={
+			"net/minecraft/block/Block hasComparatorInputOverride (Lnet/minecraft/block/state/IBlockState;)Z"
+			},
+			depends={
+			"net/minecraft/block/Block",			
+			"net/minecraft/block/BlockCommandBlock",
+			"net/minecraft/block/state/IBlockState"
+			})
+	public boolean processBlockCommandBlockClass()
+	{
+		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
+		ClassNode commandBlock = getClassNodeFromMapping("net/minecraft/block/BlockCommandBlock");
+		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
+		if (!MeddleUtil.notNull(block, commandBlock, iBlockState)) return false;
+		
+		
+		List<MethodNode> methods = getMatchingMethods(commandBlock, null, "(L" + iBlockState.name + ";)Z");
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block hasComparatorInputOverride (Lnet/minecraft/block/state/IBlockState;)Z",
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);			
+		}
+		
+		
+		return true;
+	}
 	
 	
 	
