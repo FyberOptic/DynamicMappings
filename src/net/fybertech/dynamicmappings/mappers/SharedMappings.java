@@ -9962,7 +9962,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/state/IBlockWrapper",
 			"net/minecraft/block/material/Material",
 			"net/minecraft/util/ResourceLocation",
-			"net/minecraft/world/World"
+			"net/minecraft/world/World",
+			"net/minecraft/util/BlockPos"
 			})	
 	public boolean processBlockClass4()
 	{
@@ -9971,7 +9972,9 @@ public class SharedMappings extends MappingsBase {
 		ClassNode iBlockWrapper = getClassNodeFromMapping("net/minecraft/block/state/IBlockWrapper");
 		ClassNode material = getClassNodeFromMapping("net/minecraft/block/material/Material");
 		ClassNode resourceLocation = getClassNodeFromMapping("net/minecraft/util/ResourceLocation");
-		if (!MeddleUtil.notNull(block, iBlockState, iBlockWrapper, material, resourceLocation)) return false;
+		ClassNode world = getClassNodeFromMapping("net/minecraft/world/World");
+		ClassNode blockPos = getClassNodeFromMapping("net/minecraft/util/BlockPos");
+		if (!MeddleUtil.notNull(block, iBlockState, iBlockWrapper, material, resourceLocation, world, blockPos)) return false;
 		
 		
 		// Get Block.AIR_ID field
@@ -10038,9 +10041,12 @@ public class SharedMappings extends MappingsBase {
 		}
 		
 		
-		// public boolean onBlockEventReceived(IBlockState state, World worldIn, BlockPos pos, int eventID, int eventParam)
-		// "net/minecraft/block/Block onBlockEventReceived (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;II)Z"
-		
+		// public boolean onBlockEventReceived(IBlockState state, World worldIn, BlockPos pos, int eventID, int eventParam) 
+		methods = getMatchingMethods(block, null, assembleDescriptor("(", iBlockState, world, blockPos, "II)Z"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/Block onBlockEventReceived (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;II)Z",
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
 		
 		return true;
 	}

@@ -40,7 +40,7 @@ targetCompatibility = '1.7'
 
 jar {
     baseName = 'dynamicmappings'
-    version = '023'
+    version = '024-beta'
     
     manifest {
 		attributes('TweakClass' : 'net.fybertech.dynamicmappings.Tweaker')
