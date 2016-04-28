@@ -331,7 +331,7 @@ public class ClientMappings extends MappingsBase
 		int count = 0;
 		for (MethodNode method : (List<MethodNode>)renderItem.methods) {
 			if (!method.name.equals("<init>")) continue;
-			if (!DynamicMappings.checkMethodParameters(method, Type.OBJECT, Type.OBJECT)) continue;
+			if (!DynamicMappings.checkMethodParameters(method, Type.OBJECT, Type.OBJECT, Type.OBJECT)) continue;
 			count++;
 			initMethod = method;
 		}
@@ -520,7 +520,11 @@ public class ClientMappings extends MappingsBase
 	}
 	
 	
-	@Mapping(providesMethods={
+	/*
+	 * Moved elsewhere in 16w02a 
+	 * TODO - Find item color override registry
+	 * 
+	 * @Mapping(providesMethods={
 			"net/minecraft/item/Item getColorFromItemStack (Lnet/minecraft/item/ItemStack;I)I",
 			},
 			depends={
@@ -543,7 +547,7 @@ public class ClientMappings extends MappingsBase
 		}
 		
 		return true;
-	}
+	}*/
 	
 
 	@Mapping(providesMethods={
@@ -1945,8 +1949,10 @@ public class ClientMappings extends MappingsBase
 		for (MethodNode method : methods) {
 			for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
 				if (insn.getOpcode() != Opcodes.INVOKESTATIC) continue;
-				MethodInsnNode mn = (MethodInsnNode)insn;
-				if (!mn.owner.equals("org/lwjgl/opengl/GL11") || !mn.name.equals("glLight")) continue;
+				MethodInsnNode mn = (MethodInsnNode)insn;				
+				// Changed in snapshot prior to 16w02a
+				//if (!mn.owner.equals("org/lwjgl/opengl/GL11") || !mn.name.equals("glLight")) continue;
+				if (!mn.desc.equals("(IILjava/nio/FloatBuffer;)V")) continue;
 				if (enableStandardItemLighting != null) return false;
 				enableStandardItemLighting = method; 
 				break;
@@ -2812,7 +2818,7 @@ public class ClientMappings extends MappingsBase
 			"net/minecraft/block/Block getSubBlocks (Lnet/minecraft/item/Item;Lnet/minecraft/creativetab/CreativeTabs;Ljava/util/List;)V",
 			"net/minecraft/block/Block getCreativeTabToDisplayOn ()Lnet/minecraft/creativetab/CreativeTabs;",
 			"net/minecraft/block/Block getBlockLayer ()Lnet/minecraft/util/EnumWorldBlockLayer;",
-			"net/minecraft/block/Block colorMultiplier (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;I)I"
+			//"net/minecraft/block/Block colorMultiplier (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;I)I"
 			},
 			dependsMethods={
 			"net/minecraft/block/Block getCollisionBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;"
@@ -2908,19 +2914,23 @@ public class ClientMappings extends MappingsBase
 		}
 		
 		
+		// Removed at 16w02a, moved to separate color override registry
 		// public int colorMultiplier(IBlockAccess worldIn, BlockPos pos, int renderPass)
-		methods = getMatchingMethods(block, null, assembleDescriptor("(", iBlockAccess, blockPos, "I)I"));
+		/*methods = getMatchingMethods(block, null, assembleDescriptor("(", iBlockAccess, blockPos, "I)I"));
 		if (methods.size() == 1) {
 			addMethodMapping("net/minecraft/block/Block colorMultiplier (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;I)I",
 					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-		}
+		}*/
 		
 		
 		return true;		
 	}
 	
 	
-	
+	/*
+	 * Methods removed for 16w02a, all are moved out of the Block class
+	 * TODO - Locate ColorizerGrass again elsewhere, and identify new color override registry 
+	 * 
 	@Mapping(provides="net/minecraft/world/ColorizerGrass",
 			providesMethods={
 			"net/minecraft/block/Block getBlockColor ()I",
@@ -2966,13 +2976,11 @@ public class ClientMappings extends MappingsBase
 		if (methods.size() == 1) {
 			addMethodMapping("net/minecraft/block/Block getRenderColor (Lnet/minecraft/block/state/IBlockState;)I", 
 					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-		}
-		
-		
+		}		
 		
 		return true;
 	}
-	
+	*/
 	
 	
 	@Mapping(provides={

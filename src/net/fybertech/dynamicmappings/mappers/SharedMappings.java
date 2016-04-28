@@ -343,7 +343,8 @@ public class SharedMappings extends MappingsBase {
 	
 	
 	@Mapping(provides={
-			"net/minecraft/block/state/IBlockWrapper"
+			"net/minecraft/block/state/IBlockWrapper",
+			"net/minecraft/block/state/IBlockEvents"
 			},
 			providesMethods={
 			"net/minecraft/block/state/IBlockState getPropertyNames ()Ljava/util/Collection;",
@@ -363,13 +364,30 @@ public class SharedMappings extends MappingsBase {
 		ClassNode block = getClassNode(getClassMapping("net/minecraft/block/Block"));
 		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
 		ClassNode iProperty = getClassNodeFromMapping("net/minecraft/block/properties/IProperty");
-		if (block == null || iBlockState == null || iProperty == null) return false;
-
+		if (block == null || iBlockState == null || iProperty == null) return false;		
 		
-		if (iBlockState.interfaces.size() == 1) {
-			addClassMapping("net/minecraft/block/state/IBlockWrapper", iBlockState.interfaces.get(0));
-		}
-		
+		if (iBlockState.interfaces.size() == 2) {
+			//addClassMapping("net/minecraft/block/state/IBlockWrapper", iBlockState.interfaces.get(0));
+			
+			ClassNode cn1 = getClassNode(iBlockState.interfaces.get(0));
+			ClassNode cn2 = getClassNode(iBlockState.interfaces.get(1));			
+			
+			if (cn1 != null && cn2 != null) {
+				String wrapperName = null;
+				String eventsName = null;
+				int cn1Size = cn1.methods.size();
+				int cn2Size = cn2.methods.size();
+				
+				// Just do a simple method count check between the two interfaces
+				if (cn1Size > 20 && cn2Size < cn1Size) { wrapperName = cn1.name; eventsName = cn2.name; } 
+				if (cn2Size > 20 && cn1Size < cn2Size) { wrapperName = cn2.name; eventsName = cn1.name; }
+				
+				if (wrapperName != null && eventsName != null) {
+					addClassMapping("net/minecraft/block/state/IBlockWrapper", wrapperName);
+					addClassMapping("net/minecraft/block/state/IBlockEvents", eventsName);
+				}
+			}
+		}		
 		
 		// Collection getPropertyNames();  
 		List<MethodNode> methods = getMatchingMethods(iBlockState, null, "()Ljava/util/Collection;");
@@ -414,6 +432,42 @@ public class SharedMappings extends MappingsBase {
 					iBlockState.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
+		
+		return true;
+	}
+
+	
+	@Mapping(providesMethods={			
+			"net/minecraft/block/state/IBlockEvents onBlockEventReceived (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;II)Z",
+			"net/minecraft/block/state/IBlockEvents onNeighborBlockChange (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block)V"
+			},
+			depends={
+			"net/minecraft/world/World",
+			"net/minecraft/block/Block",
+			"net/minecraft/util/BlockPos",
+			"net/minecraft/block/state/IBlockState",
+			"net/minecraft/block/state/IBlockEvents"
+			})
+	public boolean processIBlockEvents()
+	{
+		ClassNode iBlockEvents = getClassNodeFromMapping("net/minecraft/block/state/IBlockEvents");
+		ClassNode world = getClassNodeFromMapping("net/minecraft/world/World");
+		ClassNode blockPos = getClassNodeFromMapping("net/minecraft/util/BlockPos");
+		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
+		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");		
+		if (world == null || blockPos == null || iBlockState == null) return false;
+		
+		List<MethodNode> methods = getMatchingMethods(iBlockEvents, null, assembleDescriptor("(", world, blockPos, "II)Z"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/state/IBlockEvents onBlockEventReceived (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;II)Z",
+					iBlockEvents.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+		
+		methods = getMatchingMethods(iBlockEvents, null, assembleDescriptor("(", world, blockPos, block, ")V"));
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/block/state/IBlockEvents onNeighborBlockChange (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block)V",
+					iBlockEvents.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
 		
 		return true;
 	}
@@ -1140,8 +1194,7 @@ public class SharedMappings extends MappingsBase {
 	
 	
 
-	@Mapping(provides="net/minecraft/block/BlockLeavesBase",
-			providesMethods={
+	@Mapping(providesMethods={
 			"net/minecraft/block/Block setTickRandomly (Z)Lnet/minecraft/block/Block;",
 			"net/minecraft/block/Block isVisuallyOpaque ()Z",
 			"net/minecraft/block/Block isOpaqueCube (Lnet/minecraft/block/state/IBlockState;)Z"
@@ -1158,13 +1211,6 @@ public class SharedMappings extends MappingsBase {
 		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
 		if (!MeddleUtil.notNull(block, blockLeaves, iBlockState)) return false;
 
-		// BlockLeaves extends BlockLeavesBase, which extends Block
-		ClassNode blockLeavesBase = getClassNode(blockLeaves.superName);
-		if (blockLeavesBase != null && blockLeavesBase.superName != null) {
-			if (block.name.equals(blockLeavesBase.superName))
-				addClassMapping("net/minecraft/block/BlockLeavesBase", blockLeavesBase);
-		}
-		
 
 		// protected Block setTickRandomly(boolean)
 		MethodNode init = getMethodNode(blockLeaves, "--- <init> ()V");
@@ -1407,7 +1453,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/tileentity/TileEntity addMapping (Ljava/lang/Class;Ljava/lang/String;)V",
 			"net/minecraft/tileentity/TileEntity getWorld ()Lnet/minecraft/world/World;",
 			"net/minecraft/tileentity/TileEntity setWorldObj (Lnet/minecraft/world/World;)V",
-			"net/minecraft/tileentity/TileEntity createAndLoadEntity (Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/tileentity/TileEntity;",
+			"net/minecraft/tileentity/TileEntity createAndLoadEntity (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/tileentity/TileEntity;",
 			"net/minecraft/tileentity/TileEntity getBlockMetadata ()I",
 			"net/minecraft/tileentity/TileEntity getPos ()Lnet/minecraft/util/BlockPos;",
 			"net/minecraft/tileentity/TileEntity setPos (Lnet/minecraft/util/BlockPos;)V",
@@ -1419,8 +1465,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/tileentity/TileEntity invalidate ()V",
 			"net/minecraft/tileentity/TileEntity updateContainingBlockInfo ()V",
 			"net/minecraft/tileentity/TileEntity markDirty ()V",
-			"net/minecraft/tileentity/TileEntity readFromNBT (Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/nbt/NBTTagCompound;)V",
-			"net/minecraft/tileentity/TileEntity writeToNBT (Lnet/minecraft/nbt/NBTTagCompound;)V"
+			"net/minecraft/tileentity/TileEntity readFromNBT (Lnet/minecraft/nbt/NBTTagCompound;)V",
+			"net/minecraft/tileentity/TileEntity writeToNBT (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;"
 			},
 			depends={
 			"net/minecraft/tileentity/TileEntity",
@@ -1530,9 +1576,10 @@ public class SharedMappings extends MappingsBase {
 		// public static TileEntity createAndLoadEntity(NBTTagCompound nbt)
 		// CHANGED in 15w38b
 		// public static TileEntity createAndLoadEntity(MinecraftServer serevr, NBTTagCompound nbt)
-		methods = getMatchingMethods(tileEntity, null, assembleDescriptor("(", minecraftServer, tagCompound, ")", tileEntity));
+		// CHANGED back in 1.9.3-preX		
+		methods = getMatchingMethods(tileEntity, null, assembleDescriptor("(", tagCompound, ")", tileEntity));
 		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/tileentity/TileEntity createAndLoadEntity (Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/tileentity/TileEntity;",
+			addMethodMapping("net/minecraft/tileentity/TileEntity createAndLoadEntity (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/tileentity/TileEntity;",
 					tileEntity.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
@@ -1579,10 +1626,13 @@ public class SharedMappings extends MappingsBase {
 		// public Packet getDescriptionPacket()
 		for (MethodNode method : tileEntity.methods) {
 			if (!method.desc.startsWith("()L")) continue;
-			String packetClass = Type.getMethodType(method.desc).getReturnType().getClassName();
-			if (packetClass.contains(".")) continue;
-			ClassNode packet = getClassNode(packetClass);
-			if (packet == null) continue;
+			String tePacketClass = Type.getMethodType(method.desc).getReturnType().getClassName();
+			if (tePacketClass.contains(".")) continue;			
+			ClassNode tePacket = getClassNode(tePacketClass);
+			if (tePacket == null) continue;		
+			if (tePacket.interfaces.size() != 1) continue;			
+			
+			ClassNode packet = getClassNode(tePacket.interfaces.get(0));			
 			if ((packet.access & Opcodes.ACC_INTERFACE) == 0) continue;
 			
 			boolean isPacket = false;
@@ -1599,6 +1649,9 @@ public class SharedMappings extends MappingsBase {
 				}
 			}			
 			if (!isPacket) continue;
+			
+			// TODO - Perhaps confirm this one, just in case they change their minds
+			addClassMapping("net/minecraft/network/play/server/SPacketUpdateTileEntity", tePacket);			
 			
 			addClassMapping("net/minecraft/network/Packet", packet);
 			addMethodMapping("net/minecraft/tileentity/TileEntity getDescriptionPacket ()Lnet/minecraft/network/Packet;",
@@ -1715,21 +1768,23 @@ public class SharedMappings extends MappingsBase {
 			}
 		}*/
 		
-		// CHANGED in 15w38b
-		// public void readFromNBT(MinecraftServer server, NBTTagCompound compound)
-		methods = getMatchingMethods(tileEntity, null, assembleDescriptor("(", minecraftServer, tagCompound, ")V"));
-		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/tileentity/TileEntity readFromNBT (Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/nbt/NBTTagCompound;)V",
-					tileEntity.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-		}
-		
-		// public void writeToNBT(NBTTagCompound compound)
+		// public void readFromNBT(NBTTagCompound compound)
 		methods = getMatchingMethods(tileEntity, null, assembleDescriptor("(", tagCompound, ")V"));
 		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/tileentity/TileEntity writeToNBT (Lnet/minecraft/nbt/NBTTagCompound;)V",
+			addMethodMapping("net/minecraft/tileentity/TileEntity readFromNBT (Lnet/minecraft/nbt/NBTTagCompound;)V",
 					tileEntity.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-		}
+		}		
 		
+		// public void writeToNBT(NBTTagCompound compound)
+		methods = getMatchingMethods(tileEntity, null, assembleDescriptor("(", tagCompound, ")", tagCompound));
+		if (methods.size() == 2) {
+			// Remove private method
+			for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) { if ((it.next().access & Opcodes.ACC_PRIVATE) != 0) it.remove(); }
+			
+			addMethodMapping("net/minecraft/tileentity/TileEntity writeToNBT (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;",
+					tileEntity.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}		
+
 		
 		// TODO
 		// @ClientOnly
@@ -1784,13 +1839,17 @@ public class SharedMappings extends MappingsBase {
 					addClassMapping("net/minecraft/server/gui/IUpdatePlayerListBox", iUpdatePlayerListBox_name);
 				}
 			}
-		}
+		}		
 		
-		
-		String tileEntityLockable_name = tileEntityChest.superName;
-		ClassNode tileEntityLockable = getClassNode(tileEntityLockable_name);
-		if (tileEntityLockable.superName.equals(tileEntity.name)) {
-			addClassMapping("net/minecraft/tileentity/TileEntityLockable", tileEntityLockable_name);
+				
+		if (searchConstantPoolForStrings(tileEntityChest.superName, "LootTable")) {
+			// TODO - Give this class a name
+			ClassNode lootTableClass = getClassNode(tileEntityChest.superName);
+			
+			// TODO - Do this a bit safer, get other interface classes
+			ClassNode tileEntityLockable = getClassNode(lootTableClass.superName);
+			if (tileEntityLockable.superName.equals(tileEntity.name))
+				addClassMapping("net/minecraft/tileentity/TileEntityLockable", tileEntityLockable.name);
 		}
 		
 		
@@ -2287,7 +2346,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/entity/monster/EntityEnderman carriableBlocks Ljava/util/Set;"
 			}, 
 			providesMethods={
-			"net/minecraft/entity/Entity setPositionAndUpdate (DDD)V"
+			//"net/minecraft/entity/Entity setPositionAndUpdate (DDD)V"
 			}, 
 			depends={
 			"net/minecraft/entity/monster/EntityEnderman",
@@ -5328,7 +5387,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/Block getBlockFromName (Ljava/lang/String;)Lnet/minecraft/block/Block;",
 			//"net/minecraft/block/Block setBlockBounds (Lnet/minecraft/util/AxisAlignedBB;)V",
 			//"net/minecraft/block/Block getBlockBounds (Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/util/AxisAlignedBB;",
-			"net/minecraft/block/Block onNeighborBlockChange (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/Block;)V",
+			"net/minecraft/block/Block onNeighborBlockChange (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;)V",
 			//"net/minecraft/block/Block setBlockBoundsBasedOnState (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)V"
 			"net/minecraft/block/Block setCreativeTab (Lnet/minecraft/creativetab/CreativeTabs;)Lnet/minecraft/block/Block;",
 			"net/minecraft/block/Block dropBlockAsItemWithChance (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;FI)V",
@@ -5473,10 +5532,10 @@ public class SharedMappings extends MappingsBase {
 		}
 		
 		
-		//  public void onNeighborBlockChange(World, BlockPos, IBlockState, Block)
-		methods = getMatchingMethods(block, null, assembleDescriptor("(", world, blockPos, iBlockState, block, ")V"));
+		//  public void onNeighborBlockChange(IBlockState, World, BlockPos, Block)
+		methods = getMatchingMethods(block, null, assembleDescriptor("(", iBlockState, world, blockPos, block, ")V"));
 		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/block/Block onNeighborBlockChange (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/Block;)V",
+			addMethodMapping("net/minecraft/block/Block onNeighborBlockChange (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;)V",
 					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
@@ -6886,7 +6945,10 @@ public class SharedMappings extends MappingsBase {
 	
 	
 
-	@Mapping(providesFields={
+	@Mapping(provides={
+			"net/minecraft/util/SoundCategory"
+			},
+			providesFields={
 			"net/minecraft/world/World isRemote Z"
 			},
 			providesMethods={
@@ -6894,11 +6956,10 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/world/World markBlockForUpdate (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/state/IBlockState;I)V",
 			"net/minecraft/world/World markBlockRangeForRenderUpdate (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/BlockPos;)V",
 			"net/minecraft/world/World playAuxSFXAtEntity (Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/BlockPos;I)V",
-			"net/minecraft/world/World addBlockEvent (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;II)V",
-			"net/minecraft/block/Block onBlockEventReceived (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;II)Z",
+			"net/minecraft/world/World addBlockEvent (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;II)V",			
 			"net/minecraft/world/World setTileEntity (Lnet/minecraft/util/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
 			"net/minecraft/world/World markChunkDirty (Lnet/minecraft/util/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
-			"net/minecraft/world/World playSoundEffect (Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/Sound;FF)V",
+			"net/minecraft/world/World playSoundEffect (Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/Sound;Lnet/minecraft/util/SoundCategory;FF)V",
 			"net/minecraft/world/World getEntitiesInAABBexcluding (Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;Lcom/google/common/base/Predicate;)Ljava/util/List;",
 			"net/minecraft/world/World getEntitiesWithinAABBExcludingEntity (Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;",
 			"net/minecraft/world/World getCollidingBoundingBoxes (Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;"
@@ -6918,7 +6979,7 @@ public class SharedMappings extends MappingsBase {
 	{
 		ClassNode world = getClassNodeFromMapping("net/minecraft/world/World");
 		ClassNode blockPos = getClassNodeFromMapping("net/minecraft/util/BlockPos");
-		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
+		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");		
 		ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
 		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
 		ClassNode tileEntity = getClassNodeFromMapping("net/minecraft/tileentity/TileEntity");
@@ -6979,25 +7040,9 @@ public class SharedMappings extends MappingsBase {
 			AbstractInsnNode insn = getNextRealOpcode(method.instructions.getFirst());
 			if (insn != null && insn.getOpcode() == Opcodes.RETURN) it.remove();
 		}
-		if (methods.size() == 1) {		
-			boolean found_onBlockEventReceived = false;
-			List<MethodInsnNode> nodes = getAllInsnNodesOfType(methods.get(0).instructions.getFirst(), MethodInsnNode.class);
-			
-			// public boolean onBlockEventReceived(World worldIn, BlockPos pos, IBlockState state, int eventID, int eventParam)
-			String desc = assembleDescriptor("(", world, blockPos, iBlockState, "II)Z");			
-			for (MethodInsnNode mn : nodes) {
-				if (mn.owner.equals(block.name) && mn.desc.equals(desc)) {
-					addMethodMapping("net/minecraft/block/Block onBlockEventReceived (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;II)Z",
-							block.name + " " + mn.name + " " + mn.desc);
-					found_onBlockEventReceived = true;
-					break;
-				}
-			}
-			
-			if (found_onBlockEventReceived) {
-				addMethodMapping("net/minecraft/world/World addBlockEvent (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;II)V",
-						world.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-			}
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/world/World addBlockEvent (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;II)V",
+					world.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
 		
@@ -7038,10 +7083,23 @@ public class SharedMappings extends MappingsBase {
 		// public void playSoundEffect(double x, double y, double z, Sound sound, float volume, float pitch)
 		// As of 15w49a: 
 		//   public void playSoundEffect(EntityPlayer player, double x, double y, double z, Sound sound, float volume, float pitch)
-		methods = getMatchingMethods(world, null, "(L" + entityPlayer.name + ";DDDL" + sound.name + ";FF)V");
-		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/world/World playSoundEffect (Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/Sound;FF)V",
-					world.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		// As of 16w02a:
+		//   public void playSoundEffect(EntityPlayer player, double x, double y, double z, Sound sound, SoundCategory, float volume, float pitch)
+		methods = getMatchingMethods(world, null, null);
+		for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
+			MethodNode method = it.next();
+			if (!method.desc.startsWith("(L" + entityPlayer.name + ";DDDL" + sound.name + ";") ||
+					!method.desc.endsWith("FF)V")) it.remove(); 
+		}
+		if (methods.size() == 1) {			
+			Type t = Type.getMethodType(methods.get(0).desc);
+			Type soundType = t.getArgumentTypes()[5];
+			String soundCategory_name = soundType.getClassName();
+			if (soundType.getSort() == Type.OBJECT && searchConstantPoolForStrings(soundCategory_name, "MASTER", "MUSIC", "RECORDS")) {			
+				addClassMapping("net/minecraft/util/SoundCategory", soundCategory_name);
+				addMethodMapping("net/minecraft/world/World playSoundEffect (Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/Sound;Lnet/minecraft/util/SoundCategory;FF)V",
+						world.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			}
 		}
 		
 		
@@ -9877,9 +9935,10 @@ public class SharedMappings extends MappingsBase {
 		
 		
 		return true;
-	}
-	
+	}	
 
+	
+	
 	@Mapping(providesFields={
 			"net/minecraft/block/Block AIR_ID Lnet/minecraft/util/ResourceLocation;"
 			},
@@ -9887,7 +9946,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/state/IBlockWrapper getMaterial ()Lnet/minecraft/block/material/Material;",
 			"net/minecraft/block/material/Material isSolid ()Z",
 			"net/minecraft/block/Block isFullBlock (Lnet/minecraft/block/state/IBlockState;)Z",
-			"net/minecraft/block/Block getUseNeighborBrightness (Lnet/minecraft/block/state/IBlockState;)Z"
+			"net/minecraft/block/Block getUseNeighborBrightness (Lnet/minecraft/block/state/IBlockState;)Z",
+			"net/minecraft/block/Block onBlockEventReceived (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;II)Z"
 			},
 			dependsFields={
 			"net/minecraft/block/Block fullBlock Z",
@@ -9901,7 +9961,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/state/IBlockState",
 			"net/minecraft/block/state/IBlockWrapper",
 			"net/minecraft/block/material/Material",
-			"net/minecraft/util/ResourceLocation"
+			"net/minecraft/util/ResourceLocation",
+			"net/minecraft/world/World"
 			})	
 	public boolean processBlockClass4()
 	{
@@ -9975,6 +10036,10 @@ public class SharedMappings extends MappingsBase {
 						block.name + " " + getUseNeighborBrightness.get(0).name + " " + getUseNeighborBrightness.get(0).desc);
 			}
 		}
+		
+		
+		// public boolean onBlockEventReceived(IBlockState state, World worldIn, BlockPos pos, int eventID, int eventParam)
+		// "net/minecraft/block/Block onBlockEventReceived (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;II)Z"
 		
 		
 		return true;
@@ -10237,6 +10302,60 @@ public class SharedMappings extends MappingsBase {
 		return true;
 	}
 	
+	
+	
+	@Mapping(providesFields={
+			"net/minecraft/util/SoundCategory MASTER Lnet/minecraft/util/SoundCategory;",
+			"net/minecraft/util/SoundCategory MUSIC Lnet/minecraft/util/SoundCategory;",
+			"net/minecraft/util/SoundCategory RECORDS Lnet/minecraft/util/SoundCategory;",
+			"net/minecraft/util/SoundCategory WEATHER Lnet/minecraft/util/SoundCategory;",
+			"net/minecraft/util/SoundCategory BLOCKS Lnet/minecraft/util/SoundCategory;",
+			"net/minecraft/util/SoundCategory HOSTILE Lnet/minecraft/util/SoundCategory;",
+			"net/minecraft/util/SoundCategory NEUTRAL Lnet/minecraft/util/SoundCategory;",
+			"net/minecraft/util/SoundCategory PLAYERS Lnet/minecraft/util/SoundCategory;",
+			"net/minecraft/util/SoundCategory AMBIENT Lnet/minecraft/util/SoundCategory;",
+			"net/minecraft/util/SoundCategory VOICE Lnet/minecraft/util/SoundCategory;"
+			},
+			depends={
+			"net/minecraft/util/SoundCategory"
+			})
+	public boolean processSoundCategoryClass()
+	{
+		ClassNode soundCategory = getClassNodeFromMapping("net/minecraft/util/SoundCategory");
+		if (!MeddleUtil.notNull(soundCategory)) return false;
+		
+		String[] enumNames = new String[] { "MASTER", "MUSIC", "RECORDS", "WEATHER", "BLOCKS", "HOSTILE", "NEUTRAL", "PLAYERS", "AMBIENT", "VOICE" };
+		
+		MethodNode clinit = getMethodNode(soundCategory, "--- <clinit> ()V");
+		if (clinit == null) return false;
+		
+		String lastString = null;
+		Map<String, String> fields = new HashMap<>();		
+		
+		for (AbstractInsnNode insn = clinit.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+			String s = getLdcString(insn);
+			if (s != null && lastString == null) { lastString = s; continue; }
+			
+			if (insn.getOpcode() == Opcodes.PUTSTATIC && lastString != null) {
+				FieldInsnNode fn = (FieldInsnNode)insn;
+				if (fn.owner.equals(soundCategory.name) && fn.desc.equals("L" + soundCategory.name + ";")) fields.put(lastString, fn.name);
+				lastString = null;
+			}
+		}		
+		
+
+		if (enumNames.length == fields.size()) {
+			for (String enumName : enumNames) {
+				String fieldName = fields.get(enumName);
+				if (fieldName == null) continue;				
+				addFieldMapping("net/minecraft/util/SoundCategory " + enumName + " Lnet/minecraft/util/SoundCategory;",
+							soundCategory.name + " " + fieldName + " L" + soundCategory.name + ";");				
+			}
+		}
+		
+		
+		return true;
+	}
 	
 	
 }
