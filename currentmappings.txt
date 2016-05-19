@@ -1,4 +1,4 @@
-[DynamicMappings] Minecraft version: 1.9.3-pre2
+[DynamicMappings] Minecraft version: 1.9.4
 [DynamicMappings] Minecraft jar type: client
 
 CLASSES:
@@ -1059,6 +1059,7 @@ net/minecraft/block/Block onBlockAdded (Lnet/minecraft/world/World;Lnet/minecraf
 net/minecraft/block/Block onBlockClicked (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/player/EntityPlayer;)V -> ajt a (Laht;Lcl;Lzj;)V
 net/minecraft/block/Block onBlockDestroyedByExplosion (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/world/Explosion;)V -> ajt a (Laht;Lcl;Lahp;)V
 net/minecraft/block/Block onBlockDestroyedByPlayer (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)V -> ajt d (Laht;Lcl;Lard;)V
+net/minecraft/block/Block onBlockEventReceived (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;II)Z -> ajt a (Lard;Laht;Lcl;II)Z
 net/minecraft/block/Block onBlockHarvested (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;)V -> ajt a (Laht;Lcl;Lard;Lzj;)V
 net/minecraft/block/Block onBlockPlaced (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;FFFILnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/block/state/IBlockState; -> ajt a (Laht;Lcl;Lcs;FFFILsa;)Lard;
 net/minecraft/block/Block onBlockPlacedBy (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/EntityLivingBase;Lnet/minecraft/item/ItemStack;)V -> ajt a (Laht;Lcl;Lard;Lsa;Ladq;)V
