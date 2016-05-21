@@ -7562,7 +7562,7 @@ public class SharedMappings extends MappingsBase {
 
 
 	@Mapping(provides={
-			"net/minecraft/nbt/NBTBase$NBTPrimitive"
+			"net/minecraft/nbt/NBTPrimitive"
 	},
 	providesMethods={
 			"net/minecraft/nbt/NBTTagCompound getTagList (Ljava/lang/String;I)Lnet/minecraft/nbt/NBTTagList;",
@@ -7666,7 +7666,7 @@ public class SharedMappings extends MappingsBase {
 
 
 		// Find getByte and getTagType
-		methods = getMatchingMethods(tagCompound, null, "(Ljava/lang/String;)B");
+		methods = getMatchingMethods(tagCompound, null, "(Ljava/lang/String;)B");		
 		if (methods.size() == 2) 
 		{
 			for (MethodNode method : methods) {
@@ -7674,11 +7674,14 @@ public class SharedMappings extends MappingsBase {
 				boolean hasPrimitive = false;
 				for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
 					if (insn.getOpcode() != Opcodes.CHECKCAST) continue;
-					TypeInsnNode tn = (TypeInsnNode)insn;
+					TypeInsnNode tn = (TypeInsnNode)insn;				
+					
 					if (tn.desc.equals(tagBase.name)) hasBase = true;
-					else if (tn.desc.startsWith(tagBase.name + "$")) {
+					// NBTBase$NBTPrimitive changed to standalone class in 1.10
+					else //if (tn.desc.startsWith(tagBase.name + "$")) {
+					{
 						hasPrimitive = true;
-						addClassMapping("net/minecraft/nbt/NBTBase$NBTPrimitive", tn.desc);
+						addClassMapping("net/minecraft/nbt/NBTPrimitive", tn.desc);
 					}
 				}
 	
@@ -9140,7 +9143,7 @@ public class SharedMappings extends MappingsBase {
 				className = ft.getClassName();
 				if (className.contains(".")) continue;
 				
-				if (searchConstantPoolForStrings(className, "Ticking memory connection", "Failed to handle packet for")) {
+				if (searchConstantPoolForStrings(className, "Ticking memory connection", "Failed to handle packet for {}")) {
 					addClassMapping("net/minecraft/network/NetworkSystem", className);
 					continue;
 				}

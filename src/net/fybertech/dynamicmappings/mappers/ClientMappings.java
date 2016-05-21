@@ -388,8 +388,8 @@ public class ClientMappings extends MappingsBase
 			boolean foundPostStartup = false;
 			boolean foundStartup = false;
 			for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext())
-			{
-				if (!foundLWJGLVersion && !DynamicMappings.isLdcWithString(insn, "LWJGL Version: ")) continue;
+			{				
+				if (!foundLWJGLVersion && !DynamicMappings.isLdcWithString(insn, "LWJGL Version: {}")) continue;
 				foundLWJGLVersion = true;
 				
 				if (!foundStartup && !DynamicMappings.isLdcWithString(insn, "Startup")) continue;
@@ -422,14 +422,13 @@ public class ClientMappings extends MappingsBase
 		String guiMainMenu = null;
 		String loadingScreenRenderer = null;
 
-		for (String className : postStartupClasses) {
-
+		for (String className : postStartupClasses) {			
 			if (guiIngame == null && DynamicMappings.searchConstantPoolForStrings(className, "textures/misc/vignette.png", "bossHealth")) {
 				guiIngame = className;
 				continue;
 			}
 
-			if (guiConnecting == null && DynamicMappings.searchConstantPoolForStrings(className, "Connecting to", "connect.connecting")) {
+			if (guiConnecting == null && DynamicMappings.searchConstantPoolForStrings(className, "Connecting to {}, {}", "connect.connecting")) {
 				guiConnecting = className;
 				continue;
 			}
@@ -916,7 +915,7 @@ public class ClientMappings extends MappingsBase
 				addClassMapping("net/minecraft/client/gui/GuiSelectWorld", node.desc);
 				guiSelectWorld = cn;
 			}
-			if (guiMultiplayer == null && searchConstantPoolForStrings(node.desc, "Unable to start LAN server detection: ", "selectServer.edit")) {
+			if (guiMultiplayer == null && searchConstantPoolForStrings(node.desc, "Unable to start LAN server detection: {}", "selectServer.edit")) {
 				addClassMapping("net/minecraft/client/gui/GuiMultiplayer", node.desc);
 				guiMultiplayer = cn;
 			}
