@@ -1357,9 +1357,9 @@ public class SharedMappings extends MappingsBase {
 			if (className.equals(blockClass.name)) continue;
 			possibleClasses.add(className);
 		}
-
-		if (possibleClasses.size() == 1) {
-			String className = possibleClasses.get(0);
+		
+		//if (possibleClasses.size() == 1) {
+		for (String className : possibleClasses) {
 			if (searchConstantPoolForStrings(className, "item.", "arrow")) {
 				addClassMapping("net/minecraft/item/Item", getClassNode(possibleClasses.get(0)));
 				return true;
@@ -1418,7 +1418,7 @@ public class SharedMappings extends MappingsBase {
 			if (returnType.getSort() != Type.OBJECT) return false;
 
 			String className = returnType.getClassName();
-			if (tileEntity_name == null && searchConstantPoolForStrings(className, "Furnace", "MobSpawner")) {
+			if (tileEntity_name == null && searchConstantPoolForStrings(className, "furnace", "mob_spawner")) { // TE IDs changed in 16w32a
 				addClassMapping("net/minecraft/tileentity/TileEntity", getClassNode(className));
 				tileEntity_name = className;
 			}
@@ -1450,7 +1450,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/tileentity/TileEntity blockType Lnet/minecraft/block/Block;"
 			},
 			providesMethods={
-			"net/minecraft/tileentity/TileEntity addMapping (Ljava/lang/Class;Ljava/lang/String;)V",
+			"net/minecraft/tileentity/TileEntity addMapping (Ljava/lang/String;Ljava/lang/Class;)V",
 			"net/minecraft/tileentity/TileEntity getWorld ()Lnet/minecraft/world/World;",
 			"net/minecraft/tileentity/TileEntity setWorldObj (Lnet/minecraft/world/World;)V",
 			"net/minecraft/tileentity/TileEntity createAndLoadEntity (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/tileentity/TileEntity;",
@@ -1504,7 +1504,8 @@ public class SharedMappings extends MappingsBase {
 		}
 		
 		
-		String className = teMap.get("Chest");
+		// 16w32a changed all TE IDs
+		String className = teMap.get("chest");
 		if (className != null) {
 			addClassMapping("net/minecraft/tileentity/TileEntityChest", className);
 		}
@@ -1552,9 +1553,10 @@ public class SharedMappings extends MappingsBase {
 		
 		
 		// public static void addMapping(Class cl, String id)
-		methods = getMatchingMethods(tileEntity, null, "(Ljava/lang/Class;Ljava/lang/String;)V");
+		// 16w32a reversed fields
+		methods = getMatchingMethods(tileEntity, null, "(Ljava/lang/String;Ljava/lang/Class;)V");
 		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/tileentity/TileEntity addMapping (Ljava/lang/Class;Ljava/lang/String;)V",
+			addMethodMapping("net/minecraft/tileentity/TileEntity addMapping (Ljava/lang/String;Ljava/lang/Class;)V",
 					tileEntity.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
@@ -2089,26 +2091,45 @@ public class SharedMappings extends MappingsBase {
 		ClassNode entityList = getClassNode(getClassMapping("net/minecraft/entity/EntityList"));
 		if (entityList == null) return false;
 
-		List<MethodNode> methods = getMatchingMethods(entityList, "<clinit>", "()V");
+		List<MethodNode> methods = getMatchingMethods(entityList, null, "()V");
+		for (Iterator<MethodNode> it = methods.iterator(); it.hasNext(); ) {
+			MethodNode mn = it.next();
+			if (mn.name.startsWith("<")) it.remove();
+			if ((mn.access & Opcodes.ACC_STATIC) == 0) continue;
+		}
+		
 		if (methods.size() != 1) return false;
 
 		String entityClass = null;
 		String entityName = null;
-
+		
 		// Create entity list
-		for (AbstractInsnNode insn = methods.get(0).instructions.getFirst(); insn != null; insn = insn.getNext())
-		{
+		for (AbstractInsnNode insn = getNextRealOpcode(methods.get(0).instructions.getFirst()); insn != null; insn = getNextRealOpcode(insn.getNext()))
+		{			
+			// Ignore numeric ID			
+			insn = getNextRealOpcode(insn.getNext());
+			if (insn == null) break;			
+			
+			String newID = getLdcString(insn);			
+			if (newID == null) continue;
+			insn = getNextRealOpcode(insn.getNext());
+			if (insn == null) break;			
+
 			entityClass = getLdcClass(insn);
 			if (entityClass == null) continue;
-
-			insn = insn.getNext();
+			insn = getNextRealOpcode(insn.getNext());
 			if (insn == null) break;
-
+			
 			entityName = getLdcString(insn);
 			if (entityName == null) continue;
-
+			
+			// ignore invokestatic
+			insn = getNextRealOpcode(insn.getNext());
+			if (insn == null) break;
+			
 			entityListClasses.put(entityName, entityClass);
 		}
+		
 
 		// Get EntityZombie
 		String zombieClass = entityListClasses.get("Zombie");
@@ -6288,8 +6309,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/item/Item registerItem (ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/item/Item;)V",
 			"net/minecraft/item/Item registerItemBlock (Lnet/minecraft/block/Block;Lnet/minecraft/item/Item;)V",
 			"net/minecraft/item/Item registerItemBlock (Lnet/minecraft/block/Block;)V",
-			"net/minecraft/item/Item onItemRightClick (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;)Lnet/minecraft/util/ObjectActionHolder;",
-			"net/minecraft/item/Item onItemUse (Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/ItemUseResult;",
+			"net/minecraft/item/Item onItemRightClick (Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;)Lnet/minecraft/util/ObjectActionHolder;",
+			"net/minecraft/item/Item onItemUse (Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/ItemUseResult;",
 			"net/minecraft/item/Item onItemUseFinish (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/item/ItemStack;",
 			"net/minecraft/item/Item onBlockDestroyed (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/EntityLivingBase;)Z"
 			},
@@ -6327,31 +6348,33 @@ public class SharedMappings extends MappingsBase {
 		String itemState = null;
 		String resourceLocation = null;
 
-		//public ItemUseResult onItemUse(ItemStack, EntityPlayer, World, BlockPos, MainOrOffHand, EnumFacing, float, float, float)
+		// public ItemUseResult onItemUse(ItemStack, EntityPlayer, World, BlockPos, MainOrOffHand, EnumFacing, float, float, float)
+		// NOTE: 16w32a removes ItemStack
 		for (MethodNode method : item.methods) {
-			if (!checkMethodParameters(method, Type.OBJECT, Type.OBJECT, Type.OBJECT, Type.OBJECT, Type.OBJECT, Type.OBJECT, Type.FLOAT, Type.FLOAT, Type.FLOAT)) continue;
-			String test = "(L" + itemStack.name + ";L" + entityPlayer.name + ";L" + world.name + ";L" + blockPos.name + ";L";
+			if (!checkMethodParameters(method, Type.OBJECT, Type.OBJECT, Type.OBJECT, Type.OBJECT, Type.OBJECT, Type.FLOAT, Type.FLOAT, Type.FLOAT)) continue;
+			String test = "(L" + entityPlayer.name + ";L" + world.name + ";L" + blockPos.name + ";L";
 			if (!method.desc.startsWith(test)) continue;
 
 			Type t = Type.getMethodType(method.desc);
 			Type[] args = t.getArgumentTypes();
 
 			addClassMapping("net/minecraft/util/ItemUseResult", itemUseResult = t.getReturnType().getClassName());
-			addClassMapping("net/minecraft/util/MainOrOffHand", mainOrOffHand = args[4].getClassName());
-			addClassMapping("net/minecraft/util/EnumFacing", enumFacing = args[5].getClassName());
-			addMethodMapping("net/minecraft/item/Item onItemUse (Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/ItemUseResult;",
+			addClassMapping("net/minecraft/util/MainOrOffHand", mainOrOffHand = args[3].getClassName());
+			addClassMapping("net/minecraft/util/EnumFacing", enumFacing = args[4].getClassName());
+			addMethodMapping("net/minecraft/item/Item onItemUse (Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/ItemUseResult;",
 					item.name + " " + method.name + " " + method.desc);
 		}
 
 		// public ObjectActionHolderThing onItemRightClick(ItemStack, World, EntityPlayer, MainOrOffHand)
+		// NOTE: 16w32a removes ItemStack
 		for (MethodNode method : item.methods) {
-			String test = "(L" + itemStack.name + ";L" + world.name + ";L" + entityPlayer.name + ";L" + mainOrOffHand + ";)";
+			String test = "(L" + world.name + ";L" + entityPlayer.name + ";L" + mainOrOffHand + ";)";
 			if (!method.desc.startsWith(test)) continue;
 			Type t = Type.getMethodType(method.desc).getReturnType();
 
 			objectActionHolder = getClassNode(t.getClassName());
 			addClassMapping("net/minecraft/util/ObjectActionHolder", objectActionHolder);
-			addMethodMapping("net/minecraft/item/Item onItemRightClick (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;)Lnet/minecraft/util/ObjectActionHolder;",
+			addMethodMapping("net/minecraft/item/Item onItemRightClick (Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;)Lnet/minecraft/util/ObjectActionHolder;",
 					item.name + " " + method.name + " " + method.desc);
 		}
 
@@ -8206,7 +8229,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/item/ItemStack itemDamage I"
 			},
 			providesMethods={
-			"net/minecraft/item/ItemStack loadItemStackFromNBT (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/item/ItemStack;",
+			//"net/minecraft/item/ItemStack loadItemStackFromNBT (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/item/ItemStack;",
 			"net/minecraft/item/ItemStack setTagCompound (Lnet/minecraft/nbt/NBTTagCompound;)V",
 			"net/minecraft/item/ItemStack readFromNBT (Lnet/minecraft/nbt/NBTTagCompound;)V",
 			"net/minecraft/item/ItemStack isItemEnchanted ()Z",
@@ -8238,15 +8261,16 @@ public class SharedMappings extends MappingsBase {
 		if (!MeddleUtil.notNull(itemStack, tagCompound, item, nbtbase)) return false;
 
 		// public static ItemStack loadItemStackFromNBT(NBTTagCompound nbt)
-		List<MethodNode> methods = getMatchingMethods(itemStack, null, "(L" + tagCompound.name + ";)L" + itemStack.name + ";");
-		if (methods.size() != 1) return false;
-		addMethodMapping("net/minecraft/item/ItemStack loadItemStackFromNBT (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/item/ItemStack;",
-				itemStack.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		// No longer exists in 16w32a
+		//List<MethodNode> methods = getMatchingMethods(itemStack, null, "(L" + tagCompound.name + ";)L" + itemStack.name + ";");		
+		//if (methods.size() != 1) return false;
+		//addMethodMapping("net/minecraft/item/ItemStack loadItemStackFromNBT (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/item/ItemStack;",
+				//itemStack.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 
 
 		String stackTagCompoundField = null;
 
-		methods = getMatchingMethods(itemStack, null, "(L" + tagCompound.name + ";)V");
+		List<MethodNode> methods = getMatchingMethods(itemStack, null, "(L" + tagCompound.name + ";)V");		
 		if (methods.size() != 2) return false;
 		for (MethodNode method :  methods)
 		{
@@ -8323,20 +8347,26 @@ public class SharedMappings extends MappingsBase {
 		for (Iterator<MethodNode> iterator = methods.iterator(); iterator.hasNext();)
 		{
 			MethodNode method = iterator.next();
-			if (!matchOpcodeSequence(method.instructions.getFirst(), Opcodes.ALOAD, Opcodes.GETFIELD, Opcodes.IFNULL)) {
+			/*if (!matchOpcodeSequence(method.instructions.getFirst(), Opcodes.ALOAD, Opcodes.GETFIELD, Opcodes.IFNULL)) {
 				iterator.remove();
 				continue;
-			}
+			}*/
 
 			boolean correctField = false;
+			boolean correctSequence = false;
+			
 			for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+				if (matchOpcodeSequence(insn, Opcodes.ALOAD, Opcodes.GETFIELD, Opcodes.IFNULL)) 
+					correctSequence = true;				
 				if (insn.getOpcode() != Opcodes.GETFIELD) continue;
 				FieldInsnNode fn = (FieldInsnNode)insn;
 				if (fn.owner.equals(itemStack.name) && fn.name.equals(stackTagCompoundField))
+				{
 					correctField = true;
-				break;
+					break;
+				}
 			}
-			if (!correctField) { iterator.remove(); continue; }
+			if (!correctSequence || !correctField) { iterator.remove(); continue; }
 		}
 
 		if (methods.size() == 2) 
