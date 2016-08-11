@@ -1438,6 +1438,7 @@ public class SharedMappings extends MappingsBase {
 	
 	@Mapping(provides={
 			"net/minecraft/tileentity/TileEntityChest",
+			"net/minecraft/tileentity/TileEntityFurnace",
 			"net/minecraft/network/PacketBuffer",
 			"net/minecraft/network/Packet",
 			"net/minecraft/crash/CrashReportCategory"
@@ -1492,22 +1493,27 @@ public class SharedMappings extends MappingsBase {
 		
 		Map<String, String> teMap = new HashMap<>();
 		
-		String lastClass = null;
-		for (AbstractInsnNode insn = methods.get(0).instructions.getFirst(); insn != null; insn = insn.getNext()) {
-			String c = getLdcClass(insn);
-			if (c != null) { lastClass = c; continue; }
-			
+		String lastName = null;
+		for (AbstractInsnNode insn = getNextRealOpcode(methods.get(0).instructions.getFirst()); insn != null; insn = getNextRealOpcode(insn.getNext())) {
 			String name = getLdcString(insn);
-			if (name == null || lastClass == null) continue;
+			if (name != null) { lastName = name; continue; }
 			
-			teMap.put(name, lastClass);			
+			String c = getLdcClass(insn);
+			if (c == null || lastName == null) continue;		
+			
+			teMap.put(lastName, c);			
 		}
 		
 		
 		// 16w32a changed all TE IDs
 		String className = teMap.get("chest");
-		if (className != null) {
+		if (className != null && searchConstantPoolForStrings(className, "container.chest")) {
 			addClassMapping("net/minecraft/tileentity/TileEntityChest", className);
+		}
+		
+		className = teMap.get("furnace");
+		if (className != null && searchConstantPoolForStrings(className, "container.furnace")) {
+			addClassMapping("net/minecraft/tileentity/TileEntityFurnace", className);
 		}
 		
 		
