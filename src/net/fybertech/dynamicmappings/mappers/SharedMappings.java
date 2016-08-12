@@ -1,13 +1,6 @@
 package net.fybertech.dynamicmappings.mappers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
 import net.fybertech.dynamicmappings.DynamicMappings;
 import net.fybertech.dynamicmappings.Mapping;
@@ -10501,6 +10494,31 @@ public class SharedMappings extends MappingsBase {
 		}
 		
 		
+		return true;
+	}
+
+
+	@Mapping(provides = {
+			"net/minecraft/item/Item$ToolMaterial"
+			},
+			depends = {
+			"net/minecraft/item/ItemTool"
+			})
+	public boolean processToolMaterial(){
+		ClassNode item = getClassNodeFromMapping("net/minecraft/item/ItemTool");
+
+		List<FieldNode> fields = new ArrayList<>();
+
+		for(FieldNode field : item.fields){
+			if(!Objects.equals(field.desc, "F") && !Objects.equals(field.desc, "Ljava/util/Set;")){
+                fields.add(field);
+			}
+		}
+
+        if(fields.size() == 1){
+			addClassMapping("net/minecraft/item/Item$ToolMaterial", Type.getType(fields.get(0).desc).getClassName());
+		}
+
 		return true;
 	}
 	
