@@ -286,6 +286,7 @@ net/minecraft/network/PacketBuffer -> es
 net/minecraft/network/play/server/S2DPacketOpenWindow -> gi
 net/minecraft/network/play/server/SPacketUpdateTileEntity -> fy
 net/minecraft/server/MinecraftServer -> net/minecraft/server/MinecraftServer
+net/minecraft/server/gui/IUpdatePlayerListBox -> ld
 net/minecraft/server/integrated/IntegratedServer -> caj
 net/minecraft/server/management/PlayerProfileCache -> mn
 net/minecraft/stats/StatBase -> nu
@@ -1263,6 +1264,7 @@ net/minecraft/entity/EntityLivingBase getHeldItem (Lnet/minecraft/util/MainOrOff
 net/minecraft/entity/EntityLivingBase getHeldMainHandItem ()Lnet/minecraft/item/ItemStack; -> sn cf ()Laeq;
 net/minecraft/entity/EntityLivingBase getHeldOffHandItem ()Lnet/minecraft/item/ItemStack; -> sn cg ()Laeq;
 net/minecraft/entity/EntityLivingBase setHeldItem (Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/item/ItemStack;)V -> sn a (Lqz;Laeq;)V
+net/minecraft/entity/EntityLivingBase setItemInUse (Lnet/minecraft/util/MainOrOffHand;)V -> sn c (Lqz;)V
 net/minecraft/entity/EntityLivingBase teleportTo (DDD)Z -> sn k (DDD)Z
 net/minecraft/entity/monster/EntityCreeper explode ()V -> ze dk ()V
 net/minecraft/entity/player/EntityPlayer canHarvestBlock (Lnet/minecraft/block/state/IBlockState;)Z -> aak b (Lasj;)Z
@@ -1350,7 +1352,10 @@ net/minecraft/item/ItemStack getTagCompound ()Lnet/minecraft/nbt/NBTTagCompound;
 net/minecraft/item/ItemStack getUnlocalizedName ()Ljava/lang/String; -> aeq a ()Ljava/lang/String;
 net/minecraft/item/ItemStack hasDisplayName ()Z -> aeq t ()Z
 net/minecraft/item/ItemStack hasTagCompound ()Z -> aeq o ()Z
+net/minecraft/item/ItemStack isDamageableItemEqual (Lnet/minecraft/item/ItemStack;)Z -> aeq b (Laeq;)Z
 net/minecraft/item/ItemStack isItemEnchanted ()Z -> aeq x ()Z
+net/minecraft/item/ItemStack isItemEqual (Lnet/minecraft/item/ItemStack;)Z -> aeq a (Laeq;)Z
+net/minecraft/item/ItemStack isItemStackDamageable ()Z -> aeq f ()Z
 net/minecraft/item/ItemStack isItemStackEqual (Lnet/minecraft/item/ItemStack;)Z -> aeq d (Laeq;)Z
 net/minecraft/item/ItemStack readFromNBT (Lnet/minecraft/nbt/NBTTagCompound;)V -> aeq <init> (Ldt;)V
 net/minecraft/item/ItemStack setItemDamage (I)V -> aeq b (I)V
@@ -1395,6 +1400,7 @@ net/minecraft/network/play/server/S2DPacketOpenWindow hasSlots ()Z -> gi f ()Z
 net/minecraft/server/MinecraftServer createNewCommandManager ()Lnet/minecraft/command/ServerCommandManager; -> net/minecraft/server/MinecraftServer i ()Lbc;
 net/minecraft/server/MinecraftServer getCommandManager ()Lnet/minecraft/command/ICommandManager; -> net/minecraft/server/MinecraftServer N ()Lm;
 net/minecraft/server/MinecraftServer loadAllWorlds (Ljava/lang/String;Ljava/lang/String;JLnet/minecraft/world/WorldType;Ljava/lang/String;)V -> net/minecraft/server/MinecraftServer a (Ljava/lang/String;Ljava/lang/String;JLaiz;Ljava/lang/String;)V
+net/minecraft/server/gui/IUpdatePlayerListBox update ()V -> ld D_ ()V
 net/minecraft/tileentity/TileEntity addInfoToCrashReport (Lnet/minecraft/crash/CrashReportCategory;)V -> arb a (Lc;)V
 net/minecraft/tileentity/TileEntity addMapping (Ljava/lang/String;Ljava/lang/Class;)V -> arb a (Ljava/lang/String;Ljava/lang/Class;)V
 net/minecraft/tileentity/TileEntity getBlockMetadata ()I -> arb u ()I
