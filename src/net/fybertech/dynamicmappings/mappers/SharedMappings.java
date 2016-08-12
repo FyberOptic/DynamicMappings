@@ -4206,16 +4206,17 @@ public class SharedMappings extends MappingsBase {
 	
 	
 	@Mapping(providesMethods={
-			"net/minecraft/inventory/ICrafting updateCraftingInventory (Lnet/minecraft/inventory/Container;Ljava/util/List;)V",
+			"net/minecraft/inventory/ICrafting updateCraftingInventory (Lnet/minecraft/inventory/Container;Lnet/minecraft/util/MCList;)V",
 			"net/minecraft/inventory/ICrafting sendSlotContents (Lnet/minecraft/inventory/Container;ILnet/minecraft/item/ItemStack;)V",
 			"net/minecraft/inventory/ICrafting sendProgressBarUpdate (Lnet/minecraft/inventory/Container;II)V",
-			"net/minecraft/inventory/ICrafting func_175173_a (Lnet/minecraft/inventory/Container;Lnet/minecraft/inventory/IInventory;)V"
+			"net/minecraft/inventory/ICrafting sendAllWindowProperties (Lnet/minecraft/inventory/Container;Lnet/minecraft/inventory/IInventory;)V"
 			},
 			depends={
 			"net/minecraft/inventory/ICrafting",
 			"net/minecraft/inventory/Container",
 			"net/minecraft/item/ItemStack",
-			"net/minecraft/inventory/IInventory"
+			"net/minecraft/inventory/IInventory",
+			"net/minecraft/util/MCList"
 			})
 	public boolean processICraftingClass()
 	{
@@ -4223,12 +4224,14 @@ public class SharedMappings extends MappingsBase {
 		ClassNode container = getClassNodeFromMapping("net/minecraft/inventory/Container");
 		ClassNode itemStack  = getClassNodeFromMapping("net/minecraft/item/ItemStack");
 		ClassNode iInventory = getClassNodeFromMapping("net/minecraft/inventory/IInventory");
+		ClassNode mcList = getClassNodeFromMapping("net/minecraft/util/MCList");
 		if (!MeddleUtil.notNull(iCrafting, container, itemStack, iInventory)) return false;
 		
-		// void updateCraftingInventory(Container containerToSend, List itemsList);
-		List<MethodNode> methods = getMatchingMethods(iCrafting, null, "(L" + container.name + ";Ljava/util/List;)V");
+		// void updateCraftingInventory(Container containerToSend, MCList itemsList);
+		// 16w32? java list change to MCList
+		List<MethodNode> methods = getMatchingMethods(iCrafting, null, "(L" + container.name + ";L" + mcList.name + ";)V");
 		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/inventory/ICrafting updateCraftingInventory (Lnet/minecraft/inventory/Container;Ljava/util/List;)V",
+			addMethodMapping("net/minecraft/inventory/ICrafting updateCraftingInventory (Lnet/minecraft/inventory/Container;Lnet/minecraft/util/MCList;)V",
 					iCrafting.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
@@ -4249,10 +4252,10 @@ public class SharedMappings extends MappingsBase {
 		}
 		
 		
-		// void func_175173_a(Container p_175173_1_, IInventory p_175173_2_);
+		// void sendAllWindowProperties(Container p_175173_1_, IInventory p_175173_2_);
 		methods = getMatchingMethods(iCrafting, null, "(L" + container.name + ";L" + iInventory.name + ";)V");
 		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/inventory/ICrafting func_175173_a (Lnet/minecraft/inventory/Container;Lnet/minecraft/inventory/IInventory;)V",
+			addMethodMapping("net/minecraft/inventory/ICrafting sendAllWindowProperties (Lnet/minecraft/inventory/Container;Lnet/minecraft/inventory/IInventory;)V",
 					iCrafting.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
