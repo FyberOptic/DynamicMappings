@@ -8903,14 +8903,15 @@ public class SharedMappings extends MappingsBase {
 	
 
 	@Mapping(provides={
-			"net/minecraft/inventory/InventoryCrafting"			
+			"net/minecraft/inventory/InventoryCrafting",
+			"net/minecraft/util/MCList"
 			},
 			providesMethods={
 			"net/minecraft/item/crafting/IRecipe getRecipeSize ()I",
 			"net/minecraft/item/crafting/IRecipe getRecipeOutput ()Lnet/minecraft/item/ItemStack;",
 			"net/minecraft/item/crafting/IRecipe matches (Lnet/minecraft/inventory/InventoryCrafting;Lnet/minecraft/world/World;)Z",
 			"net/minecraft/item/crafting/IRecipe getCraftingResult (Lnet/minecraft/inventory/InventoryCrafting;)Lnet/minecraft/item/ItemStack;",
-			"net/minecraft/item/crafting/IRecipe getRemainingItems (Lnet/minecraft/inventory/InventoryCrafting;)[Lnet/minecraft/item/ItemStack;"
+			"net/minecraft/item/crafting/IRecipe getRemainingItems (Lnet/minecraft/inventory/InventoryCrafting;)Lnet/minecraft/util/MCList;"
 			},
 			depends={
 			"net/minecraft/item/crafting/IRecipe",
@@ -8967,15 +8968,22 @@ public class SharedMappings extends MappingsBase {
 			addMethodMapping("net/minecraft/item/crafting/IRecipe getCraftingResult (Lnet/minecraft/inventory/InventoryCrafting;)Lnet/minecraft/item/ItemStack;", 
 					iRecipe.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
-		
-		
-	    // ItemStack[] getRemainingItems(InventoryCrafting inv);
-		methods = getMatchingMethods(iRecipe, null, "(L" + inventoryCrafting_name + ";)[L" + itemStack.name + ";");
-		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/item/crafting/IRecipe getRemainingItems (Lnet/minecraft/inventory/InventoryCrafting;)[Lnet/minecraft/item/ItemStack;", 
-					iRecipe.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+
+		// ItemStack[] getRemainingItems(InventoryCrafting inv);
+		// MCList I don't exactly know why mojang do this
+		for(MethodNode method : iRecipe.methods){
+			if(method.desc.startsWith("(L" + inventoryCrafting_name + ";)") && !method.desc.endsWith(itemStack.name + ";")){
+				String returnType = Type.getReturnType(method.desc).getClassName();
+				addClassMapping("net/minecraft/util/MCList", returnType);
+				methods = getMatchingMethods(iRecipe, null, "(L" + inventoryCrafting_name + ";)L" + returnType + ";");
+				if (methods.size() == 1) {
+					addMethodMapping("net/minecraft/item/crafting/IRecipe getRemainingItems (Lnet/minecraft/inventory/InventoryCrafting;)Lnet/minecraft/util/MCList;",
+							iRecipe.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+				}
+			}
 		}
-		
+
+
 		
 		return true;
 	}
