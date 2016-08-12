@@ -1441,9 +1441,21 @@ public class SharedMappings extends MappingsBase {
 	@Mapping(provides={
 			"net/minecraft/tileentity/TileEntityChest",
 			"net/minecraft/tileentity/TileEntityFurnace",
+			"net/minecraft/tileentity/TileEntityEnderChest",
+			"net/minecraft/tileentity/TileEntityJukebox",
+			"net/minecraft/tileentity/TileEntityDispenser",
+			"net/minecraft/tileentity/TileEntityDropper",
+			"net/minecraft/tileentity/TileEntitySign",
+			"net/minecraft/tileentity/TileEntityMobSpawner",
+			"net/minecraft/tileentity/TileEntityNoteblock",
+			"net/minecraft/tileentity/TileEntityPiston",
+			"net/minecraft/tileentity/TileEntityBrewingStand",
+			"net/minecraft/tileentity/TileEntityEnchantingTable",
+			"net/minecraft/tileentity/TileEntityEndPortal",
 			"net/minecraft/network/PacketBuffer",
 			"net/minecraft/network/Packet",
-			"net/minecraft/crash/CrashReportCategory"
+			"net/minecraft/crash/CrashReportCategory",
+			"net/minecraft/inventory/ISidedInventory"
 			},
 			providesFields={
 			"net/minecraft/tileentity/TileEntity worldObj Lnet/minecraft/world/World;",
@@ -1507,21 +1519,65 @@ public class SharedMappings extends MappingsBase {
 			teMap.put(lastName, c);			
 		}
 		
-		
+
 		// 16w32a changed all TE IDs
-		String className = teMap.get("chest");
-		if (className != null && searchConstantPoolForStrings(className, "container.chest")) {
-			addClassMapping("net/minecraft/tileentity/TileEntityChest", className);
+		for(Map.Entry<String, String> entry : teMap.entrySet()){
+			switch(entry.getKey()){
+				case "chest":{
+					addClassMapping("net/minecraft/tileentity/TileEntityChest", entry.getValue());
+					break;
+				}
+				case "furnace":{
+					addClassMapping("net/minecraft/tileentity/TileEntityFurnace", entry.getValue());
+					break;
+				}
+				case "ender_chest":{
+					addClassMapping("net/minecraft/tileentity/TileEntityEnderChest", entry.getValue());
+					break;
+				}
+				case "jukebox":{
+					addClassMapping("net/minecraft/tileentity/TileEntityJukebox", entry.getValue());
+					break;
+				}
+				case "dispenser":{
+					addClassMapping("net/minecraft/tileentity/TileEntityDispenser", entry.getValue());
+					break;
+				}
+				case "dropper":{
+					addClassMapping("net/minecraft/tileentity/TileEntityDropper", entry.getValue());
+					break;
+				}
+				case "sign":{
+					addClassMapping("net/minecraft/tileentity/TileEntitySign", entry.getValue());
+					break;
+				}
+				case "mob_spawner":{
+					addClassMapping("net/minecraft/tileentity/TileEntityMobSpawner", entry.getValue());
+					break;
+				}
+				case "noteblock":{
+					addClassMapping("net/minecraft/tileentity/TileEntityNoteblock", entry.getValue());
+					break;
+				}
+				case "piston":{
+					addClassMapping("net/minecraft/tileentity/TileEntityPiston", entry.getValue());
+					break;
+				}
+				case "brewing_stand":{
+					addClassMapping("net/minecraft/tileentity/TileEntityBrewingStand", entry.getValue());
+					break;
+				}
+				case "enchanting_table":{
+					addClassMapping("net/minecraft/tileentity/TileEntityEnchantingTable", entry.getValue());
+					break;
+				}
+				case "end_portal":{
+					addClassMapping("net/minecraft/tileentity/TileEntityEndPortal", entry.getValue());
+					break;
+				}
+			}
 		}
-		
-		className = teMap.get("furnace");
-		if (className != null && searchConstantPoolForStrings(className, "container.furnace")) {
-			addClassMapping("net/minecraft/tileentity/TileEntityFurnace", className);
-		}
-		
-		
-		
-		
+
 		// protected World worldObj
 		List<FieldNode> fields = getMatchingFields(tileEntity, null, "L" + world.name + ";");
 		if (fields.size() == 1) {
@@ -1689,8 +1745,8 @@ public class SharedMappings extends MappingsBase {
 			
 			if (t.getReturnType().getSort() != Type.VOID) continue;			
 			if (args.length != 1) continue;
-			
-			className = args[0].getClassName();
+
+			String className = args[0].getClassName();
 			if (searchConstantPoolForStrings(className, "(Error finding world loc)", "Details:")) {
 				addClassMapping("net/minecraft/crash/CrashReportCategory", className);
 				methods.add(method);
@@ -1812,8 +1868,19 @@ public class SharedMappings extends MappingsBase {
 		// public double getDistanceSq(double x, double y, double z)
 	    // @ClientOnly
 	    // public double getMaxRenderDistanceSquared()
-		
-		
+
+		// provides ISidedInventory
+		ClassNode tileEntityBrewingStand = getClassNodeFromMapping("net/minecraft/tileentity/TileEntityBrewingStand");
+		if(tileEntityBrewingStand != null){
+			if(tileEntityBrewingStand.interfaces.size() == 2){
+				for(String iface : tileEntityBrewingStand.interfaces){
+					if(getClassNode(iface).methods.size() > 1){ // 1 because ITickable has only one method
+						addClassMapping("net/minecraft/inventory/ISidedInventory", iface);
+					}
+				}
+			}
+		}
+
 		return true;
 	}
 	
