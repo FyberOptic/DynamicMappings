@@ -3907,7 +3907,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/entity/player/EntityPlayer displayGui (Lnet/minecraft/world/IInteractionObject;)V"
 			},
 			dependsMethods={
-			"net/minecraft/block/Block onBlockActivated (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumFacing;FFF)Z"
+			"net/minecraft/block/Block onBlockActivated (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/util/EnumFacing;FFF)Z"
 			},
 			depends={
 			"net/minecraft/block/BlockAnvil",
@@ -3919,7 +3919,7 @@ public class SharedMappings extends MappingsBase {
 		ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
 		if (blockAnvil == null || entityPlayer == null) return false;
 
-		MethodNode onBlockActivated = getMethodNodeFromMapping(blockAnvil, "net/minecraft/block/Block onBlockActivated (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumFacing;FFF)Z");
+		MethodNode onBlockActivated = getMethodNodeFromMapping(blockAnvil, "net/minecraft/block/Block onBlockActivated (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/util/EnumFacing;FFF)Z");
 		if (onBlockActivated == null) return false;
 
 		String iInteractionObject = null;
@@ -4710,7 +4710,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/init/Sounds"
 			},
 			dependsMethods={
-			"net/minecraft/item/Item onItemRightClick (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;)Lnet/minecraft/util/ObjectActionHolder;",
+			"net/minecraft/item/Item onItemRightClick (Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;)Lnet/minecraft/util/ObjectActionHolder;",
 			},
 			depends={
 			"net/minecraft/item/Item",
@@ -4732,10 +4732,11 @@ public class SharedMappings extends MappingsBase {
 		ClassNode entityLivingBase = getClassNodeFromMapping("net/minecraft/entity/EntityLivingBase");
 		ClassNode hand = getClassNodeFromMapping("net/minecraft/util/MainOrOffHand");
 		ClassNode sound = getClassNodeFromMapping("net/minecraft/util/Sound");
+		
 		if (!MeddleUtil.notNull(item, itemBow, itemStack, world, entityPlayer, entityLivingBase, hand, sound)) return false;
 		
 		// public void onPlayerStoppedUsing(ItemStack stack, World worldIn, EntityLivingBase playerIn, int timeLeft)
-		List<MethodNode> methods = getMatchingMethods(itemBow, null, assembleDescriptor("(", itemStack, world, entityLivingBase, "I)V"));
+		List<MethodNode> methods = getMatchingMethods(itemBow, null, assembleDescriptor("(", itemStack, world, entityLivingBase, "I)V"));		
 		if (methods.size() == 1) {
 			addMethodMapping("net/minecraft/item/Item onPlayerStoppedUsing (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;I)V",
 					item.name + " " + methods.get(0).name + " " + methods.get(0).desc);
@@ -5000,7 +5001,7 @@ public class SharedMappings extends MappingsBase {
 			},
 			providesMethods={
 			"net/minecraft/block/Block getIdFromBlock (Lnet/minecraft/block/Block;)I",
-			"net/minecraft/block/Block onBlockActivated (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumFacing;FFF)Z",
+			"net/minecraft/block/Block onBlockActivated (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/util/EnumFacing;FFF)Z",
 			"net/minecraft/block/Block collisionRayTrace (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;)Lnet/minecraft/util/MovingObjectPosition;",
 			"net/minecraft/block/Block registerBlock (ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/block/Block;)V",
 			"net/minecraft/block/Block registerBlock (ILjava/lang/String;Lnet/minecraft/block/Block;)V",
@@ -5159,11 +5160,12 @@ public class SharedMappings extends MappingsBase {
 		
 
 		// public boolean onBlockActivated(World, BlockPos, IBlockState, EntityPlayer, MainOrOffHand, ItemStack, EnumFacing, float, float, float)
-		String descriptor = assembleDescriptor("(", world, blockPos, iBlockState, entityPlayer, mainOrOffHand, itemStack, enumFacing, "FFF)Z");
-		methods = getMatchingMethods(block,  null,  descriptor);
+		// 16w32a removed itemstack
+		String descriptor = assembleDescriptor("(", world, blockPos, iBlockState, entityPlayer, mainOrOffHand, enumFacing, "FFF)Z");
+		methods = getMatchingMethods(block,  null,  descriptor);		
 		if (methods.size() == 1) {
 			MethodNode method = methods.get(0);
-			addMethodMapping("net/minecraft/block/Block onBlockActivated (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumFacing;FFF)Z",
+			addMethodMapping("net/minecraft/block/Block onBlockActivated (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/util/EnumFacing;FFF)Z",
 					block.name + " " + method.name + " " + method.desc);
 		}
 
@@ -5732,6 +5734,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/material/Material",
 			"net/minecraft/block/material/MapColor",
 			"net/minecraft/block/BlockSoundType",
+			"net/minecraft/world/Explosion",
 			"net/minecraft/entity/EntityLivingBase",
 			"net/minecraft/util/EnumFacing",
 			"net/minecraft/entity/Entity",
@@ -5762,10 +5765,10 @@ public class SharedMappings extends MappingsBase {
 		ClassNode vec3 = getClassNodeFromMapping("net/minecraft/util/Vec3");
 		ClassNode aabb = getClassNodeFromMapping("net/minecraft/util/AxisAlignedBB");
 		ClassNode iBlockWrapper = getClassNodeFromMapping("net/minecraft/block/state/IBlockWrapper");
+
 		if (!MeddleUtil.notNull(block, item, iBlockState, blockState, blockPos, world, iBlockAccess, creativeTabs,
 				entityPlayer, tileEntity, itemStack, material, mapColor, blockSoundType, explosion, entityLivingBase,
 				enumFacing, entity, vec3, aabb, iBlockWrapper)) return false;
-		
 		
 		// public Material getMaterial(IBlockState)
 		List<MethodNode> methods = getMatchingMethods(block, null, assembleDescriptor("(", iBlockState, ")", material));		
@@ -7185,7 +7188,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/state/IBlockWrapper isNormalCube ()Z"
 			},
 			dependsMethods={
-			"net/minecraft/block/Block onBlockActivated (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumFacing;FFF)Z"
+			"net/minecraft/block/Block onBlockActivated (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/util/EnumFacing;FFF)Z"
 			},
 			depends={
 			"net/minecraft/block/BlockChest",
@@ -7207,7 +7210,7 @@ public class SharedMappings extends MappingsBase {
 		ClassNode iBlockWrapper = getClassNodeFromMapping("net/minecraft/block/state/IBlockWrapper");
 		if (!MeddleUtil.notNull(blockChest, entityPlayer, world, blockPos, ocelot, iBlockState, iBlockWrapper)) return false;
 
-		MethodNode onBlockActivated = getMethodNodeFromMapping(blockChest, "net/minecraft/block/Block onBlockActivated (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumFacing;FFF)Z");
+		MethodNode onBlockActivated = getMethodNodeFromMapping(blockChest, "net/minecraft/block/Block onBlockActivated (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/util/EnumFacing;FFF)Z");
 		if (onBlockActivated == null) return false;
 
 		for (AbstractInsnNode insn = onBlockActivated.instructions.getFirst(); insn != null; insn = insn.getNext()) {

@@ -252,9 +252,15 @@ public class DynamicMappings
 			{
 				System.out.println("Unmet mapping dependencies in " + mappingsClass.getName() + "!");
 				for (MappingMethod mm : mappingMethods) {
-					System.out.println("  Method: " + mm.method.getName());
+					System.out.println("  Mapper Method: " + mm.method.getName());
 					for (String depend : mm.depends) {
-						if (!classMappings.keySet().contains(depend)) System.out.println("    " + depend);
+						if (!classMappings.keySet().contains(depend)) System.out.println("    Class: " + depend);						
+					}
+					for (String depend : mm.dependsFields) {
+						if (!fieldMappings.keySet().contains(depend)) System.out.println("    Field: " + depend);
+					}
+					for (String depend : mm.dependsMethods) {
+						if (!methodMappings.keySet().contains(depend)) System.out.println("    Method: " + depend);
 					}
 				}
 				return false;
