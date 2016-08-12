@@ -4213,7 +4213,7 @@ public class SharedMappings extends MappingsBase {
 		ClassNode itemStack  = getClassNodeFromMapping("net/minecraft/item/ItemStack");
 		ClassNode iInventory = getClassNodeFromMapping("net/minecraft/inventory/IInventory");
 		ClassNode mcList = getClassNodeFromMapping("net/minecraft/util/MCList");
-		if (!MeddleUtil.notNull(iCrafting, container, itemStack, iInventory)) return false;
+		if (!MeddleUtil.notNull(iCrafting, container, itemStack, iInventory, mcList)) return false;
 		
 		// void updateCraftingInventory(Container containerToSend, MCList itemsList);
 		// 16w32? java list change to MCList
