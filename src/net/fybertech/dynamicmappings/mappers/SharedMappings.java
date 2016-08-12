@@ -7805,7 +7805,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/inventory/InventoryBasic slotsCount I",
 			"net/minecraft/inventory/InventoryBasic inventoryTitle Ljava/lang/String;",
 			"net/minecraft/inventory/InventoryBasic hasCustomName Z",
-			"net/minecraft/inventory/InventoryBasic inventoryContent [Lnet/minecraft/item/ItemStack;"
+			"net/minecraft/inventory/InventoryBasic inventoryContent Lnet/minecraft/util/MCList;"
 	},
 	providesMethods={
 			"net/minecraft/inventory/IInventory getSizeInventory ()I",
@@ -7826,7 +7826,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/inventory/IInventory",
 			"net/minecraft/inventory/InventoryBasic",
 			"net/minecraft/item/ItemStack",
-			"net/minecraft/entity/player/EntityPlayer"
+			"net/minecraft/entity/player/EntityPlayer",
+			"net/minecraft/util/MCList"
 	})
 	public boolean processInventoryBasicClass()
 	{
@@ -7834,7 +7835,8 @@ public class SharedMappings extends MappingsBase {
 		ClassNode inventoryBasic = getClassNodeFromMapping("net/minecraft/inventory/InventoryBasic");
 		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
 		ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
-		if (!MeddleUtil.notNull(iInventory, inventoryBasic, itemStack, entityPlayer)) return false;
+		ClassNode mcList = getClassNodeFromMapping("net/minecraft/util/MCList");
+		if (!MeddleUtil.notNull(iInventory, inventoryBasic, itemStack, entityPlayer, mcList)) return false;
 
 		String slotsCountField = null;
 		String inventoryTitleField = null;
@@ -7862,11 +7864,18 @@ public class SharedMappings extends MappingsBase {
 					inventoryBasic.name + " " + hasCustomNameField + " Z");
 		}
 
-		fields = getMatchingFields(inventoryBasic, null, "[L" + itemStack.name + ";");
+		// 16w32? changed java list to MCList
+		fields = getMatchingFields(inventoryBasic, null, "L" + mcList.name + ";");
 		if (fields.size() == 1) {
-			inventoryContentsField = fields.get(0).name;
-			addFieldMapping("net/minecraft/inventory/InventoryBasic inventoryContent [Lnet/minecraft/item/ItemStack;",
-					inventoryBasic.name + " " + inventoryContentsField + " [L" + itemStack.name + ";");
+			addFieldMapping("net/minecraft/inventory/InventoryBasic inventoryContent Lnet/minecraft/util/MCList;",
+					inventoryBasic.name + " " + fields.get(0).name + " " + fields.get(0).desc);
+		}
+
+		// changeListener
+		fields = getMatchingFields(inventoryBasic, null, "Ljava/util/List;");
+		if(fields.size() == 1){
+			addFieldMapping("net/minecraft/inventory/InventoryBasic changeListener Ljava/util/List;",
+					inventoryBasic.name + " " + fields.get(0).name + " " + fields.get(0).desc);
 		}
 
 
@@ -7926,20 +7935,18 @@ public class SharedMappings extends MappingsBase {
 		if (methods.size() != 2) return false;
 		for (MethodNode method : methods)
 		{
-			boolean foundStore = false;
-			boolean foundLength = false;
+			short iLoadCounter = 0;
 			for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
-				if (insn.getOpcode() == Opcodes.AASTORE) foundStore = true;
-				else if (insn.getOpcode() == Opcodes.ARRAYLENGTH) foundLength = true;
+				if(insn.getOpcode() == Opcodes.ILOAD) iLoadCounter++;
 			}
 
-			// public ItemStack getStackInSlot(int)
-			if (foundLength && !foundStore) {
+            if(iLoadCounter == 3){
+				// public ItemStack getStackInSlot(int)
 				addMethodMapping("net/minecraft/inventory/IInventory getStackInSlot (I)Lnet/minecraft/item/ItemStack;",
 						iInventory.name + " " + method.name + " " + method.desc);
-			}
-			// ItemStack getStackInSlotOnClosing(int)
-			else if (foundStore && !foundLength) {
+            }
+            if(iLoadCounter == 2){
+				// ItemStack getStackInSlotOnClosing(int)
 				addMethodMapping("net/minecraft/inventory/IInventory getStackInSlotOnClosing (I)Lnet/minecraft/item/ItemStack;",
 						iInventory.name + " " + method.name + " " + method.desc);
 			}
@@ -7955,7 +7962,7 @@ public class SharedMappings extends MappingsBase {
 				if (insn.getOpcode() == Opcodes.GETFIELD) {
 					FieldInsnNode fn = (FieldInsnNode)insn;
 					if (fn.owner.equals(inventoryBasic.name) && fn.desc.equals("Ljava/util/List;")) hasList = true;
-					if (fn.owner.equals(inventoryBasic.name) && fn.desc.equals("[L" + itemStack.name + ";")) hasArray = true;
+					if (fn.owner.equals(inventoryBasic.name) && fn.desc.equals("L" + mcList.name + ";")) hasArray = true;
 				}
 			}
 
@@ -8010,32 +8017,32 @@ public class SharedMappings extends MappingsBase {
 			addMethodMapping("net/minecraft/inventory/IInventory setField (II)V",
 					iInventory.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
-		
-		
+
+
 		return true;
 	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
