@@ -1456,7 +1456,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/tileentity/TileEntity addMapping (Ljava/lang/String;Ljava/lang/Class;)V",
 			"net/minecraft/tileentity/TileEntity getWorld ()Lnet/minecraft/world/World;",
 			"net/minecraft/tileentity/TileEntity setWorldObj (Lnet/minecraft/world/World;)V",
-			"net/minecraft/tileentity/TileEntity createAndLoadEntity (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/tileentity/TileEntity;",
+			"net/minecraft/tileentity/TileEntity setWorldCreate (Lnet/minecraft/world/World;)V",
+			"net/minecraft/tileentity/TileEntity createAndLoadEntity (Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/tileentity/TileEntity;",
 			"net/minecraft/tileentity/TileEntity getBlockMetadata ()I",
 			"net/minecraft/tileentity/TileEntity getPos ()Lnet/minecraft/util/BlockPos;",
 			"net/minecraft/tileentity/TileEntity setPos (Lnet/minecraft/util/BlockPos;)V",
@@ -1577,19 +1578,29 @@ public class SharedMappings extends MappingsBase {
 		
 		// public void setWorldObj(World worldIn)
 		methods = getMatchingMethods(tileEntity, null, "(L" + world.name + ";)V");
-		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/tileentity/TileEntity setWorldObj (Lnet/minecraft/world/World;)V",
-					tileEntity.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		for(MethodNode method : methods){
+			boolean isSetWorldObj = false;
+			for(AbstractInsnNode ins : method.instructions.toArray()){
+				if(!isSetWorldObj && ins.getOpcode() == Opcodes.PUTFIELD) isSetWorldObj = true;
+			}
+			if(isSetWorldObj){
+				addMethodMapping("net/minecraft/tileentity/TileEntity setWorldObj (Lnet/minecraft/world/World;)V",
+						tileEntity.name + " " + method.name + " " + method.desc);
+			} else {
+				addMethodMapping("net/minecraft/tileentity/TileEntity setWorldCreate (Lnet/minecraft/world/World;)V",
+						tileEntity.name + " " + method.name + " " + method.desc);
+			}
 		}
 		
 		
 		// public static TileEntity createAndLoadEntity(NBTTagCompound nbt)
 		// CHANGED in 15w38b
 		// public static TileEntity createAndLoadEntity(MinecraftServer serevr, NBTTagCompound nbt)
-		// CHANGED back in 1.9.3-preX		
-		methods = getMatchingMethods(tileEntity, null, assembleDescriptor("(", tagCompound, ")", tileEntity));
+		// CHANGED back in 1.9.3-preX
+		// 1.10 added parameter World
+		methods = getMatchingMethods(tileEntity, null, assembleDescriptor("(", world,  tagCompound, ")", tileEntity));
 		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/tileentity/TileEntity createAndLoadEntity (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/tileentity/TileEntity;",
+			addMethodMapping("net/minecraft/tileentity/TileEntity createAndLoadEntity (Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/tileentity/TileEntity;",
 					tileEntity.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
