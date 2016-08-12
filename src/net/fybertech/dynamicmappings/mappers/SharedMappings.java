@@ -1822,9 +1822,10 @@ public class SharedMappings extends MappingsBase {
 	@Mapping(provides={
 			"net/minecraft/inventory/ContainerChest",
 			"net/minecraft/tileentity/TileEntityLockable",
-			"net/minecraft/server/gui/IUpdatePlayerListBox"
+			"net/minecraft/util/ITickable"
 			},
 			providesMethods={
+				"net/minecraft/util/ITickable update ()V"
 			},
 			depends={
 			"net/minecraft/tileentity/TileEntity",
@@ -1845,20 +1846,13 @@ public class SharedMappings extends MappingsBase {
 		if (!MeddleUtil.notNull(tileEntity, tileEntityChest, inventoryPlayer, entityPlayer, container, iInventory)) return false;
 		
 			
-		
-		if (tileEntityChest.interfaces.size() == 2) {
-			String iUpdatePlayerListBox_name = null;
-			int count = 0;
-			for (String iface : tileEntityChest.interfaces) {
-				if (iface.equals(iInventory.name)) continue;
-				count++;
-				iUpdatePlayerListBox_name = iface;
-			}
-			if (count == 1) {
-				ClassNode iUpdatePlayerListBox = getClassNode(iUpdatePlayerListBox_name);
-				if (iUpdatePlayerListBox.methods.size() == 1) {
-					addClassMapping("net/minecraft/server/gui/IUpdatePlayerListBox", iUpdatePlayerListBox_name);
-				}
+		//16w32? no IInventory interface anymore, renamed IUpdatePlayerListBox to the new name ITickable
+		if (tileEntityChest.interfaces.size() == 1) {
+			String iTickable = tileEntityChest.interfaces.get(0);
+			addClassMapping("net/minecraft/util/ITickable", iTickable);
+			ClassNode iTickableNode = getClassNode(iTickable);
+			if (iTickableNode.methods.size() == 1) {
+				addMethodMapping("net/minecraft/util/ITickable update ()V", iTickableNode.name + " " + iTickableNode.methods.get(0).name + " " + iTickableNode.methods.get(0).desc);
 			}
 		}		
 		
