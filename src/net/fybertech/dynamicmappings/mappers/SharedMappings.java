@@ -4278,7 +4278,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/inventory/Slot onCrafting (Lnet/minecraft/item/ItemStack;I)V",
 			"net/minecraft/inventory/Slot onCrafting (Lnet/minecraft/item/ItemStack;)V",
 			"net/minecraft/inventory/Slot putStack (Lnet/minecraft/item/ItemStack;)V",
-			"net/minecraft/inventory/Slot onPickupFromSlot (Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)V",
+			"net/minecraft/inventory/Slot onPickupFromSlot (Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/ItemStack;",
 			"net/minecraft/inventory/Slot isItemValid (Lnet/minecraft/item/ItemStack;)Z",
 			"net/minecraft/inventory/Slot getStack ()Lnet/minecraft/item/ItemStack;",
 			"net/minecraft/inventory/Slot getHasStack ()Z",
@@ -4390,9 +4390,9 @@ public class SharedMappings extends MappingsBase {
 		}
 		
 		// public void onPickupFromSlot(EntityPlayer, ItemStack)
-		methods = getMatchingMethods(slot, null, assembleDescriptor("(",entityPlayer, itemStack,")V"));
+		methods = getMatchingMethods(slot, null, assembleDescriptor("(",entityPlayer, itemStack,")", itemStack));
 		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/inventory/Slot onPickupFromSlot (Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)V",
+			addMethodMapping("net/minecraft/inventory/Slot onPickupFromSlot (Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/ItemStack;",
 					slot.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
@@ -8588,15 +8588,17 @@ public class SharedMappings extends MappingsBase {
 		
 		
 		// public int getItemDamage()
+		// TODO find a better solution for splitting the two exact same methods
 		List<MethodNode> methods = getMatchingMethods(itemStack, null, "()I");
 		for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
 			MethodNode method = it.next();
 			if (!matchOpcodeSequence(method.instructions.getFirst(), Opcodes.ALOAD, Opcodes.GETFIELD, Opcodes.IRETURN) || method.name.equals(getMetadata.name)) { 
 				it.remove(); 
 				continue; 
-			}			
+			}
+
 		}
-		if (methods.size() == 1) {
+		if (methods.size() == 2) {
 			addMethodMapping("net/minecraft/item/ItemStack getItemDamage ()I", itemStack.name + " " + methods.get(0).name + " ()I");
 		}
 		
