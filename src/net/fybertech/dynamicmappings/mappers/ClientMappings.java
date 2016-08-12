@@ -2839,16 +2839,16 @@ public class ClientMappings extends MappingsBase
 	
 	@Mapping(providesMethods={
 			"net/minecraft/block/Block getMixedBrightnessForBlock (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)I",
-			"net/minecraft/block/Block getSelectedBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
+			"net/minecraft/block/Block getSelectedBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
 			"net/minecraft/block/Block shouldSideBeRendered (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z",
 			"net/minecraft/block/Block randomDisplayTick (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Ljava/util/Random;)V",
-			"net/minecraft/block/Block getSubBlocks (Lnet/minecraft/item/Item;Lnet/minecraft/creativetab/CreativeTabs;Ljava/util/List;)V",
+			"net/minecraft/block/Block getSubBlocks (Lnet/minecraft/item/Item;Lnet/minecraft/creativetab/CreativeTabs;Lnet/minecraft/util/MCList;)V",
 			"net/minecraft/block/Block getCreativeTabToDisplayOn ()Lnet/minecraft/creativetab/CreativeTabs;",
 			"net/minecraft/block/Block getBlockLayer ()Lnet/minecraft/util/EnumWorldBlockLayer;",
 			//"net/minecraft/block/Block colorMultiplier (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;I)I"
 			},
 			dependsMethods={
-			"net/minecraft/block/Block getCollisionBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;"
+			"net/minecraft/block/Block getCollisionBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;"
 			},
 			depends={
 			"net/minecraft/block/Block",
@@ -2860,7 +2860,8 @@ public class ClientMappings extends MappingsBase
 			"net/minecraft/util/EnumFacing",
 			"net/minecraft/item/Item",
 			"net/minecraft/creativetab/CreativeTabs",
-			"net/minecraft/util/EnumWorldBlockLayer"
+			"net/minecraft/util/EnumWorldBlockLayer",
+			"net/minecraft/util/MCList"
 			})
 	public boolean processBlockClass()
 	{
@@ -2874,8 +2875,9 @@ public class ClientMappings extends MappingsBase
 		ClassNode item = getClassNodeFromMapping("net/minecraft/item/Item");
 		ClassNode creativeTabs = getClassNodeFromMapping("net/minecraft/creativetab/CreativeTabs");
 		ClassNode enumWorldBlockLayer = getClassNodeFromMapping("net/minecraft/util/EnumWorldBlockLayer");
+		ClassNode mcList = getClassNodeFromMapping("net/minecraft/util/MCList");
 		if (!MeddleUtil.notNull(block, iBlockAccess, blockPos, world, aabb, enumFacing, item, creativeTabs,
-				enumWorldBlockLayer)) return false;
+				enumWorldBlockLayer, mcList)) return false;
 		
 		// public int getMixedBrightnessForBlock(IBlockState state, IBlockAccess worldIn, BlockPos pos)
 		List<MethodNode> methods = DynamicMappings.getMatchingMethods(block, null, DynamicMappings.assembleDescriptor("(", iBlockState, iBlockAccess, blockPos, ")I"));
@@ -2885,17 +2887,17 @@ public class ClientMappings extends MappingsBase
 		}
 		
 		
-		MethodNode getCollisionBoundingBox = getMethodNodeFromMapping(block, "net/minecraft/block/Block getCollisionBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;");
+		MethodNode getCollisionBoundingBox = getMethodNodeFromMapping(block, "net/minecraft/block/Block getCollisionBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;");
 		
 		// public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World worldIn, BlockPos pos)
-		methods = getMatchingMethods(block, null, assembleDescriptor("(", iBlockState, world, blockPos, ")", aabb));
+		methods = getMatchingMethods(block, null, assembleDescriptor("(", iBlockState, iBlockAccess, blockPos, ")", aabb));
 		if (methods.size() == 2 && getCollisionBoundingBox != null) {
 			for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
 				MethodNode method = it.next();
 				if (method.name.equals(getCollisionBoundingBox.name)) it.remove();
 			}
 			if (methods.size() == 1) {
-				addMethodMapping("net/minecraft/block/Block getSelectedBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
+				addMethodMapping("net/minecraft/block/Block getSelectedBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
 						block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 			}
 		}
@@ -2918,9 +2920,9 @@ public class ClientMappings extends MappingsBase
 		
 		
 		// public void getSubBlocks(Item itemIn, CreativeTabs tab, List list)
-		methods = getMatchingMethods(block, null, assembleDescriptor("(", item, creativeTabs, "Ljava/util/List;)V"));
+		methods = getMatchingMethods(block, null, assembleDescriptor("(", item, creativeTabs, mcList, ")V"));
 		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/block/Block getSubBlocks (Lnet/minecraft/item/Item;Lnet/minecraft/creativetab/CreativeTabs;Ljava/util/List;)V",
+			addMethodMapping("net/minecraft/block/Block getSubBlocks (Lnet/minecraft/item/Item;Lnet/minecraft/creativetab/CreativeTabs;Lnet/minecraft/util/MCList;)V",
 					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
