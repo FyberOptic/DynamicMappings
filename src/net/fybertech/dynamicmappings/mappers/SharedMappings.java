@@ -1,19 +1,9 @@
 package net.fybertech.dynamicmappings.mappers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
-import net.fybertech.dynamicmappings.DynamicMappings;
-import net.fybertech.dynamicmappings.Mapping;
-import net.fybertech.dynamicmappings.MethodCallIterator;
+import net.fybertech.dynamicmappings.*;
 import net.fybertech.dynamicmappings.MethodCallIterator.MethodCall;
-import net.fybertech.dynamicmappings.MethodCallVisitor;
 import net.fybertech.meddle.MeddleUtil;
 
 import org.objectweb.asm.Opcodes;
@@ -22,12 +12,8 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FieldNode;
-import org.objectweb.asm.tree.FrameNode;
-import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
-import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
-import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TableSwitchInsnNode;
@@ -5312,8 +5298,8 @@ public class SharedMappings extends MappingsBase {
 			addMethodMapping("net/minecraft/block/Block collisionRayTrace (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;)Lnet/minecraft/util/MovingObjectPosition;",
 					block.name + " " + method.name + " " + method.desc);
 		}
-		
-		
+
+
 		methods = getMatchingMethods(block, null, "(I)L" + iBlockState.name + ";");
 		if (methods.size() == 2) {
 			for (MethodNode method : methods) {
@@ -5618,8 +5604,8 @@ public class SharedMappings extends MappingsBase {
 			addFieldMapping("net/minecraft/block/Block blockState Lnet/minecraft/block/state/BlockState;",
 					block.name + " " + fields.get(0).name + " " + fields.get(0).desc);
 		}
-		
-		
+
+
 		// public static int getStateId(IBlockState)
 		methods = getMatchingMethods(block, null, "(L" + iBlockState.name + ";)I");
 		methods = removeMethodsWithoutFlags(methods, Opcodes.ACC_STATIC);
@@ -5887,6 +5873,7 @@ public class SharedMappings extends MappingsBase {
 		ClassNode vec3 = getClassNodeFromMapping("net/minecraft/util/Vec3");
 		ClassNode aabb = getClassNodeFromMapping("net/minecraft/util/AxisAlignedBB");
 		ClassNode iBlockWrapper = getClassNodeFromMapping("net/minecraft/block/state/IBlockWrapper");
+		ClassNode mop = getClassNodeFromMapping("net/minecraft/util/MovingObjectPosition");
 
 		if (!MeddleUtil.notNull(block, item, iBlockState, blockState, blockPos, world, iBlockAccess, creativeTabs,
 				entityPlayer, tileEntity, itemStack, material, mapColor, blockSoundType, explosion, entityLivingBase,
@@ -5904,8 +5891,15 @@ public class SharedMappings extends MappingsBase {
 						block.name + " " + nodes.get(0).name + " " + nodes.get(0).desc);
 			}
 		}
-		
-		
+
+
+		methods = getMatchingMethods(block, null, assembleDescriptor("(", blockPos, vec3, vec3, aabb, ")", mop));
+		if(methods.size() == 1){
+			addMethodMapping("net/minecraft/block/Block collisionRayTrace (Lnet/minecraft/block/Block;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/AxisAlignedBB;)Lnet/minecraft/util/MovingObjectPosition;",
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+
+
 		// public MapColor getMapColor(IBlockState state)
 		methods = getMatchingMethods(block, null, assembleDescriptor("(", iBlockState, ")", mapColor));
 		if (methods.size() == 1) {
@@ -7550,7 +7544,10 @@ public class SharedMappings extends MappingsBase {
 
 
 
-	@Mapping(providesFields={
+	@Mapping(provides = {
+			"net/minecraft/util/DamageSource"
+			},
+			providesFields={
 			"net/minecraft/entity/player/EntityPlayer inventory Lnet/minecraft/entity/player/InventoryPlayer;"
 			},
 			depends={
@@ -7576,13 +7573,103 @@ public class SharedMappings extends MappingsBase {
 					entityPlayer.name + " " + fields.get(0).name + " " + fields.get(0).desc);
 		}
 
+		List<MethodNode> methods = entityPlayer.methods;
+		for(MethodNode methodNode : methods){
+			Type[] params = Type.getArgumentTypes(methodNode.desc);
+			if(params.length == 2){
+				if(methodNode.access == Opcodes.ACC_PROTECTED && params[0].getSort() == Type.OBJECT && params[1].getSort() == Type.FLOAT && Type.getReturnType(methodNode.desc).getSort() == Type.VOID){
+					addClassMapping("net/minecraft/util/DamageSource", params[0].getClassName());
+				}
+			}
+		}
+
+
+
+		return true;
+	}
+
+
+	@Mapping(depends = {
+			"net/minecraft/util/DamageSource",
+			"net/minecraft/entity/EntityLivingBase",
+			"net/minecraft/util/IChatComponent"
+			},
+			providesFields = {
+			"net/minecraft/util/DamageSource inFire Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource inFire Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource lightningBolt Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource onFire Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource lava Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource hotFloor Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource inWall Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource drown Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource starve Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource cactus Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource fall Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource flyIntoWall Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource outOfWorld Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource generic Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource magic Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource wither Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource anvil Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource fallingBlock Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource dragonBreath Lnet/minecraft/util/DamageSource;",
+			},
+			providesMethods = {
+			"net/minecraft/util/DamageSource getDeathMessage (Lnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/util/IChatComponent;"
+			})
+	public boolean processDamageSourceClass(){
+		ClassNode damageSource = getClassNodeFromMapping("net/minecraft/util/DamageSource");
+		ClassNode livingBase = getClassNodeFromMapping("net/minecraft/entity/EntityLivingBase");
+		ClassNode iChatComponent = getClassNodeFromMapping("net/minecraft/util/IChatComponent");
+
+		if(MeddleUtil.notNull(damageSource, livingBase, iChatComponent)){
+			List<MethodNode> methods = damageSource.methods;
+			List<String> sourceStrings = new ArrayList<>();
+			for(MethodNode method : methods){
+				if(method.name.equals("<clinit>")){
+					MethodCallVisitor visitor = new MethodCallVisitor(method, false);
+					for(MethodCall call : visitor){
+						MethodInsnNode node = call.methodNode;
+						if(node.name.equals("<init>") && call.args.length == 2){
+							String name = (String) call.args[1];
+							if(name != null){
+								sourceStrings.add(name);
+							}
+						}
+					}
+				}
+			}
+			List<FieldNode> possibleFields = new ArrayList<>();
+			for(FieldNode field : damageSource.fields){
+				if((field.access & Opcodes.ACC_PUBLIC) != 0 && (field.access & Opcodes.ACC_STATIC) != 0){
+					possibleFields.add(field);
+				}
+			}
+			if(possibleFields.size() == sourceStrings.size()){
+				for(String fieldName : sourceStrings){
+					FieldNode node = possibleFields.get(sourceStrings.indexOf(fieldName));
+					addFieldMapping("net/minecraft/util/DamageSource " + fieldName + " Lnet/minecraft/util/DamageSource;",
+							damageSource.name + " " + node.name + " " + node.desc);
+				}
+			}
+
+
+			// getDeathMessage
+			methods = getMatchingMethods(damageSource, null, assembleDescriptor("(", livingBase, ")", iChatComponent));
+			if(methods.size() == 1){
+				addMethodMapping("net/minecraft/util/DamageSource getDeathMessage (Lnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/util/IChatComponent;",
+						damageSource.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			}
+
+		}
 
 		return true;
 	}
 
 
 
-	
+
 
 
 	@Mapping(provides={
