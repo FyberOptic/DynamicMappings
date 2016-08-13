@@ -9017,18 +9017,19 @@ public class SharedMappings extends MappingsBase {
 					iRecipe.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 
-		// ItemStack[] getRemainingItems(InventoryCrafting inv);
-		// MCList I don't exactly know why mojang do this
-		for(MethodNode method : iRecipe.methods){
-			if(method.desc.startsWith("(L" + inventoryCrafting_name + ";)") && !method.desc.endsWith(itemStack.name + ";")){
-				String returnType = Type.getReturnType(method.desc).getClassName();
-				addClassMapping("net/minecraft/util/MCList", returnType);
-				methods = getMatchingMethods(iRecipe, null, "(L" + inventoryCrafting_name + ";)L" + returnType + ";");
-				if (methods.size() == 1) {
-					addMethodMapping("net/minecraft/item/crafting/IRecipe getRemainingItems (Lnet/minecraft/inventory/InventoryCrafting;)Lnet/minecraft/util/MCList;",
-							iRecipe.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-				}
-			}
+		// public MCList<ItemStack> getRemainingItems(InventoryCrafting paramInventoryCrafting);
+		// 16w32a changed output array to new "MCList" class for some reason
+		methods = getMatchingMethods(iRecipe, null, null);
+		for(Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
+			MethodNode method = it.next();
+			if(method.desc.startsWith("(L" + inventoryCrafting_name + ";)") && !method.desc.endsWith(itemStack.name + ";")) {}
+			else it.remove();
+		}
+		if (methods.size() == 1) {
+			String returnType = Type.getReturnType(methods.get(0).desc).getClassName();
+			addClassMapping("net/minecraft/util/MCList", returnType);
+			addMethodMapping("net/minecraft/item/crafting/IRecipe getRemainingItems (Lnet/minecraft/inventory/InventoryCrafting;)Lnet/minecraft/util/MCList;",
+					iRecipe.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 
 
