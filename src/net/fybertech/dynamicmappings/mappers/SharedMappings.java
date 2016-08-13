@@ -1441,6 +1441,27 @@ public class SharedMappings extends MappingsBase {
 	@Mapping(provides={
 			"net/minecraft/tileentity/TileEntityChest",
 			"net/minecraft/tileentity/TileEntityFurnace",
+			"net/minecraft/tileentity/TileEntityEnderChest",
+			"net/minecraft/block/BlockJukebox$TileEntityJukebox",
+			"net/minecraft/tileentity/TileEntityDispenser",
+			"net/minecraft/tileentity/TileEntityDropper",
+			"net/minecraft/tileentity/TileEntitySign",
+			"net/minecraft/tileentity/TileEntityMobSpawner",
+			"net/minecraft/tileentity/TileEntityNoteblock",
+			"net/minecraft/tileentity/TileEntityPiston",
+			"net/minecraft/tileentity/TileEntityBrewingStand",
+			"net/minecraft/tileentity/TileEntityEnchantingTable",
+			"net/minecraft/tileentity/TileEntityEndPortal",
+			"net/minecraft/tileentity/TileEntityBeacon",
+			"net/minecraft/tileentity/TileEntitySkull",
+			"net/minecraft/tileentity/TileEntityDaylightDetector",
+			"net/minecraft/tileentity/TileEntityHopper",
+			"net/minecraft/tileentity/TileEntityComparator",
+			"net/minecraft/tileentity/TileEntityFlowerPot",
+			"net/minecraft/tileentity/TileEntityBanner",
+			"net/minecraft/tileentity/TileEntityStructureBlock",
+			"net/minecraft/tileentity/TileEntityEndGateway",
+			"net/minecraft/tileentity/TileEntityCommandBlock",
 			"net/minecraft/network/PacketBuffer",
 			"net/minecraft/network/Packet",
 			"net/minecraft/crash/CrashReportCategory"
@@ -1506,21 +1527,106 @@ public class SharedMappings extends MappingsBase {
 			
 			teMap.put(lastName, c);			
 		}
-		
-		
+
 		// 16w32a changed all TE IDs
-		String className = teMap.get("chest");
-		if (className != null && searchConstantPoolForStrings(className, "container.chest")) {
-			addClassMapping("net/minecraft/tileentity/TileEntityChest", className);
+		// it's unnecessary to check if the registered TileEntity classes contains strings. If here is something wrong than mojang has fucked up done things
+		for(Map.Entry<String, String> entry : teMap.entrySet()){
+			switch(entry.getKey()){
+				case "furnace":{
+					addClassMapping("net/minecraft/tileentity/TileEntityFurnace", entry.getValue());
+					break;
+				}
+				case "chest":{
+					addClassMapping("net/minecraft/tileentity/TileEntityChest", entry.getValue());
+					break;
+				}
+				case "ender_chest":{
+					addClassMapping("net/minecraft/tileentity/TileEntityEnderChest", entry.getValue());
+					break;
+				}
+				case "jukebox":{
+					addClassMapping("net/minecraft/block/BlockJukebox$TileEntityJukebox", entry.getValue());
+					break;
+				}
+				case "dispenser":{
+					addClassMapping("net/minecraft/tileentity/TileEntityDispenser", entry.getValue());
+					break;
+				}
+				case "dropper":{
+					addClassMapping("net/minecraft/tileentity/TileEntityDropper", entry.getValue());
+					break;
+				}
+				case "sign":{
+					addClassMapping("net/minecraft/tileentity/TileEntitySign", entry.getValue());
+					break;
+				}
+				case "mob_spawner":{
+					addClassMapping("net/minecraft/tileentity/TileEntityMobSpawner", entry.getValue());
+					break;
+				}
+				case "noteblock":{
+					addClassMapping("net/minecraft/tileentity/TileEntityNoteblock", entry.getValue());
+					break;
+				}
+				case "piston":{
+					addClassMapping("net/minecraft/tileentity/TileEntityPiston", entry.getValue());
+					break;
+				}
+				case "brewing_stand":{
+					addClassMapping("net/minecraft/tileentity/TileEntityBrewingStand", entry.getValue());
+					break;
+				}
+				case "enchanting_table":{
+					addClassMapping("net/minecraft/tileentity/TileEntityEnchantingTable", entry.getValue());
+					break;
+				}
+				case "end_portal":{
+					addClassMapping("net/minecraft/tileentity/TileEntityEndPortal", entry.getValue());
+					break;
+				}
+				case "beacon":{
+					addClassMapping("net/minecraft/tileentity/TileEntityBeacon", entry.getValue());
+					break;
+				}
+				case "skull":{
+					addClassMapping("net/minecraft/tileentity/TileEntitySkull", entry.getValue());
+					break;
+				}
+				case "daylight_detector":{
+					addClassMapping("net/minecraft/tileentity/TileEntityDaylightDetector", entry.getValue());
+					break;
+				}
+				case "hopper":{
+					addClassMapping("net/minecraft/tileentity/TileEntityHopper", entry.getValue());
+					break;
+				}
+				case "comparator":{
+					addClassMapping("net/minecraft/tileentity/TileEntityComparator", entry.getValue());
+					break;
+				}
+				case "flower_pot":{
+					addClassMapping("net/minecraft/tileentity/TileEntityFlowerPot", entry.getValue());
+					break;
+				}
+				case "banner":{
+					addClassMapping("net/minecraft/tileentity/TileEntityBanner", entry.getValue());
+					break;
+				}
+				case "structure_block":{
+					addClassMapping("net/minecraft/tileentity/TileEntityStructureBlock", entry.getValue());
+					break;
+				}
+				case "end_gateway":{
+					addClassMapping("net/minecraft/tileentity/TileEntityEndGateway", entry.getValue());
+					break;
+				}
+				case "command_block":{
+					addClassMapping("net/minecraft/tileentity/TileEntityCommandBlock", entry.getValue());
+					break;
+				}
+			}
 		}
-		
-		className = teMap.get("furnace");
-		if (className != null && searchConstantPoolForStrings(className, "container.furnace")) {
-			addClassMapping("net/minecraft/tileentity/TileEntityFurnace", className);
-		}
-		
-		
-		
+
 		
 		// protected World worldObj
 		List<FieldNode> fields = getMatchingFields(tileEntity, null, "L" + world.name + ";");
@@ -1690,7 +1796,7 @@ public class SharedMappings extends MappingsBase {
 			if (t.getReturnType().getSort() != Type.VOID) continue;			
 			if (args.length != 1) continue;
 			
-			className = args[0].getClassName();
+			String className = args[0].getClassName();
 			if (searchConstantPoolForStrings(className, "(Error finding world loc)", "Details:")) {
 				addClassMapping("net/minecraft/crash/CrashReportCategory", className);
 				methods.add(method);
@@ -1812,8 +1918,8 @@ public class SharedMappings extends MappingsBase {
 		// public double getDistanceSq(double x, double y, double z)
 	    // @ClientOnly
 	    // public double getMaxRenderDistanceSquared()
-		
-		
+
+
 		return true;
 	}
 	
@@ -1822,10 +1928,11 @@ public class SharedMappings extends MappingsBase {
 	@Mapping(provides={
 			"net/minecraft/inventory/ContainerChest",
 			"net/minecraft/tileentity/TileEntityLockable",
-			"net/minecraft/server/gui/IUpdatePlayerListBox"
+			"net/minecraft/util/ITickable",
+			"net/minecraft/tileentity/TileEntityLootable"
 			},
 			providesMethods={
-			"net/minecraft/server/gui/IUpdatePlayerListBox update ()V"
+			"net/minecraft/util/ITickable update ()V"
 			},
 			depends={
 			"net/minecraft/tileentity/TileEntity",
@@ -1846,15 +1953,15 @@ public class SharedMappings extends MappingsBase {
 		if (!MeddleUtil.notNull(tileEntity, tileEntityChest, inventoryPlayer, entityPlayer, container, iInventory)) return false;
 		
 			
-		
+		// canitzp - renamed IUpdatePlayerListBox to ITickable
 		if (tileEntityChest.interfaces.size() == 1) {
 			String iUpdatePlayerListBox_name = tileEntityChest.interfaces.get(0);
 			ClassNode iUpdatePlayerListBox = getClassNode(iUpdatePlayerListBox_name);
 			if (iUpdatePlayerListBox.methods.size() == 1) {
 				MethodNode m = iUpdatePlayerListBox.methods.get(0);
 				if (m.desc.equals("()V")) {
-					addClassMapping("net/minecraft/server/gui/IUpdatePlayerListBox", iUpdatePlayerListBox_name);
-					addMethodMapping("net/minecraft/server/gui/IUpdatePlayerListBox update ()V",
+					addClassMapping("net/minecraft/util/ITickable", iUpdatePlayerListBox_name);
+					addMethodMapping("net/minecraft/util/ITickable update ()V",
 							iUpdatePlayerListBox.name + " " + m.name + " ()V");
 				}
 			}			
@@ -1862,7 +1969,7 @@ public class SharedMappings extends MappingsBase {
 		
 				
 		if (searchConstantPoolForStrings(tileEntityChest.superName, "LootTable")) {
-			// TODO - Give this class a name
+			addClassMapping("net/minecraft/tileentity/TileEntityLootable", tileEntityChest.superName);
 			ClassNode lootTableClass = getClassNode(tileEntityChest.superName);
 			
 			// TODO - Do this a bit safer, get other interface classes
