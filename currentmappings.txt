@@ -1,4 +1,4 @@
-[DynamicMappings] Minecraft version: 16w32a
+[DynamicMappings] Minecraft version: 16w32b
 [DynamicMappings] Minecraft jar type: client
 
 CLASSES:
@@ -332,6 +332,7 @@ net/minecraft/world/WorldSettings -> aix
 net/minecraft/world/WorldType -> aiz
 
 FIELDS:
+net/minecraft/block/Block AIR_ID Lnet/minecraft/util/ResourceLocation; -> akw a Lkp;
 net/minecraft/block/Block BLOCK_STATE_IDS Lnet/minecraft/util/ObjectIntIdentityMap; -> akw i Lcx;
 net/minecraft/block/Block blockMaterial Lnet/minecraft/block/material/Material; -> akw x Layo;
 net/minecraft/block/Block blockRegistry Lnet/minecraft/util/RegistryNamespacedDefaultedByKey; -> akw h Lcs;
@@ -339,6 +340,7 @@ net/minecraft/block/Block blockResistance F -> akw r F
 net/minecraft/block/Block blockState Lnet/minecraft/block/state/BlockState; -> akw A Lask;
 net/minecraft/block/Block defaultBlockState Lnet/minecraft/block/state/IBlockState; -> akw c Lasj;
 net/minecraft/block/Block displayOnCreativeTab Lnet/minecraft/creativetab/CreativeTabs; -> akw b Ladq;
+net/minecraft/block/Block fullBlock Z -> akw l Z
 net/minecraft/block/Block lightOpacity I -> akw m I
 net/minecraft/block/Block lightValue I -> akw o I
 net/minecraft/block/Block mapColor Lnet/minecraft/block/material/MapColor; -> akw y Layp;
@@ -930,6 +932,7 @@ net/minecraft/item/Item maxDamage I -> aeo o I
 net/minecraft/item/Item maxStackSize I -> aeo k I
 net/minecraft/item/Item unlocalizedName Ljava/lang/String; -> aeo q Ljava/lang/String;
 net/minecraft/item/ItemPickaxe EFFECTIVE_ON Ljava/util/Set; -> afb e Ljava/util/Set;
+net/minecraft/item/ItemStack animationsToGo I -> aeq d I
 net/minecraft/item/ItemStack item Lnet/minecraft/item/Item; -> aeq e Laeo;
 net/minecraft/item/ItemStack itemDamage I -> aeq h I
 net/minecraft/item/ItemStack stackSize I -> aeq c I
@@ -1030,16 +1033,13 @@ net/minecraft/block/Block dropBlockAsItem (Lnet/minecraft/world/World;Lnet/minec
 net/minecraft/block/Block dropBlockAsItemWithChance (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;FI)V -> akw a (Laiu;Lcn;Lasj;FI)V
 net/minecraft/block/Block dropXpOnBlockBreak (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;I)V -> akw b (Laiu;Lcn;I)V
 net/minecraft/block/Block fillWithRain (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)V -> akw h (Laiu;Lcn;)V
-net/minecraft/block/Block getActualState (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/block/state/IBlockState; -> akw b (Lasj;Laiy;Lcn;)Lasj;
-net/minecraft/block/Block getBlockBoundsBasedOnState (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB; -> akw a (Lasj;Laiy;Lcn;)Lbcp;
+net/minecraft/block/Block getActualState (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/block/state/IBlockState; -> akw c (Lasj;Laiy;Lcn;)Lasj;
+net/minecraft/block/Block getBlockBoundsBasedOnState (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB; -> akw b (Lasj;Laiy;Lcn;)Lbcp;
 net/minecraft/block/Block getBlockById (I)Lnet/minecraft/block/Block; -> akw b (I)Lakw;
 net/minecraft/block/Block getBlockFromItem (Lnet/minecraft/item/Item;)Lnet/minecraft/block/Block; -> akw a (Laeo;)Lakw;
 net/minecraft/block/Block getBlockFromName (Ljava/lang/String;)Lnet/minecraft/block/Block; -> akw b (Ljava/lang/String;)Lakw;
-net/minecraft/block/Block getBlockLayer ()Lnet/minecraft/util/EnumWorldBlockLayer; -> akw f ()Laim;
 net/minecraft/block/Block getBlockState ()Lnet/minecraft/block/state/BlockState; -> akw t ()Lask;
-net/minecraft/block/Block getCollisionBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB; -> akw a (Lasj;Laiu;Lcn;)Lbcp;
-net/minecraft/block/Block getComparatorInputOverride (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)I -> akw d (Lasj;Laiu;Lcn;)I
-net/minecraft/block/Block getCreativeTabToDisplayOn ()Lnet/minecraft/creativetab/CreativeTabs; -> akw r ()Ladq;
+net/minecraft/block/Block getComparatorInputOverride (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)I -> akw c (Lasj;Laiu;Lcn;)I
 net/minecraft/block/Block getDefaultState ()Lnet/minecraft/block/state/IBlockState; -> akw u ()Lasj;
 net/minecraft/block/Block getExplosionResistance (Lnet/minecraft/entity/Entity;)F -> akw a (Lse;)F
 net/minecraft/block/Block getIdFromBlock (Lnet/minecraft/block/Block;)I -> akw a (Lakw;)I
@@ -1049,10 +1049,8 @@ net/minecraft/block/Block getLocalizedName ()Ljava/lang/String; -> akw c ()Ljava
 net/minecraft/block/Block getMapColor (Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/block/material/MapColor; -> akw r (Lasj;)Layp;
 net/minecraft/block/Block getMaterial (Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/block/material/Material; -> akw q (Lasj;)Layo;
 net/minecraft/block/Block getMetaFromState (Lnet/minecraft/block/state/IBlockState;)I -> akw e (Lasj;)I
-net/minecraft/block/Block getMixedBrightnessForBlock (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)I -> akw c (Lasj;Laiy;Lcn;)I
 net/minecraft/block/Block getPlayerRelativeBlockHardness (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)F -> akw a (Lasj;Laak;Laiu;Lcn;)F
 net/minecraft/block/Block getRenderType ()Lnet/minecraft/block/EnumRenderType; -> akw a (Lasj;)Lapg;
-net/minecraft/block/Block getSelectedBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB; -> akw c (Lasj;Laiu;Lcn;)Lbcp;
 net/minecraft/block/Block getStateById (I)Lnet/minecraft/block/state/IBlockState; -> akw c (I)Lasj;
 net/minecraft/block/Block getStateFromMeta (I)Lnet/minecraft/block/state/IBlockState; -> akw a (I)Lasj;
 net/minecraft/block/Block getStateFromMirroring (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/EnumBlockMirroring;)Lnet/minecraft/block/state/IBlockState; -> akw a (Lasj;Lanw;)Lasj;
@@ -1060,11 +1058,13 @@ net/minecraft/block/Block getStateFromRotation (Lnet/minecraft/block/state/IBloc
 net/minecraft/block/Block getStateId (Lnet/minecraft/block/state/IBlockState;)I -> akw j (Lasj;)I
 net/minecraft/block/Block getStepSound ()Lnet/minecraft/block/BlockSoundType; -> akw w ()Lapu;
 net/minecraft/block/Block getUnlocalizedName ()Ljava/lang/String; -> akw a ()Ljava/lang/String;
+net/minecraft/block/Block getUseNeighborBrightness (Lnet/minecraft/block/state/IBlockState;)Z -> akw p (Lasj;)Z
 net/minecraft/block/Block harvestBlock (Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/tileentity/TileEntity;Lnet/minecraft/item/ItemStack;)V -> akw a (Laiu;Laak;Lcn;Lasj;Larb;Laeq;)V
 net/minecraft/block/Block hasComparatorInputOverride (Lnet/minecraft/block/state/IBlockState;)Z -> akw v (Lasj;)Z
 net/minecraft/block/Block isAssociatedBlock (Lnet/minecraft/block/Block;)Z -> akw b (Lakw;)Z
 net/minecraft/block/Block isBlockSolid (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z -> akw a (Laiy;Lcn;Lcu;)Z
 net/minecraft/block/Block isEqualTo (Lnet/minecraft/block/Block;Lnet/minecraft/block/Block;)Z -> akw a (Lakw;Lakw;)Z
+net/minecraft/block/Block isFullBlock (Lnet/minecraft/block/state/IBlockState;)Z -> akw l (Lasj;)Z
 net/minecraft/block/Block isFullCube (Lnet/minecraft/block/state/IBlockState;)Z -> akw c (Lasj;)Z
 net/minecraft/block/Block isOpaqueCube (Lnet/minecraft/block/state/IBlockState;)Z -> akw b (Lasj;)Z
 net/minecraft/block/Block isPassable (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)Z -> akw b (Laiy;Lcn;)Z
@@ -1076,6 +1076,7 @@ net/minecraft/block/Block onBlockAdded (Lnet/minecraft/world/World;Lnet/minecraf
 net/minecraft/block/Block onBlockClicked (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/player/EntityPlayer;)V -> akw a (Laiu;Lcn;Laak;)V
 net/minecraft/block/Block onBlockDestroyedByExplosion (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/world/Explosion;)V -> akw a (Laiu;Lcn;Laip;)V
 net/minecraft/block/Block onBlockDestroyedByPlayer (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)V -> akw d (Laiu;Lcn;Lasj;)V
+net/minecraft/block/Block onBlockEventReceived (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;II)Z -> akw a (Lasj;Laiu;Lcn;II)Z
 net/minecraft/block/Block onBlockHarvested (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/player/EntityPlayer;)V -> akw a (Laiu;Lcn;Lasj;Laak;)V
 net/minecraft/block/Block onBlockPlaced (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;FFFILnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/block/state/IBlockState; -> akw a (Laiu;Lcn;Lcu;FFFILsn;)Lasj;
 net/minecraft/block/Block onBlockPlacedBy (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/EntityLivingBase;Lnet/minecraft/item/ItemStack;)V -> akw a (Laiu;Lcn;Lasj;Lsn;Laeq;)V
@@ -1086,7 +1087,6 @@ net/minecraft/block/Block onLanded (Lnet/minecraft/world/World;Lnet/minecraft/en
 net/minecraft/block/Block onNeighborBlockChange (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;)V -> akw a (Lasj;Laiu;Lcn;Lakw;)V
 net/minecraft/block/Block quantityDropped (Ljava/util/Random;)I -> akw a (Ljava/util/Random;)I
 net/minecraft/block/Block quantityDroppedWithBonus (ILjava/util/Random;)I -> akw a (ILjava/util/Random;)I
-net/minecraft/block/Block randomDisplayTick (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Ljava/util/Random;)V -> akw a (Lasj;Laiu;Lcn;Ljava/util/Random;)V
 net/minecraft/block/Block randomTick (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V -> akw a (Laiu;Lcn;Lasj;Ljava/util/Random;)V
 net/minecraft/block/Block registerBlock (ILjava/lang/String;Lnet/minecraft/block/Block;)V -> akw a (ILjava/lang/String;Lakw;)V
 net/minecraft/block/Block registerBlock (ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/block/Block;)V -> akw a (ILkp;Lakw;)V
@@ -1100,7 +1100,6 @@ net/minecraft/block/Block setResistance (F)Lnet/minecraft/block/Block; -> akw b 
 net/minecraft/block/Block setStepSound (Lnet/minecraft/block/Block$SoundType;)Lnet/minecraft/block/Block; -> akw a (Lapu;)Lakw;
 net/minecraft/block/Block setTickRandomly (Z)Lnet/minecraft/block/Block; -> akw a (Z)Lakw;
 net/minecraft/block/Block setUnlocalizedName (Ljava/lang/String;)Lnet/minecraft/block/Block; -> akw c (Ljava/lang/String;)Lakw;
-net/minecraft/block/Block shouldSideBeRendered (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z -> akw a (Lasj;Laiy;Lcn;Lcu;)Z
 net/minecraft/block/Block spawnAsEntity (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/item/ItemStack;)V -> akw a (Laiu;Lcn;Laeq;)V
 net/minecraft/block/Block tickRate (Lnet/minecraft/world/World;)I -> akw a (Laiu;)I
 net/minecraft/block/Block updateTick (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V -> akw b (Laiu;Lcn;Lasj;Ljava/util/Random;)V
@@ -1115,6 +1114,7 @@ net/minecraft/block/IGrowable canUseBonemeal (Lnet/minecraft/world/World;Ljava/u
 net/minecraft/block/IGrowable grow (Lnet/minecraft/world/World;Ljava/util/Random;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)V -> akz b (Laiu;Ljava/util/Random;Lcn;Lasj;)V
 net/minecraft/block/ITileEntityProvider createNewTileEntity (Lnet/minecraft/world/World;I)Lnet/minecraft/tileentity/TileEntity; -> amk a (Laiu;I)Larb;
 net/minecraft/block/material/Material getMaterialMapColor ()Lnet/minecraft/block/material/MapColor; -> ayo r ()Layp;
+net/minecraft/block/material/Material isSolid ()Z -> ayo a ()Z
 net/minecraft/block/properties/PropertyBool create (Ljava/lang/String;)Lnet/minecraft/block/properties/PropertyBool; -> asv a (Ljava/lang/String;)Lasv;
 net/minecraft/block/properties/PropertyDirection create (Ljava/lang/String;)Lnet/minecraft/block/properties/PropertyDirection; -> asw a (Ljava/lang/String;)Lasw;
 net/minecraft/block/properties/PropertyDirection create (Ljava/lang/String;Lcom/google/common/base/Predicate;)Lnet/minecraft/block/properties/PropertyDirection; -> asw a (Ljava/lang/String;Lcom/google/common/base/Predicate;)Lasw;
@@ -1135,7 +1135,7 @@ net/minecraft/block/state/IBlockState getProperties ()Lcom/google/common/collect
 net/minecraft/block/state/IBlockState getPropertyNames ()Ljava/util/Collection; -> asj r ()Ljava/util/Collection;
 net/minecraft/block/state/IBlockState getValue (Lnet/minecraft/block/properties/IProperty;)Ljava/lang/Comparable; -> asj c (Lasz;)Ljava/lang/Comparable;
 net/minecraft/block/state/IBlockState withProperty (Lnet/minecraft/block/properties/IProperty;Ljava/lang/Comparable;)Lnet/minecraft/block/state/IBlockState; -> asj a (Lasz;Ljava/lang/Comparable;)Lasj;
-net/minecraft/block/state/IBlockWrapper getCollisionBoundingBox (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB; -> asi d (Laiu;Lcn;)Lbcp;
+net/minecraft/block/state/IBlockWrapper getMaterial ()Lnet/minecraft/block/material/Material; -> asi a ()Layo;
 net/minecraft/block/state/IBlockWrapper isNormalCube ()Z -> asi l ()Z
 net/minecraft/client/Minecraft displayGuiScreen (Lnet/minecraft/client/gui/GuiScreen;)V -> bdo a (Lbgk;)V
 net/minecraft/client/Minecraft getBlockRendererDispatcher ()Lnet/minecraft/client/renderer/BlockRendererDispatcher; -> bdo ab ()Lbpm;
@@ -1286,7 +1286,6 @@ net/minecraft/inventory/Container transferStackInSlot (Lnet/minecraft/entity/pla
 net/minecraft/inventory/ICrafting func_175173_a (Lnet/minecraft/inventory/Container;Lnet/minecraft/inventory/IInventory;)V -> aca a (Labv;Lqt;)V
 net/minecraft/inventory/ICrafting sendProgressBarUpdate (Lnet/minecraft/inventory/Container;II)V -> aca a (Labv;II)V
 net/minecraft/inventory/ICrafting sendSlotContents (Lnet/minecraft/inventory/Container;ILnet/minecraft/item/ItemStack;)V -> aca a (Labv;ILaeq;)V
-net/minecraft/inventory/ICrafting updateCraftingInventory (Lnet/minecraft/inventory/Container;Ljava/util/List;)V -> aca a (Labv;Ljava/util/List;)V
 net/minecraft/inventory/IInventory closeInventory (Lnet/minecraft/entity/player/EntityPlayer;)V -> qt c (Laak;)V
 net/minecraft/inventory/IInventory decrStackSize (II)Lnet/minecraft/item/ItemStack; -> qt a (II)Laeq;
 net/minecraft/inventory/IInventory getField (I)I -> qt c_ (I)I
@@ -1309,6 +1308,7 @@ net/minecraft/inventory/Slot isHere (Lnet/minecraft/inventory/IInventory;I)Z -> 
 net/minecraft/inventory/Slot isItemValid (Lnet/minecraft/item/ItemStack;)Z -> act a (Laeq;)Z
 net/minecraft/inventory/Slot onCrafting (Lnet/minecraft/item/ItemStack;)V -> act c (Laeq;)V
 net/minecraft/inventory/Slot onCrafting (Lnet/minecraft/item/ItemStack;I)V -> act a (Laeq;I)V
+net/minecraft/inventory/Slot onPickupFromSlot (Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/ItemStack; -> act a (Laak;Laeq;)Laeq;
 net/minecraft/inventory/Slot onSlotChange (Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)V -> act a (Laeq;Laeq;)V
 net/minecraft/inventory/Slot onSlotChanged ()V -> act f ()V
 net/minecraft/inventory/Slot putStack (Lnet/minecraft/item/ItemStack;)V -> act d (Laeq;)V
@@ -1344,8 +1344,10 @@ net/minecraft/item/Item setMaxStackSize (I)Lnet/minecraft/item/Item; -> aeo d (I
 net/minecraft/item/Item setUnlocalizedName (Ljava/lang/String;)Lnet/minecraft/item/Item; -> aeo c (Ljava/lang/String;)Laeo;
 net/minecraft/item/ItemStack copy ()Lnet/minecraft/item/ItemStack; -> aeq l ()Laeq;
 net/minecraft/item/ItemStack damageItem (ILnet/minecraft/entity/EntityLivingBase;)V -> aeq a (ILsn;)V
+net/minecraft/item/ItemStack getAnimationsToGo ()I -> aeq D ()I
 net/minecraft/item/ItemStack getDisplayName ()Ljava/lang/String; -> aeq r ()Ljava/lang/String;
 net/minecraft/item/ItemStack getItem ()Lnet/minecraft/item/Item; -> aeq c ()Laeo;
+net/minecraft/item/ItemStack getItemDamage ()I -> aeq i ()I
 net/minecraft/item/ItemStack getMaxDamage ()I -> aeq k ()I
 net/minecraft/item/ItemStack getMetadata ()I -> aeq j ()I
 net/minecraft/item/ItemStack getTagCompound ()Lnet/minecraft/nbt/NBTTagCompound; -> aeq p ()Ldt;
@@ -1362,6 +1364,7 @@ net/minecraft/item/ItemStack setItemDamage (I)V -> aeq b (I)V
 net/minecraft/item/ItemStack setTagCompound (Lnet/minecraft/nbt/NBTTagCompound;)V -> aeq b (Ldt;)V
 net/minecraft/item/ItemStack setTagInfo (Ljava/lang/String;Lnet/minecraft/nbt/NBTBase;)V -> aeq a (Ljava/lang/String;Leh;)V
 net/minecraft/item/ItemStack splitStack (I)Lnet/minecraft/item/ItemStack; -> aeq a (I)Laeq;
+net/minecraft/item/ItemStack updateAnimation (Lnet/minecraft/world/World;Lnet/minecraft/entity/Entity;IZ)V -> aeq a (Laiu;Lse;IZ)V
 net/minecraft/item/ItemStack writeToNBT (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound; -> aeq a (Ldt;)Ldt;
 net/minecraft/item/ItemTool getStrVsBlock (Lnet/minecraft/item/ItemStack;Lnet/minecraft/block/state/IBlockState;)F -> adr a (Laeq;Lasj;)F
 net/minecraft/item/crafting/CraftingManager addRecipe (Lnet/minecraft/item/ItemStack;[Ljava/lang/Object;)Lnet/minecraft/item/crafting/ShapedRecipes; -> agv a (Laeq;[Ljava/lang/Object;)Lagx;
