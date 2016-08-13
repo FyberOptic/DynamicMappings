@@ -3100,7 +3100,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/material/Material air Lnet/minecraft/block/material/Material;"
 			},
 			providesMethods={
-			"net/minecraft/block/Block getCollisionBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
+			"net/minecraft/block/Block getCollisionBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
 			//"net/minecraft/block/Block isOpaqueCube (Lnet/minecraft/block/state/IBlockState;)Z",
 			"net/minecraft/block/Block canCollideCheck (Lnet/minecraft/block/state/IBlockState;Z)Z",
 			"net/minecraft/block/Block isReplaceable (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)Z",
@@ -3139,9 +3139,10 @@ public class SharedMappings extends MappingsBase {
 		
 		
 		// public AxisAlignedBB getCollisionBoundingBox(IBlockState state, World worldIn, BlockPos pos)
-		List<MethodNode> methods = getMatchingMethods(blockAir, null, assembleDescriptor("(", iBlockState, world, blockPos, ")", aabb));
+		List<MethodNode> methods = getMatchingMethods(blockAir, null, assembleDescriptor("(", iBlockState, iBlockAccess, blockPos, ")", aabb));
+		
 		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/block/Block getCollisionBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
+			addMethodMapping("net/minecraft/block/Block getCollisionBoundingBox (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
 					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
@@ -5716,7 +5717,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/Block randomTick (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V",
 			"net/minecraft/block/Block updateTick (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V",
 			"net/minecraft/block/Block addCollisionBoxesToList (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/AxisAlignedBB;Ljava/util/List;Lnet/minecraft/entity/Entity;)V",
-			"net/minecraft/block/state/IBlockWrapper getCollisionBoundingBox (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
+			"net/minecraft/block/state/IBlockWrapper getCollisionBoundingBox (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
 			"net/minecraft/block/Block addCollisionBoxToList (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/AxisAlignedBB;Ljava/util/List;Lnet/minecraft/util/AxisAlignedBB;)V"
 			},
 			depends={
@@ -6115,13 +6116,13 @@ public class SharedMappings extends MappingsBase {
 						addCollisionBoxToList.add(mn);					
 				}
 				else if (mn.owner.equals(iBlockState.name)) {
-					if (mn.desc.equals(assembleDescriptor("(", world, blockPos, ")", aabb)))
+					if (mn.desc.equals(assembleDescriptor("(", iBlockAccess, blockPos, ")", aabb)))
 						getCollisionBoundingBox.add(mn);
 				}
 			}
 			
 			if (getCollisionBoundingBox.size() == 1) {
-				addMethodMapping("net/minecraft/block/state/IBlockWrapper getCollisionBoundingBox (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
+				addMethodMapping("net/minecraft/block/state/IBlockWrapper getCollisionBoundingBox (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
 						iBlockWrapper.name + " " + getCollisionBoundingBox.get(0).name + " " + getCollisionBoundingBox.get(0).desc);
 			}
 			if (addCollisionBoxToList.size() == 1) {
