@@ -6438,7 +6438,9 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/item/Item onItemRightClick (Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;)Lnet/minecraft/util/ObjectActionHolder;",
 			"net/minecraft/item/Item onItemUse (Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/ItemUseResult;",
 			"net/minecraft/item/Item onItemUseFinish (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/item/ItemStack;",
-			"net/minecraft/item/Item onBlockDestroyed (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/EntityLivingBase;)Z"
+			"net/minecraft/item/Item onBlockDestroyed (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/EntityLivingBase;)Z",
+			"net/minecraft/item/Item hitEntity (Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/EntityLivingBase;Lnet/minecraft/entity/EntityLivingBase;)Z",
+			"net/minecraft/item/Item itemInteractionForEntity (Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/entity/EntityLivingBase;Lnet/minecraft/util/MainOrOffHand;)Z"
 			},
 			providesFields={
 			"net/minecraft/item/Item maxStackSize I",
@@ -6711,11 +6713,25 @@ public class SharedMappings extends MappingsBase {
 					item.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 
+		// public boolean hitEntity(ItemStack stack, EntityLivingbase target, EntityLivingBase attacker)
+		methods = getMatchingMethods(item, null, assembleDescriptor("(", itemStack, entityLivingBase, entityLivingBase, ")Z"));
+		if(methods.size() == 1){
+			addMethodMapping("net/minecraft/item/Item hitEntity (Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/EntityLivingBase;Lnet/minecraft/entity/EntityLivingBase;)Z",
+					item.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+
+		// public boolean itemInteractionForEntity(ItemStack stack, EntityPlayer player, EntityLivingBase target, MainOrOffHand hand)
+		ClassNode hand = getClassNodeFromMapping("net/minecraft/util/MainOrOffHand");
+		methods = getMatchingMethods(item, null, assembleDescriptor("(", itemStack, entityPlayer, entityLivingBase, hand, ")Z"));
+		if(methods.size() == 1){
+			addMethodMapping("net/minecraft/item/Item itemInteractionForEntity (Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/entity/EntityLivingBase;Lnet/minecraft/util/MainOrOffHand;)Z",
+					item.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+
 		return true;
 	}
 
-	
-	
+
 	
 	@Mapping(provides={
 			"net/minecraft/util/EnumFacing$AxisDirection",
@@ -7595,7 +7611,6 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/util/IChatComponent"
 			},
 			providesFields = {
-			"net/minecraft/util/DamageSource inFire Lnet/minecraft/util/DamageSource;",
 			"net/minecraft/util/DamageSource inFire Lnet/minecraft/util/DamageSource;",
 			"net/minecraft/util/DamageSource lightningBolt Lnet/minecraft/util/DamageSource;",
 			"net/minecraft/util/DamageSource onFire Lnet/minecraft/util/DamageSource;",
@@ -10676,8 +10691,48 @@ public class SharedMappings extends MappingsBase {
 		
 		return true;
 	}
-	
-	
+
+	@Mapping(provides = {
+			"net/minecraft/item/Item$ToolMaterial"
+			},
+			providesFields = {
+			"net/minecraft/item/Item$ToolMaterial WOOD Lnet/minecraft/item/Item$ToolMaterial",
+			"net/minecraft/item/Item$ToolMaterial STONE Lnet/minecraft/item/Item$ToolMaterial",
+			"net/minecraft/item/Item$ToolMaterial IRON Lnet/minecraft/item/Item$ToolMaterial",
+			"net/minecraft/item/Item$ToolMaterial DIAMOND Lnet/minecraft/item/Item$ToolMaterial",
+			"net/minecraft/item/Item$ToolMaterial GOLD Lnet/minecraft/item/Item$ToolMaterial"
+			},
+			depends = {
+			"net/minecraft/item/ItemTool"
+			})
+	public boolean processToolMaterial(){
+		ClassNode item = getClassNodeFromMapping("net/minecraft/item/ItemTool");
+
+		List<FieldNode> fields = new ArrayList<>();
+
+		for(FieldNode field : item.fields){
+			if(!Objects.equals(field.desc, "F") && !Objects.equals(field.desc, "Ljava/util/Set;")){
+				fields.add(field);
+			}
+		}
+
+		if(fields.size() == 1){
+			addClassMapping("net/minecraft/item/Item$ToolMaterial", Type.getType(fields.get(0).desc).getClassName());
+		}
+
+		ClassNode toolmaterial = getClassNodeFromMapping("net/minecraft/item/Item$ToolMaterial");
+		String[] names = {"WOOD", "STONE", "IRON", "DIAMOND", "GOLD"};
+		List<FieldNode> matchingFields = getMatchingFields(toolmaterial, null, assembleDescriptor(toolmaterial));
+		for(int i = 0; i < matchingFields.size(); i++){
+			FieldNode field = matchingFields.get(i);
+			addFieldMapping("net/minecraft/item/Item$ToolMaterial " + names[i] +" Lnet/minecraft/item/Item$ToolMaterial",
+					toolmaterial.name + " " + field.name + " " + field.desc);
+
+		}
+
+		return true;
+	}
+
 }
 
 
