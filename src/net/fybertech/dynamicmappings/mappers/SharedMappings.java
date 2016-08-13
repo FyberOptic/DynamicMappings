@@ -8951,14 +8951,15 @@ public class SharedMappings extends MappingsBase {
 	
 
 	@Mapping(provides={
-			"net/minecraft/inventory/InventoryCrafting"			
+			"net/minecraft/inventory/InventoryCrafting",
+			"net/minecraft/util/MCList"
 			},
 			providesMethods={
 			"net/minecraft/item/crafting/IRecipe getRecipeSize ()I",
 			"net/minecraft/item/crafting/IRecipe getRecipeOutput ()Lnet/minecraft/item/ItemStack;",
 			"net/minecraft/item/crafting/IRecipe matches (Lnet/minecraft/inventory/InventoryCrafting;Lnet/minecraft/world/World;)Z",
 			"net/minecraft/item/crafting/IRecipe getCraftingResult (Lnet/minecraft/inventory/InventoryCrafting;)Lnet/minecraft/item/ItemStack;",
-			"net/minecraft/item/crafting/IRecipe getRemainingItems (Lnet/minecraft/inventory/InventoryCrafting;)[Lnet/minecraft/item/ItemStack;"
+			"net/minecraft/item/crafting/IRecipe getRemainingItems (Lnet/minecraft/inventory/InventoryCrafting;)Lnet/minecraft/util/MCList;"
 			},
 			depends={
 			"net/minecraft/item/crafting/IRecipe",
@@ -9015,15 +9016,23 @@ public class SharedMappings extends MappingsBase {
 			addMethodMapping("net/minecraft/item/crafting/IRecipe getCraftingResult (Lnet/minecraft/inventory/InventoryCrafting;)Lnet/minecraft/item/ItemStack;", 
 					iRecipe.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
-		
-		
-	    // ItemStack[] getRemainingItems(InventoryCrafting inv);
-		methods = getMatchingMethods(iRecipe, null, "(L" + inventoryCrafting_name + ";)[L" + itemStack.name + ";");
+
+		// public MCList<ItemStack> getRemainingItems(InventoryCrafting paramInventoryCrafting);
+		// 16w32a changed output array to new "MCList" class for some reason
+		methods = getMatchingMethods(iRecipe, null, null);
+		for(Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
+			MethodNode method = it.next();
+			if(method.desc.startsWith("(L" + inventoryCrafting_name + ";)") && !method.desc.endsWith(itemStack.name + ";")) {}
+			else it.remove();
+		}
 		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/item/crafting/IRecipe getRemainingItems (Lnet/minecraft/inventory/InventoryCrafting;)[Lnet/minecraft/item/ItemStack;", 
+			String returnType = Type.getReturnType(methods.get(0).desc).getClassName();
+			addClassMapping("net/minecraft/util/MCList", returnType);
+			addMethodMapping("net/minecraft/item/crafting/IRecipe getRemainingItems (Lnet/minecraft/inventory/InventoryCrafting;)Lnet/minecraft/util/MCList;",
 					iRecipe.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
-		
+
+
 		
 		return true;
 	}
