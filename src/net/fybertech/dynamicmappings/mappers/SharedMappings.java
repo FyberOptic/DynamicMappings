@@ -5825,7 +5825,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/Block updateTick (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V",
 			"net/minecraft/block/Block addCollisionBoxesToList (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/AxisAlignedBB;Ljava/util/List;Lnet/minecraft/entity/Entity;)V",
 			"net/minecraft/block/state/IBlockWrapper getCollisionBoundingBox (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
-			"net/minecraft/block/Block addCollisionBoxToList (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/AxisAlignedBB;Ljava/util/List;Lnet/minecraft/util/AxisAlignedBB;)V"
+			"net/minecraft/block/Block addCollisionBoxToList (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/AxisAlignedBB;Ljava/util/List;Lnet/minecraft/util/AxisAlignedBB;)V",
+			"net/minecraft/block/Block rayTrace (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/AxisAlignedBB;)Lnet/minecraft/util/MovingObjectPosition;"
 			},
 			depends={
 			"net/minecraft/block/Block",
@@ -5895,7 +5896,7 @@ public class SharedMappings extends MappingsBase {
 
 		methods = getMatchingMethods(block, null, assembleDescriptor("(", blockPos, vec3, vec3, aabb, ")", mop));
 		if(methods.size() == 1){
-			addMethodMapping("net/minecraft/block/Block collisionRayTrace (Lnet/minecraft/block/Block;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/AxisAlignedBB;)Lnet/minecraft/util/MovingObjectPosition;",
+			addMethodMapping("net/minecraft/block/Block rayTrace (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/AxisAlignedBB;)Lnet/minecraft/util/MovingObjectPosition;",
 					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 
