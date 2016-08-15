@@ -9,11 +9,14 @@ net/minecraft/block/BlockAnvil$Anvil -> akn$a
 net/minecraft/block/BlockBanner$BlockBannerHanging -> ako$b
 net/minecraft/block/BlockBanner$BlockBannerStanding -> ako$a
 net/minecraft/block/BlockBarrier -> akp
+net/minecraft/block/BlockBasePressurePlate -> akr
 net/minecraft/block/BlockBeacon -> akt
 net/minecraft/block/BlockBed -> aku
 net/minecraft/block/BlockBookshelf -> ala
+net/minecraft/block/BlockBreakable -> anf
 net/minecraft/block/BlockBrewingStand -> alb
 net/minecraft/block/BlockBush -> alc
+net/minecraft/block/BlockButton -> ald
 net/minecraft/block/BlockButtonStone -> aqe
 net/minecraft/block/BlockButtonWood -> aqv
 net/minecraft/block/BlockCactus -> ale
@@ -48,10 +51,12 @@ net/minecraft/block/BlockEnchantmentTable -> ame
 net/minecraft/block/BlockEndPortal -> amg
 net/minecraft/block/BlockEndPortalFrame -> amh
 net/minecraft/block/BlockEnderChest -> amj
+net/minecraft/block/BlockFalling -> aml
 net/minecraft/block/BlockFarmland -> amm
 net/minecraft/block/BlockFence -> amn
 net/minecraft/block/BlockFenceGate -> amo
 net/minecraft/block/BlockFire -> amp
+net/minecraft/block/BlockFlower -> amq
 net/minecraft/block/BlockFlowerPot -> amr
 net/minecraft/block/BlockFurnace -> amw
 net/minecraft/block/BlockGlass -> amx
@@ -102,11 +107,13 @@ net/minecraft/block/BlockPrismarine -> aou
 net/minecraft/block/BlockPumpkin -> aov
 net/minecraft/block/BlockQuartz -> aox
 net/minecraft/block/BlockRail -> aoy
+net/minecraft/block/BlockRailBase -> aks
 net/minecraft/block/BlockRailDetector -> alu
 net/minecraft/block/BlockRailPowered -> aos
 net/minecraft/block/BlockRedFlower -> aoz
 net/minecraft/block/BlockRedSandstone -> apa
 net/minecraft/block/BlockRedstoneComparator -> alp
+net/minecraft/block/BlockRedstoneDiode -> alv
 net/minecraft/block/BlockRedstoneLight -> apd
 net/minecraft/block/BlockRedstoneOre -> apb
 net/minecraft/block/BlockRedstoneRepeater -> aph
@@ -118,6 +125,7 @@ net/minecraft/block/BlockSand -> apk
 net/minecraft/block/BlockSandStone -> apl
 net/minecraft/block/BlockSapling -> apm
 net/minecraft/block/BlockSeaLantern -> apn
+net/minecraft/block/BlockSign -> apo
 net/minecraft/block/BlockSilverfish -> any
 net/minecraft/block/BlockSkull -> app
 net/minecraft/block/BlockSlab -> and
@@ -221,19 +229,32 @@ net/minecraft/creativetab/CreativeTabs -> adq
 net/minecraft/entity/Entity -> se
 net/minecraft/entity/EntityList -> sg
 net/minecraft/entity/EntityLivingBase -> sn
+net/minecraft/entity/boss/EntityDragon -> xp
+net/minecraft/entity/item/EntityArmorStand -> yl
+net/minecraft/entity/item/EntityEnderCrystal -> xo
 net/minecraft/entity/item/EntityEnderPearl -> abb
+net/minecraft/entity/item/EntityFallingBlock -> yx
+net/minecraft/entity/item/EntityFireworkRocket -> aar
 net/minecraft/entity/item/EntityItem -> yy
+net/minecraft/entity/item/EntityItemFrame -> yn
+net/minecraft/entity/item/EntityPainting -> yp
 net/minecraft/entity/monster/EntityCreeper -> ze
 net/minecraft/entity/monster/EntityEnderman -> zg
 net/minecraft/entity/monster/EntityMob -> zo
+net/minecraft/entity/monster/EntitySlime -> zv
 net/minecraft/entity/monster/EntityZombie -> aaa
 net/minecraft/entity/passive/EntityAnimal -> wl
+net/minecraft/entity/passive/EntityBat -> wj
+net/minecraft/entity/passive/EntityChicken -> wm
 net/minecraft/entity/passive/EntityOcelot -> wq
+net/minecraft/entity/passive/EntityRabbit -> wt
 net/minecraft/entity/passive/EntitySheep -> wu
 net/minecraft/entity/passive/EntityVillager -> aaf
+net/minecraft/entity/passive/EntityWolf -> wz
 net/minecraft/entity/player/EntityPlayer -> aak
 net/minecraft/entity/player/EntityPlayerMP -> lw
 net/minecraft/entity/player/InventoryPlayer -> aaj
+net/minecraft/entity/projectile/EntityPotion -> abd
 net/minecraft/init/Blocks -> akx
 net/minecraft/init/Items -> aes
 net/minecraft/init/Sounds -> nl
@@ -1320,6 +1341,7 @@ net/minecraft/entity/Entity isSneaking ()Z -> se aM ()Z
 net/minecraft/entity/Entity onUpdate ()V -> se m ()V
 net/minecraft/entity/Entity playSound (Lnet/minecraft/util/Sound;FF)V -> se a (Lnk;FF)V
 net/minecraft/entity/Entity setPositionAndUpdate (DDD)V -> se a (DDD)V
+net/minecraft/entity/EntityLivingBase damageEntity (Lnet/minecraft/util/DamageSource;F)V -> sn d (Lrp;F)V
 net/minecraft/entity/EntityLivingBase getHeldItem (Lnet/minecraft/util/MainOrOffHand;)Lnet/minecraft/item/ItemStack; -> sn b (Lqz;)Laeq;
 net/minecraft/entity/EntityLivingBase getHeldMainHandItem ()Lnet/minecraft/item/ItemStack; -> sn cf ()Laeq;
 net/minecraft/entity/EntityLivingBase getHeldOffHandItem ()Lnet/minecraft/item/ItemStack; -> sn cg ()Laeq;
