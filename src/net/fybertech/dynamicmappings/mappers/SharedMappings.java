@@ -1,19 +1,9 @@
 package net.fybertech.dynamicmappings.mappers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
-import net.fybertech.dynamicmappings.DynamicMappings;
-import net.fybertech.dynamicmappings.Mapping;
-import net.fybertech.dynamicmappings.MethodCallIterator;
+import net.fybertech.dynamicmappings.*;
 import net.fybertech.dynamicmappings.MethodCallIterator.MethodCall;
-import net.fybertech.dynamicmappings.MethodCallVisitor;
 import net.fybertech.meddle.MeddleUtil;
 
 import org.objectweb.asm.Opcodes;
@@ -22,12 +12,8 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FieldNode;
-import org.objectweb.asm.tree.FrameNode;
-import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
-import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
-import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TableSwitchInsnNode;
@@ -1441,6 +1427,27 @@ public class SharedMappings extends MappingsBase {
 	@Mapping(provides={
 			"net/minecraft/tileentity/TileEntityChest",
 			"net/minecraft/tileentity/TileEntityFurnace",
+			"net/minecraft/tileentity/TileEntityEnderChest",
+			"net/minecraft/block/BlockJukebox$TileEntityJukebox",
+			"net/minecraft/tileentity/TileEntityDispenser",
+			"net/minecraft/tileentity/TileEntityDropper",
+			"net/minecraft/tileentity/TileEntitySign",
+			"net/minecraft/tileentity/TileEntityMobSpawner",
+			"net/minecraft/tileentity/TileEntityNoteblock",
+			"net/minecraft/tileentity/TileEntityPiston",
+			"net/minecraft/tileentity/TileEntityBrewingStand",
+			"net/minecraft/tileentity/TileEntityEnchantingTable",
+			"net/minecraft/tileentity/TileEntityEndPortal",
+			"net/minecraft/tileentity/TileEntityBeacon",
+			"net/minecraft/tileentity/TileEntitySkull",
+			"net/minecraft/tileentity/TileEntityDaylightDetector",
+			"net/minecraft/tileentity/TileEntityHopper",
+			"net/minecraft/tileentity/TileEntityComparator",
+			"net/minecraft/tileentity/TileEntityFlowerPot",
+			"net/minecraft/tileentity/TileEntityBanner",
+			"net/minecraft/tileentity/TileEntityStructureBlock",
+			"net/minecraft/tileentity/TileEntityEndGateway",
+			"net/minecraft/tileentity/TileEntityCommandBlock",
 			"net/minecraft/network/PacketBuffer",
 			"net/minecraft/network/Packet",
 			"net/minecraft/crash/CrashReportCategory"
@@ -1506,21 +1513,106 @@ public class SharedMappings extends MappingsBase {
 			
 			teMap.put(lastName, c);			
 		}
-		
-		
+
 		// 16w32a changed all TE IDs
-		String className = teMap.get("chest");
-		if (className != null && searchConstantPoolForStrings(className, "container.chest")) {
-			addClassMapping("net/minecraft/tileentity/TileEntityChest", className);
+		// it's unnecessary to check if the registered TileEntity classes contains strings. If here is something wrong than mojang has fucked up done things
+		for(Map.Entry<String, String> entry : teMap.entrySet()){
+			switch(entry.getKey()){
+				case "furnace":{
+					addClassMapping("net/minecraft/tileentity/TileEntityFurnace", entry.getValue());
+					break;
+				}
+				case "chest":{
+					addClassMapping("net/minecraft/tileentity/TileEntityChest", entry.getValue());
+					break;
+				}
+				case "ender_chest":{
+					addClassMapping("net/minecraft/tileentity/TileEntityEnderChest", entry.getValue());
+					break;
+				}
+				case "jukebox":{
+					addClassMapping("net/minecraft/block/BlockJukebox$TileEntityJukebox", entry.getValue());
+					break;
+				}
+				case "dispenser":{
+					addClassMapping("net/minecraft/tileentity/TileEntityDispenser", entry.getValue());
+					break;
+				}
+				case "dropper":{
+					addClassMapping("net/minecraft/tileentity/TileEntityDropper", entry.getValue());
+					break;
+				}
+				case "sign":{
+					addClassMapping("net/minecraft/tileentity/TileEntitySign", entry.getValue());
+					break;
+				}
+				case "mob_spawner":{
+					addClassMapping("net/minecraft/tileentity/TileEntityMobSpawner", entry.getValue());
+					break;
+				}
+				case "noteblock":{
+					addClassMapping("net/minecraft/tileentity/TileEntityNoteblock", entry.getValue());
+					break;
+				}
+				case "piston":{
+					addClassMapping("net/minecraft/tileentity/TileEntityPiston", entry.getValue());
+					break;
+				}
+				case "brewing_stand":{
+					addClassMapping("net/minecraft/tileentity/TileEntityBrewingStand", entry.getValue());
+					break;
+				}
+				case "enchanting_table":{
+					addClassMapping("net/minecraft/tileentity/TileEntityEnchantingTable", entry.getValue());
+					break;
+				}
+				case "end_portal":{
+					addClassMapping("net/minecraft/tileentity/TileEntityEndPortal", entry.getValue());
+					break;
+				}
+				case "beacon":{
+					addClassMapping("net/minecraft/tileentity/TileEntityBeacon", entry.getValue());
+					break;
+				}
+				case "skull":{
+					addClassMapping("net/minecraft/tileentity/TileEntitySkull", entry.getValue());
+					break;
+				}
+				case "daylight_detector":{
+					addClassMapping("net/minecraft/tileentity/TileEntityDaylightDetector", entry.getValue());
+					break;
+				}
+				case "hopper":{
+					addClassMapping("net/minecraft/tileentity/TileEntityHopper", entry.getValue());
+					break;
+				}
+				case "comparator":{
+					addClassMapping("net/minecraft/tileentity/TileEntityComparator", entry.getValue());
+					break;
+				}
+				case "flower_pot":{
+					addClassMapping("net/minecraft/tileentity/TileEntityFlowerPot", entry.getValue());
+					break;
+				}
+				case "banner":{
+					addClassMapping("net/minecraft/tileentity/TileEntityBanner", entry.getValue());
+					break;
+				}
+				case "structure_block":{
+					addClassMapping("net/minecraft/tileentity/TileEntityStructureBlock", entry.getValue());
+					break;
+				}
+				case "end_gateway":{
+					addClassMapping("net/minecraft/tileentity/TileEntityEndGateway", entry.getValue());
+					break;
+				}
+				case "command_block":{
+					addClassMapping("net/minecraft/tileentity/TileEntityCommandBlock", entry.getValue());
+					break;
+				}
+			}
 		}
-		
-		className = teMap.get("furnace");
-		if (className != null && searchConstantPoolForStrings(className, "container.furnace")) {
-			addClassMapping("net/minecraft/tileentity/TileEntityFurnace", className);
-		}
-		
-		
-		
+
 		
 		// protected World worldObj
 		List<FieldNode> fields = getMatchingFields(tileEntity, null, "L" + world.name + ";");
@@ -1690,7 +1782,7 @@ public class SharedMappings extends MappingsBase {
 			if (t.getReturnType().getSort() != Type.VOID) continue;			
 			if (args.length != 1) continue;
 			
-			className = args[0].getClassName();
+			String className = args[0].getClassName();
 			if (searchConstantPoolForStrings(className, "(Error finding world loc)", "Details:")) {
 				addClassMapping("net/minecraft/crash/CrashReportCategory", className);
 				methods.add(method);
@@ -1812,8 +1904,8 @@ public class SharedMappings extends MappingsBase {
 		// public double getDistanceSq(double x, double y, double z)
 	    // @ClientOnly
 	    // public double getMaxRenderDistanceSquared()
-		
-		
+
+
 		return true;
 	}
 	
@@ -1822,10 +1914,11 @@ public class SharedMappings extends MappingsBase {
 	@Mapping(provides={
 			"net/minecraft/inventory/ContainerChest",
 			"net/minecraft/tileentity/TileEntityLockable",
-			"net/minecraft/server/gui/IUpdatePlayerListBox"
+			"net/minecraft/util/ITickable",
+			"net/minecraft/tileentity/TileEntityLootable"
 			},
 			providesMethods={
-			"net/minecraft/server/gui/IUpdatePlayerListBox update ()V"
+			"net/minecraft/util/ITickable update ()V"
 			},
 			depends={
 			"net/minecraft/tileentity/TileEntity",
@@ -1846,15 +1939,15 @@ public class SharedMappings extends MappingsBase {
 		if (!MeddleUtil.notNull(tileEntity, tileEntityChest, inventoryPlayer, entityPlayer, container, iInventory)) return false;
 		
 			
-		
+		// canitzp - renamed IUpdatePlayerListBox to ITickable
 		if (tileEntityChest.interfaces.size() == 1) {
 			String iUpdatePlayerListBox_name = tileEntityChest.interfaces.get(0);
 			ClassNode iUpdatePlayerListBox = getClassNode(iUpdatePlayerListBox_name);
 			if (iUpdatePlayerListBox.methods.size() == 1) {
 				MethodNode m = iUpdatePlayerListBox.methods.get(0);
 				if (m.desc.equals("()V")) {
-					addClassMapping("net/minecraft/server/gui/IUpdatePlayerListBox", iUpdatePlayerListBox_name);
-					addMethodMapping("net/minecraft/server/gui/IUpdatePlayerListBox update ()V",
+					addClassMapping("net/minecraft/util/ITickable", iUpdatePlayerListBox_name);
+					addMethodMapping("net/minecraft/util/ITickable update ()V",
 							iUpdatePlayerListBox.name + " " + m.name + " ()V");
 				}
 			}			
@@ -1862,7 +1955,7 @@ public class SharedMappings extends MappingsBase {
 		
 				
 		if (searchConstantPoolForStrings(tileEntityChest.superName, "LootTable")) {
-			// TODO - Give this class a name
+			addClassMapping("net/minecraft/tileentity/TileEntityLootable", tileEntityChest.superName);
 			ClassNode lootTableClass = getClassNode(tileEntityChest.superName);
 			
 			// TODO - Do this a bit safer, get other interface classes
@@ -5205,8 +5298,8 @@ public class SharedMappings extends MappingsBase {
 			addMethodMapping("net/minecraft/block/Block collisionRayTrace (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;)Lnet/minecraft/util/MovingObjectPosition;",
 					block.name + " " + method.name + " " + method.desc);
 		}
-		
-		
+
+
 		methods = getMatchingMethods(block, null, "(I)L" + iBlockState.name + ";");
 		if (methods.size() == 2) {
 			for (MethodNode method : methods) {
@@ -5511,8 +5604,8 @@ public class SharedMappings extends MappingsBase {
 			addFieldMapping("net/minecraft/block/Block blockState Lnet/minecraft/block/state/BlockState;",
 					block.name + " " + fields.get(0).name + " " + fields.get(0).desc);
 		}
-		
-		
+
+
 		// public static int getStateId(IBlockState)
 		methods = getMatchingMethods(block, null, "(L" + iBlockState.name + ";)I");
 		methods = removeMethodsWithoutFlags(methods, Opcodes.ACC_STATIC);
@@ -5780,6 +5873,7 @@ public class SharedMappings extends MappingsBase {
 		ClassNode vec3 = getClassNodeFromMapping("net/minecraft/util/Vec3");
 		ClassNode aabb = getClassNodeFromMapping("net/minecraft/util/AxisAlignedBB");
 		ClassNode iBlockWrapper = getClassNodeFromMapping("net/minecraft/block/state/IBlockWrapper");
+		ClassNode mop = getClassNodeFromMapping("net/minecraft/util/MovingObjectPosition");
 
 		if (!MeddleUtil.notNull(block, item, iBlockState, blockState, blockPos, world, iBlockAccess, creativeTabs,
 				entityPlayer, tileEntity, itemStack, material, mapColor, blockSoundType, explosion, entityLivingBase,
@@ -5797,8 +5891,15 @@ public class SharedMappings extends MappingsBase {
 						block.name + " " + nodes.get(0).name + " " + nodes.get(0).desc);
 			}
 		}
-		
-		
+
+
+		methods = getMatchingMethods(block, null, assembleDescriptor("(", blockPos, vec3, vec3, aabb, ")", mop));
+		if(methods.size() == 1){
+			addMethodMapping("net/minecraft/block/Block collisionRayTrace (Lnet/minecraft/block/Block;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/AxisAlignedBB;)Lnet/minecraft/util/MovingObjectPosition;",
+					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+
+
 		// public MapColor getMapColor(IBlockState state)
 		methods = getMatchingMethods(block, null, assembleDescriptor("(", iBlockState, ")", mapColor));
 		if (methods.size() == 1) {
@@ -6337,7 +6438,9 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/item/Item onItemRightClick (Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/MainOrOffHand;)Lnet/minecraft/util/ObjectActionHolder;",
 			"net/minecraft/item/Item onItemUse (Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/MainOrOffHand;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/ItemUseResult;",
 			"net/minecraft/item/Item onItemUseFinish (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/item/ItemStack;",
-			"net/minecraft/item/Item onBlockDestroyed (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/EntityLivingBase;)Z"
+			"net/minecraft/item/Item onBlockDestroyed (Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/EntityLivingBase;)Z",
+			"net/minecraft/item/Item hitEntity (Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/EntityLivingBase;Lnet/minecraft/entity/EntityLivingBase;)Z",
+			"net/minecraft/item/Item itemInteractionForEntity (Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/entity/EntityLivingBase;Lnet/minecraft/util/MainOrOffHand;)Z"
 			},
 			providesFields={
 			"net/minecraft/item/Item maxStackSize I",
@@ -6610,11 +6713,25 @@ public class SharedMappings extends MappingsBase {
 					item.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 
+		// public boolean hitEntity(ItemStack stack, EntityLivingbase target, EntityLivingBase attacker)
+		methods = getMatchingMethods(item, null, assembleDescriptor("(", itemStack, entityLivingBase, entityLivingBase, ")Z"));
+		if(methods.size() == 1){
+			addMethodMapping("net/minecraft/item/Item hitEntity (Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/EntityLivingBase;Lnet/minecraft/entity/EntityLivingBase;)Z",
+					item.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+
+		// public boolean itemInteractionForEntity(ItemStack stack, EntityPlayer player, EntityLivingBase target, MainOrOffHand hand)
+		ClassNode hand = getClassNodeFromMapping("net/minecraft/util/MainOrOffHand");
+		methods = getMatchingMethods(item, null, assembleDescriptor("(", itemStack, entityPlayer, entityLivingBase, hand, ")Z"));
+		if(methods.size() == 1){
+			addMethodMapping("net/minecraft/item/Item itemInteractionForEntity (Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/entity/EntityLivingBase;Lnet/minecraft/util/MainOrOffHand;)Z",
+					item.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+
 		return true;
 	}
 
-	
-	
+
 	
 	@Mapping(provides={
 			"net/minecraft/util/EnumFacing$AxisDirection",
@@ -7443,7 +7560,10 @@ public class SharedMappings extends MappingsBase {
 
 
 
-	@Mapping(providesFields={
+	@Mapping(provides = {
+			"net/minecraft/util/DamageSource"
+			},
+			providesFields={
 			"net/minecraft/entity/player/EntityPlayer inventory Lnet/minecraft/entity/player/InventoryPlayer;"
 			},
 			depends={
@@ -7469,13 +7589,102 @@ public class SharedMappings extends MappingsBase {
 					entityPlayer.name + " " + fields.get(0).name + " " + fields.get(0).desc);
 		}
 
+		List<MethodNode> methods = entityPlayer.methods;
+		for(MethodNode methodNode : methods){
+			Type[] params = Type.getArgumentTypes(methodNode.desc);
+			if(params.length == 2){
+				if(methodNode.access == Opcodes.ACC_PROTECTED && params[0].getSort() == Type.OBJECT && params[1].getSort() == Type.FLOAT && Type.getReturnType(methodNode.desc).getSort() == Type.VOID){
+					addClassMapping("net/minecraft/util/DamageSource", params[0].getClassName());
+				}
+			}
+		}
+
+
+
+		return true;
+	}
+
+
+	@Mapping(depends = {
+			"net/minecraft/util/DamageSource",
+			"net/minecraft/entity/EntityLivingBase",
+			"net/minecraft/util/IChatComponent"
+			},
+			providesFields = {
+			"net/minecraft/util/DamageSource inFire Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource lightningBolt Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource onFire Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource lava Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource hotFloor Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource inWall Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource drown Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource starve Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource cactus Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource fall Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource flyIntoWall Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource outOfWorld Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource generic Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource magic Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource wither Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource anvil Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource fallingBlock Lnet/minecraft/util/DamageSource;",
+			"net/minecraft/util/DamageSource dragonBreath Lnet/minecraft/util/DamageSource;",
+			},
+			providesMethods = {
+			"net/minecraft/util/DamageSource getDeathMessage (Lnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/util/IChatComponent;"
+			})
+	public boolean processDamageSourceClass(){
+		ClassNode damageSource = getClassNodeFromMapping("net/minecraft/util/DamageSource");
+		ClassNode livingBase = getClassNodeFromMapping("net/minecraft/entity/EntityLivingBase");
+		ClassNode iChatComponent = getClassNodeFromMapping("net/minecraft/util/IChatComponent");
+
+		if(MeddleUtil.notNull(damageSource, livingBase, iChatComponent)){
+			List<MethodNode> methods = damageSource.methods;
+			List<String> sourceStrings = new ArrayList<>();
+			for(MethodNode method : methods){
+				if(method.name.equals("<clinit>")){
+					MethodCallVisitor visitor = new MethodCallVisitor(method, false);
+					for(MethodCall call : visitor){
+						MethodInsnNode node = call.methodNode;
+						if(node.name.equals("<init>") && call.args.length == 2){
+							String name = (String) call.args[1];
+							if(name != null){
+								sourceStrings.add(name);
+							}
+						}
+					}
+				}
+			}
+			List<FieldNode> possibleFields = new ArrayList<>();
+			for(FieldNode field : damageSource.fields){
+				if((field.access & Opcodes.ACC_PUBLIC) != 0 && (field.access & Opcodes.ACC_STATIC) != 0){
+					possibleFields.add(field);
+				}
+			}
+			if(possibleFields.size() == sourceStrings.size()){
+				for(String fieldName : sourceStrings){
+					FieldNode node = possibleFields.get(sourceStrings.indexOf(fieldName));
+					addFieldMapping("net/minecraft/util/DamageSource " + fieldName + " Lnet/minecraft/util/DamageSource;",
+							damageSource.name + " " + node.name + " " + node.desc);
+				}
+			}
+
+
+			// getDeathMessage
+			methods = getMatchingMethods(damageSource, null, assembleDescriptor("(", livingBase, ")", iChatComponent));
+			if(methods.size() == 1){
+				addMethodMapping("net/minecraft/util/DamageSource getDeathMessage (Lnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/util/IChatComponent;",
+						damageSource.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			}
+
+		}
 
 		return true;
 	}
 
 
 
-	
+
 
 
 	@Mapping(provides={
@@ -10482,8 +10691,48 @@ public class SharedMappings extends MappingsBase {
 		
 		return true;
 	}
-	
-	
+
+	@Mapping(provides = {
+			"net/minecraft/item/Item$ToolMaterial"
+			},
+			providesFields = {
+			"net/minecraft/item/Item$ToolMaterial WOOD Lnet/minecraft/item/Item$ToolMaterial",
+			"net/minecraft/item/Item$ToolMaterial STONE Lnet/minecraft/item/Item$ToolMaterial",
+			"net/minecraft/item/Item$ToolMaterial IRON Lnet/minecraft/item/Item$ToolMaterial",
+			"net/minecraft/item/Item$ToolMaterial DIAMOND Lnet/minecraft/item/Item$ToolMaterial",
+			"net/minecraft/item/Item$ToolMaterial GOLD Lnet/minecraft/item/Item$ToolMaterial"
+			},
+			depends = {
+			"net/minecraft/item/ItemTool"
+			})
+	public boolean processToolMaterial(){
+		ClassNode item = getClassNodeFromMapping("net/minecraft/item/ItemTool");
+
+		List<FieldNode> fields = new ArrayList<>();
+
+		for(FieldNode field : item.fields){
+			if(!Objects.equals(field.desc, "F") && !Objects.equals(field.desc, "Ljava/util/Set;")){
+				fields.add(field);
+			}
+		}
+
+		if(fields.size() == 1){
+			addClassMapping("net/minecraft/item/Item$ToolMaterial", Type.getType(fields.get(0).desc).getClassName());
+		}
+
+		ClassNode toolmaterial = getClassNodeFromMapping("net/minecraft/item/Item$ToolMaterial");
+		String[] names = {"WOOD", "STONE", "IRON", "DIAMOND", "GOLD"};
+		List<FieldNode> matchingFields = getMatchingFields(toolmaterial, null, assembleDescriptor(toolmaterial));
+		for(int i = 0; i < matchingFields.size(); i++){
+			FieldNode field = matchingFields.get(i);
+			addFieldMapping("net/minecraft/item/Item$ToolMaterial " + names[i] +" Lnet/minecraft/item/Item$ToolMaterial",
+					toolmaterial.name + " " + field.name + " " + field.desc);
+
+		}
+
+		return true;
+	}
+
 }
 
 
