@@ -2191,7 +2191,23 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/entity/monster/EntityEnderman",
 			"net/minecraft/entity/item/EntityEnderPearl",
 			"net/minecraft/entity/monster/EntityCreeper",
-			"net/minecraft/entity/passive/EntityOcelot"
+			"net/minecraft/entity/passive/EntityOcelot",
+			"net/minecraft/entity/item/EntityItemFrame",
+			"net/minecraft/entity/item/EntityPainting",
+			"net/minecraft/entity/projectile/EntityPotion",
+			"net/minecraft/entity/item/EntityFallingBlock",
+			"net/minecraft/entity/item/EntityFireworkRocket",
+			"net/minecraft/entity/item/EntityArmorStand",
+			"net/minecraft/entity/EntityLiving",
+			"net/minecraft/entity/monster/EntitySkeleton",
+			"net/minecraft/entity/monster/EntitySlime",
+			"net/minecraft/entity/boss/EntityDragon",
+			"net/minecraft/entity/passive/EntityBat",
+			"net/minecraft/entity/passive/EntityChicken",
+			"net/minecraft/entity/passive/EntityWolf",
+			"net/minecraft/entity/passive/EntityHorse",
+			"net/minecraft/entity/passive/EntityRabbit",
+			"net/minecraft/entity/item/EntityEnderCrystal"
 			},
 			depends="net/minecraft/entity/EntityList")
 	public boolean parseEntityList()
@@ -2291,6 +2307,118 @@ public class SharedMappings extends MappingsBase {
 		if (ocelotClass != null) {
 			if (searchConstantPoolForStrings(ocelotClass, "CatType", "entity.Cat.name")) {
 				addClassMapping("net/minecraft/entity/passive/EntityOcelot", ocelotClass);
+			}
+		}
+		
+		String itemFrameClass = entityListClasses.get("ItemFrame");
+		if (itemFrameClass != null) {
+			if (searchConstantPoolForStrings(itemFrameClass, "frame-", "ItemRotation")) {
+				addClassMapping("net/minecraft/entity/item/EntityItemFrame", itemFrameClass);
+			}
+		}
+		
+		String paintingClass = entityListClasses.get("Painting");
+		if (paintingClass != null) {
+			if (searchConstantPoolForStrings(paintingClass, "Motive", "doEntityDrops")) {
+				addClassMapping("net/minecraft/entity/item/EntityPainting", paintingClass);
+			}
+		}
+		
+		String potionClass = entityListClasses.get("ThrownPotion");
+		if (potionClass != null) {
+			if (searchConstantPoolForStrings(potionClass, "ThrownPotion entity ", " has no item?!", "Potion")) {
+				addClassMapping("net/minecraft/entity/projectile/EntityPotion", potionClass);
+			}
+		}
+		
+		String fallingBlockClass = entityListClasses.get("FallingSand");
+		if (fallingBlockClass != null) {
+			if (searchConstantPoolForStrings(fallingBlockClass, "DropItem", "FallHurtAmount")) {
+				addClassMapping("net/minecraft/entity/item/EntityFallingBlock", fallingBlockClass);
+			}
+		}
+		
+		String fireworkClass = entityListClasses.get("FireworksRocketEntity");
+		if (fireworkClass != null) {
+			if (searchConstantPoolForStrings(fireworkClass, "Fireworks", "Flight")) {
+				addClassMapping("net/minecraft/entity/item/EntityFireworkRocket", fireworkClass);
+			}
+		}
+		
+		String armorStandClass = entityListClasses.get("ArmorStand");
+		if (armorStandClass != null) {
+			if (searchConstantPoolForStrings(armorStandClass, "ArmorItems", "ShowArms", "Pose")) {
+				addClassMapping("net/minecraft/entity/item/EntityArmorStand", armorStandClass);
+			}
+		}
+		
+		String livingClass = entityListClasses.get("Mob");
+		if (livingClass != null) {
+			if (searchConstantPoolForStrings(livingClass, "mobBaseTick", "CanPickUpLoot", "PersistenceRequired")) {
+				addClassMapping("net/minecraft/entity/EntityLiving", livingClass);
+			}
+		}
+		
+		String skeletonClass = entityListClasses.get("Skeleton");
+		if (skeletonClass != null) {
+			if (searchConstantPoolForStrings(skeletonClass, "SkeletonType")) {
+				addClassMapping("net/minecraft/entity/monster/EntitySkeleton", skeletonClass);
+			}
+		}
+		
+		String slimeClass = entityListClasses.get("Slime");
+		if (slimeClass != null) {
+			if (searchConstantPoolForStrings(slimeClass, "Size", "wasOnGround")) {
+				addClassMapping("net/minecraft/entity/monster/EntitySlime", slimeClass);
+			}
+		}
+		
+		String dragonClass = entityListClasses.get("EnderDragon");
+		if (dragonClass != null) {
+			if (searchConstantPoolForStrings(dragonClass, "Failed to find path from {} to {}", "DragonPhase")) {
+				addClassMapping("net/minecraft/entity/boss/EntityDragon", dragonClass);
+			}
+		}
+		
+		String batClass = entityListClasses.get("Bat");
+		if (batClass != null) {
+			if (searchConstantPoolForStrings(batClass, "BatFlags")) {
+				addClassMapping("net/minecraft/entity/passive/EntityBat", batClass);
+			}
+		}
+		
+		String chickenClass = entityListClasses.get("Chicken");
+		if (chickenClass != null) {
+			if (searchConstantPoolForStrings(chickenClass, "IsChickenJockey", "EggLayTime")) {
+				addClassMapping("net/minecraft/entity/passive/EntityChicken", chickenClass);
+			}
+		}
+		
+		String wolfClass = entityListClasses.get("Wolf");
+		if (wolfClass != null) {
+			if (searchConstantPoolForStrings(wolfClass, "Angry", "CollarColor")) {
+				addClassMapping("net/minecraft/entity/passive/EntityWolf", wolfClass);
+			}
+		}
+		
+		String horseClass = entityListClasses.get("EntityHorse");
+		if (horseClass != null) {
+			if (searchConstantPoolForStrings(horseClass, "EatingHaystack", "ChestedHorse")) {
+				addClassMapping("net/minecraft/entity/passive/EntityHorse", horseClass);
+			}
+		}
+		
+		String rabbitClass = entityListClasses.get("Rabbit");
+		if (rabbitClass != null) {
+			if (searchConstantPoolForStrings(rabbitClass, "RabbitType", "MoreCarrotTicks")) {
+				addClassMapping("net/minecraft/entity/passive/EntityRabbit", rabbitClass);
+			}
+		}
+		
+		String enderCrystalClass = entityListClasses.get("EnderCrystal");
+		if (enderCrystalClass != null) {
+			if (searchConstantPoolForStrings(enderCrystalClass, "BeamTarget", "ShowBottom")) {
+				addClassMapping("net/minecraft/entity/item/EntityEnderCrystal", enderCrystalClass);
 			}
 		}
 		
@@ -10649,6 +10777,174 @@ public class SharedMappings extends MappingsBase {
 		}
 		
 		
+		return true;
+	}
+	
+	@Mapping(provides="net/minecraft/block/BlockBasePressurePlate",
+			depends={
+			"net/minecraft/block/Block",
+			"net/minecraft/block/BlockPressurePlate"
+			})
+	public boolean getBlockPressurePlateClass()
+	{
+		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
+		ClassNode pressurePlate = getClassNodeFromMapping("net/minecraft/block/BlockPressurePlate");
+		if (!MeddleUtil.notNull(block, pressurePlate)) return false;
+		
+		ClassNode pressurePlateBase = getClassNode(pressurePlate.superName);
+		if (!block.name.equals(pressurePlateBase.superName)) return false;
+		
+		addClassMapping("net/minecraft/block/BlockBasePressurePlate", pressurePlateBase);
+		return true;
+	}
+	
+	@Mapping(provides="net/minecraft/block/BlockRailBase",
+			depends={
+					"net/minecraft/block/Block",
+					"net/minecraft/block/BlockRail",
+					"net/minecraft/block/BlockRailPowered"
+			})
+	public boolean getBlockRailClass()
+	{
+		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
+		ClassNode rail = getClassNodeFromMapping("net/minecraft/block/BlockRail");
+		ClassNode railPowered = getClassNodeFromMapping("net/minecraft/block/BlockRailPowered");
+		if (!MeddleUtil.notNull(block, rail, railPowered)) return false;
+		
+		if (!rail.superName.equals(railPowered.superName)) return false;
+		
+		ClassNode railBase = getClassNode(rail.superName);
+		if (!block.name.equals(railBase.superName)) return false;
+		
+		addClassMapping("net/minecraft/block/BlockRailBase", railBase);
+		return true;
+	}
+	
+	@Mapping(provides="net/minecraft/block/BlockButton",
+			depends={
+					"net/minecraft/block/BlockButtonStone",
+					"net/minecraft/block/BlockButtonWood"
+			})
+	public boolean getBlockButtonClass()
+	{
+		ClassNode buttonStone = getClassNodeFromMapping("net/minecraft/block/BlockButtonStone");
+		ClassNode buttonWood = getClassNodeFromMapping("net/minecraft/block/BlockButtonWood");
+		if (!MeddleUtil.notNull(buttonStone, buttonWood)) return false;
+		
+		if (!buttonStone.superName.equals(buttonWood.superName)) return false;
+		if (!searchConstantPoolForStrings(buttonStone.superName, "powered")) return false;
+		
+		addClassMapping("net/minecraft/block/BlockButton", buttonStone.superName);
+		return true;
+	}
+	
+	@Mapping(provides="net/minecraft/block/BlockRedstoneDiode",
+			depends={
+					"net/minecraft/block/BlockDirectional",
+					"net/minecraft/block/BlockRedstoneRepeater",
+					"net/minecraft/block/BlockRedstoneComparator"
+			})
+	public boolean getBlockRedstoneDiodeClass()
+	{
+		ClassNode directional = getClassNodeFromMapping("net/minecraft/block/BlockDirectional");
+		ClassNode repeater = getClassNodeFromMapping("net/minecraft/block/BlockRedstoneRepeater");
+		ClassNode comparator = getClassNodeFromMapping("net/minecraft/block/BlockRedstoneComparator");
+		if (!MeddleUtil.notNull(directional, repeater, comparator)) return false;
+		
+		if (!repeater.superName.equals(comparator.superName)) return false;
+		
+		ClassNode diode = getClassNode(repeater.superName);
+		if (!directional.name.equals(diode.superName)) return false;
+		
+		addClassMapping("net/minecraft/block/BlockRedstoneDiode", diode);
+		return true;
+	}
+	
+	@Mapping(provides="net/minecraft/block/BlockFalling",
+			depends={
+					"net/minecraft/block/Block",
+					"net/minecraft/block/BlockSand",
+					"net/minecraft/block/BlockGravel"
+			})
+	public boolean getBlockFallingClass()
+	{
+		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
+		ClassNode sand = getClassNodeFromMapping("net/minecraft/block/BlockSand");
+		ClassNode gravel = getClassNodeFromMapping("net/minecraft/block/BlockGravel");
+		if (!MeddleUtil.notNull(block, sand, gravel)) return false;
+		
+		if (!sand.superName.equals(gravel.superName)) return false;
+		
+		ClassNode falling = getClassNode(sand.superName);
+		if (!block.name.equals(falling.superName)) return false;
+		
+		addClassMapping("net/minecraft/block/BlockFalling", falling);
+		return true;
+	}
+	
+	@Mapping(provides="net/minecraft/block/BlockFlower",
+			depends={
+					"net/minecraft/block/BlockBush",
+					"net/minecraft/block/BlockYellowFlower",
+					"net/minecraft/block/BlockRedFlower"
+			})
+	public boolean getBlockFlowerClass()
+	{
+		ClassNode bush = getClassNodeFromMapping("net/minecraft/block/BlockBush");
+		ClassNode yellowFlower = getClassNodeFromMapping("net/minecraft/block/BlockYellowFlower");
+		ClassNode redFlower = getClassNodeFromMapping("net/minecraft/block/BlockRedFlower");
+		if (!MeddleUtil.notNull(bush, yellowFlower, redFlower)) return false;
+		
+		if (!yellowFlower.superName.equals(redFlower.superName)) return false;
+		
+		ClassNode flower = getClassNode(yellowFlower.superName);
+		if (!bush.name.equals(flower.superName)) return false;
+		
+		addClassMapping("net/minecraft/block/BlockFlower", flower);
+		return true;
+	}
+	
+	@Mapping(provides="net/minecraft/block/BlockBreakable",
+			depends={
+					"net/minecraft/block/Block",
+					"net/minecraft/block/BlockGlass",
+					"net/minecraft/block/BlockIce"
+			})
+	public boolean getBlockBreakableClass()
+	{
+		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
+		ClassNode glass = getClassNodeFromMapping("net/minecraft/block/BlockGlass");
+		ClassNode ice = getClassNodeFromMapping("net/minecraft/block/BlockIce");
+		if (!MeddleUtil.notNull(block, glass, ice)) return false;
+		
+		if (!glass.superName.equals(ice.superName)) return false;
+		
+		ClassNode flower = getClassNode(glass.superName);
+		if (!block.name.equals(flower.superName)) return false;
+		
+		addClassMapping("net/minecraft/block/BlockBreakable", flower);
+		return true;
+	}
+	
+	@Mapping(provides="net/minecraft/block/BlockSign",
+			depends={
+					"net/minecraft/block/BlockContainer",
+					"net/minecraft/block/BlockStandingSign",
+					"net/minecraft/block/BlockWallSign"
+			})
+	public boolean getBlockSignClass()
+	{
+		ClassNode container = getClassNodeFromMapping("net/minecraft/block/BlockContainer");
+		ClassNode standingSign = getClassNodeFromMapping("net/minecraft/block/BlockStandingSign");
+		ClassNode wallSign = getClassNodeFromMapping("net/minecraft/block/BlockWallSign");
+		if (!MeddleUtil.notNull(container, standingSign, wallSign)) return false;
+		
+		if (!standingSign.superName.equals(wallSign.superName)) return false;
+		
+		ClassNode sign = getClassNode(standingSign.superName);
+		if (!container.name.equals(sign.superName)) return false;
+		
+		addClassMapping("net/minecraft/block/BlockSign", sign);
 		return true;
 	}
 	
