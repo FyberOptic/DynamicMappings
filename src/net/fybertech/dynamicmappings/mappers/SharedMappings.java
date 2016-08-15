@@ -987,7 +987,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/init/Sounds block_lava_pop Lnet/minecraft/util/Sound;",
 			"net/minecraft/init/Sounds entity_generic_explode Lnet/minecraft/util/Sound;",
 			"net/minecraft/init/Sounds ui_button_click Lnet/minecraft/util/Sound;",
-			"net/minecraft/init/Sounds block_portal_trigger Lnet/minecraft/util/Sound;"
+			"net/minecraft/init/Sounds block_portal_trigger Lnet/minecraft/util/Sound;",
+			"net/minecraft/init/Sounds entity_skeleton_step Lnet/minecraft/util/Sound;"			
 			},
 			depends={
 			"net/minecraft/util/Sound",
@@ -2198,7 +2199,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/entity/item/EntityFallingBlock",
 			"net/minecraft/entity/item/EntityFireworkRocket",
 			"net/minecraft/entity/item/EntityArmorStand",
-			"net/minecraft/entity/EntityLiving",
+			//"net/minecraft/entity/EntityLiving",
 			"net/minecraft/entity/monster/EntitySkeleton",
 			"net/minecraft/entity/monster/EntitySlime",
 			"net/minecraft/entity/boss/EntityDragon",
@@ -2209,7 +2210,13 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/entity/passive/EntityRabbit",
 			"net/minecraft/entity/item/EntityEnderCrystal"
 			},
-			depends="net/minecraft/entity/EntityList")
+			dependsFields={
+			"net/minecraft/init/Sounds entity_skeleton_step Lnet/minecraft/util/Sound;"
+			},
+			depends={
+			"net/minecraft/entity/EntityList"
+			}
+			)
 	public boolean parseEntityList()
 	{
 		Map<String, String> entityListClasses = new HashMap<String, String>();
@@ -2326,7 +2333,7 @@ public class SharedMappings extends MappingsBase {
 		
 		String potionClass = entityListClasses.get("ThrownPotion");
 		if (potionClass != null) {
-			if (searchConstantPoolForStrings(potionClass, "ThrownPotion entity ", " has no item?!", "Potion")) {
+			if (searchConstantPoolForStrings(potionClass, "ThrownPotion entity {} has no item?!")) {
 				addClassMapping("net/minecraft/entity/projectile/EntityPotion", potionClass);
 			}
 		}
@@ -2352,16 +2359,17 @@ public class SharedMappings extends MappingsBase {
 			}
 		}
 		
-		String livingClass = entityListClasses.get("Mob");
+		// No longer present in 16w32a
+		/*String livingClass = entityListClasses.get("Mob");
 		if (livingClass != null) {
 			if (searchConstantPoolForStrings(livingClass, "mobBaseTick", "CanPickUpLoot", "PersistenceRequired")) {
 				addClassMapping("net/minecraft/entity/EntityLiving", livingClass);
 			}
-		}
+		}*/
 		
 		String skeletonClass = entityListClasses.get("Skeleton");
 		if (skeletonClass != null) {
-			if (searchConstantPoolForStrings(skeletonClass, "SkeletonType")) {
+			if (searchConstantPoolForFields(skeletonClass, getSoundFieldFull("entity_skeleton_step"))) {
 				addClassMapping("net/minecraft/entity/monster/EntitySkeleton", skeletonClass);
 			}
 		}
@@ -2401,9 +2409,9 @@ public class SharedMappings extends MappingsBase {
 			}
 		}
 		
-		String horseClass = entityListClasses.get("EntityHorse");
+		String horseClass = entityListClasses.get("Horse");
 		if (horseClass != null) {
-			if (searchConstantPoolForStrings(horseClass, "EatingHaystack", "ChestedHorse")) {
+			if (searchConstantPoolForStrings(horseClass, "Horse armor bonus")) {
 				addClassMapping("net/minecraft/entity/passive/EntityHorse", horseClass);
 			}
 		}
