@@ -7567,15 +7567,20 @@ public class SharedMappings extends MappingsBase {
 			providesFields={
 			"net/minecraft/entity/player/EntityPlayer inventory Lnet/minecraft/entity/player/InventoryPlayer;"
 			},
+			providesMethods={
+			"net/minecraft/entity/EntityLivingBase damageEntity (Lnet/minecraft/util/DamageSource;F)V"
+			},
 			depends={
 			"net/minecraft/entity/player/EntityPlayer",
-			"net/minecraft/entity/player/InventoryPlayer"
+			"net/minecraft/entity/player/InventoryPlayer",
+			"net/minecraft/entity/EntityLivingBase"
 			})
 	public boolean processEntityPlayerClass()
 	{
 		ClassNode entityPlayer = getClassNodeFromMapping("net/minecraft/entity/player/EntityPlayer");
 		ClassNode inventoryPlayer = getClassNodeFromMapping("net/minecraft/entity/player/InventoryPlayer");
-		if (entityPlayer == null || inventoryPlayer == null) return false;
+		ClassNode entityLivingBase = getClassNodeFromMapping("net/minecraft/entity/EntityLivingBase");
+		if (!MeddleUtil.notNull(entityPlayer, inventoryPlayer, entityLivingBase)) return false;
 
 		for (MethodNode method : entityPlayer.methods) {
 			Type t = Type.getMethodType(method.desc);
@@ -7590,14 +7595,23 @@ public class SharedMappings extends MappingsBase {
 					entityPlayer.name + " " + fields.get(0).name + " " + fields.get(0).desc);
 		}
 
-		List<MethodNode> methods = entityPlayer.methods;
-		for(MethodNode methodNode : methods){
+		List<MethodNode> methods = getMatchingMethods(entityPlayer, null, null);
+		String damageSource = null;
+		for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
+			MethodNode methodNode = it.next();
 			Type[] params = Type.getArgumentTypes(methodNode.desc);
-			if(params.length == 2){
-				if(methodNode.access == Opcodes.ACC_PROTECTED && params[0].getSort() == Type.OBJECT && params[1].getSort() == Type.FLOAT && Type.getReturnType(methodNode.desc).getSort() == Type.VOID){
-					addClassMapping("net/minecraft/util/DamageSource", params[0].getClassName());
+			if(params.length == 2) {
+				if(methodNode.access == Opcodes.ACC_PROTECTED && params[0].getSort() == Type.OBJECT && params[1].getSort() == Type.FLOAT && Type.getReturnType(methodNode.desc).getSort() == Type.VOID) {
+					damageSource = params[0].getClassName();
+					continue;
 				}
 			}
+			it.remove();
+		}
+		if (methods.size() == 1 && damageSource != null && searchConstantPoolForStrings(damageSource, "starve")) {
+			addClassMapping("net/minecraft/util/DamageSource", damageSource);
+			addMethodMapping("net/minecraft/entity/EntityLivingBase damageEntity (Lnet/minecraft/util/DamageSource;F)V",
+					entityLivingBase.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 
 
