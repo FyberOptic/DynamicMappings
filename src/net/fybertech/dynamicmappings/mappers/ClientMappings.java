@@ -1016,57 +1016,34 @@ public class ClientMappings extends MappingsBase
 			"net/minecraft/client/gui/Gui drawString (Lnet/minecraft/client/gui/FontRenderer;Ljava/lang/String;III)V"
 			},
 			depends={
-			"net/minecraft/client/gui/GuiMainMenu",
-			"net/minecraft/client/gui/GuiScreen",
 			"net/minecraft/client/gui/Gui",
-			"net/minecraft/client/Minecraft",
 			"net/minecraft/client/gui/FontRenderer"
 			})			
 	public boolean processGuiMainMenuClass()
 	{
-		ClassNode guiMainMenu = getClassNodeFromMapping("net/minecraft/client/gui/GuiMainMenu");
-		ClassNode guiScreen = getClassNodeFromMapping("net/minecraft/client/gui/GuiScreen");
 		ClassNode gui = getClassNodeFromMapping("net/minecraft/client/gui/Gui");
-		ClassNode minecraft = getClassNodeFromMapping("net/minecraft/client/Minecraft");
 		ClassNode fontRenderer = getClassNodeFromMapping("net/minecraft/client/gui/FontRenderer");
-		if (!MeddleUtil.notNull(guiMainMenu, guiScreen, gui, minecraft, fontRenderer)) return false;		
-	
-		String drawScreenDesc = "net/minecraft/client/gui/GuiScreen drawScreen (IIF)V";
-		MethodNode drawScreenMethod = DynamicMappings.getMethodNodeFromMapping(guiMainMenu, drawScreenDesc);
-		if (drawScreenMethod == null) return false;
-		
-		String drawStringMethodsDesc = "(L" + fontRenderer.name + ";Ljava/lang/String;III)V";
-		
-		String getStringWidthName = null;
-		String drawCenteredStringName = null;
-		String drawStringName = null;
-		
-		for (AbstractInsnNode insn = drawScreenMethod.instructions.getFirst(); insn != null; insn = insn.getNext()) {
-			if (insn.getOpcode() != Opcodes.INVOKEVIRTUAL) continue;
-			MethodInsnNode mn = (MethodInsnNode)insn;
-			
-			if (getStringWidthName == null && mn.owner.equals(fontRenderer.name) && mn.desc.equals("(Ljava/lang/String;)I")) {
-				getStringWidthName = mn.name;
-				addMethodMapping("net/minecraft/client/gui/FontRenderer getStringWidth (Ljava/lang/String;)I",
-						fontRenderer.name + " " + mn.name + " " + mn.desc);
-			}
-			
-			if (mn.owner.equals(guiMainMenu.name)  && mn.desc.equals(drawStringMethodsDesc)) {
-				if (drawCenteredStringName == null) {
-					drawCenteredStringName = mn.name;
-					addMethodMapping("net/minecraft/client/gui/Gui drawCenteredString (Lnet/minecraft/client/gui/FontRenderer;Ljava/lang/String;III)V",
-							gui.name + " " + mn.name + " " + mn.desc);
-				}
-				else if (drawStringName == null) {
-					drawStringName = mn.name;
-					addMethodMapping("net/minecraft/client/gui/Gui drawString (Lnet/minecraft/client/gui/FontRenderer;Ljava/lang/String;III)V",
-							gui.name + " " + mn.name + " " + mn.desc);
-				}
-			}
+		if (!MeddleUtil.notNull(gui,fontRenderer)) return false;
+
+		//TODO move to other methods because of the name
+
+		List<MethodNode> methods = getMatchingMethods(gui, null, assembleDescriptor("(", fontRenderer, "Ljava/lang/String;III)V"));
+		if(methods.size() == 2){
+			//Gui drawCenteredString
+			addMethodMapping("net/minecraft/client/gui/Gui drawCenteredString (Lnet/minecraft/client/gui/FontRenderer;Ljava/lang/String;III)V",
+					gui.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			//Gui drawString
+			addMethodMapping("net/minecraft/client/gui/Gui drawString (Lnet/minecraft/client/gui/FontRenderer;Ljava/lang/String;III)V",
+					gui.name + " " + methods.get(1).name + " " + methods.get(1).desc);
 		}
-		
-		
-		
+
+		methods = getMatchingMethods(fontRenderer, null, "(Ljava/lang/String;)I");
+		if(methods.size() == 1){
+			//FontRenderer getStringWidth
+			addMethodMapping("net/minecraft/client/gui/FontRenderer getStringWidth (Ljava/lang/String;)I",
+					fontRenderer.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+
 		return true;
 	}
 	
