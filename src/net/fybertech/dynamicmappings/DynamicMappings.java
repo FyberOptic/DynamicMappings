@@ -770,6 +770,45 @@ public class DynamicMappings
 		return output;
 	}
 
+
+	/**
+	 * Finds all methods matching the specified return and argument types
+	 *
+	 * @param cn - ClassNode to search.
+	 * @param accessCode - The Opcode for the access of the method.
+	 * @param returnType - The return type as integer
+	 * @param parameterTypes - The arguments of the method as integer. Can be null if the method haven't arguments
+	 * @return List of matching methods.
+	 * @author canitzp
+	 */
+	public static List<MethodNode> getMatchingMethods(ClassNode cn, int accessCode, int returnType, int... parameterTypes){
+		List<MethodNode> methodNodes = new ArrayList<>();
+
+		for(MethodNode method : cn.methods){
+			Type rt = Type.getReturnType(method.desc);
+			Type[] params = Type.getArgumentTypes(method.desc);
+			if(returnType == rt.getSort() && (method.access & accessCode) != 0){
+				if(parameterTypes != null){
+					if(parameterTypes.length == params.length){
+						boolean isSame = true;
+						for(int i = 0; i < parameterTypes.length; i++){
+							if(parameterTypes[i] != params[i].getSort()){
+								isSame = false;
+								break;
+							}
+						}
+						if(isSame){
+							methodNodes.add(method);
+						}
+					}
+				} else if(params.length == 0){
+					methodNodes.add(method);
+				}
+			}
+		}
+
+		return methodNodes;
+	}
 	
 	/**
 	 * Finds all fields matching the specified name and/or description.

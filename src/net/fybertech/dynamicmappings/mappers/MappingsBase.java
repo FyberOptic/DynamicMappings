@@ -52,6 +52,11 @@ public class MappingsBase
 	{
 		return DynamicMappings.getMatchingMethods(cn,  name,  desc);
 	}
+
+	public List<MethodNode> getMatchingMethods(ClassNode cn, int accessCode, int returnType, int... parameterTypes)
+	{
+		return DynamicMappings.getMatchingMethods(cn, accessCode, returnType, parameterTypes);
+	}
 		
 	public void addFieldMapping(String deobfFieldDesc, String obfFieldDesc)
 	{
