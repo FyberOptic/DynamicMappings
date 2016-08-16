@@ -1,7 +1,6 @@
 package net.fybertech.dynamicmappings.mappers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,7 +11,6 @@ import java.util.Set;
 import net.fybertech.dynamicmappings.DynamicMappings;
 import net.fybertech.dynamicmappings.Mapping;
 import net.fybertech.dynamicmappings.MappingsClass;
-import net.fybertech.meddle.Meddle;
 import net.fybertech.meddle.MeddleUtil;
 
 import org.objectweb.asm.Opcodes;
@@ -21,7 +19,6 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FieldNode;
-import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
@@ -320,41 +317,35 @@ public class ClientMappings extends MappingsBase
 	}
 
 
-	@Mapping(provides="net/minecraft/client/renderer/ItemModelMesher", depends="net/minecraft/client/renderer/entity/RenderItem")
-	public boolean getItemModelMesherClass() 
+	@Mapping(provides= {
+			"net/minecraft/client/renderer/ItemModelMesher",
+			"net/minecraft/client/renderer/ModelManager"
+			},
+			depends="net/minecraft/client/renderer/entity/RenderItem"
+			)
+	public boolean processRenderItemClass()
 	{
 		ClassNode renderItem = getClassNodeFromMapping("net/minecraft/client/renderer/entity/RenderItem");
-		if (renderItem == null) return false;
+		if(!MeddleUtil.notNull(renderItem)) return false;
 
-		// Find constructor RenderItem(TextureManager, ModelManager)
-		MethodNode initMethod = null;
-		int count = 0;
-		for (MethodNode method : (List<MethodNode>)renderItem.methods) {
-			if (!method.name.equals("<init>")) continue;
-			if (!DynamicMappings.checkMethodParameters(method, Type.OBJECT, Type.OBJECT, Type.OBJECT)) continue;
-			count++;
-			initMethod = method;
-		}
-		if (count != 1) return false;
-
-		Type t = Type.getMethodType(initMethod.desc);
-		Type[] args = t.getArgumentTypes();
-		// TODO: Get TextureManager and ModelManager from args
-
-		String className = null;
-
-		count = 0;
-		for (AbstractInsnNode insn = initMethod.instructions.getFirst(); insn != null; insn = insn.getNext()) {
-			if (insn.getOpcode() == Opcodes.NEW) {
-				TypeInsnNode tn = (TypeInsnNode)insn;
-				className = tn.desc;
-				count++;
+		List<MethodNode> methods = getMatchingMethods(renderItem, Opcodes.ACC_PUBLIC, Type.VOID, Type.OBJECT, Type.OBJECT, Type.OBJECT);
+		if(methods.size() == 1){
+			List<ClassNode> argumentClasses = getClassNodesFromMethodArguments(methods.get(0));
+			if(argumentClasses.size() == 3){
+				//TextureManager
+				addClassMapping("net/minecraft/client/renderer/texture/TextureManager", argumentClasses.get(0));
+				//ModelManager
+				addClassMapping("net/minecraft/client/renderer/ModelManager", argumentClasses.get(1));
+				//ItemColors
+				addClassMapping("net/minecraft/client/renderer/color/ItemColors", argumentClasses.get(2));
 			}
 		}
-		if (count != 1 || className == null) return false;
 
-		// We'll assume this is it, might do more detailed confirmations later if necessary
-		addClassMapping("net/minecraft/client/renderer/ItemModelMesher", getClassNode(className));
+		methods = getMatchingMethods(renderItem, Opcodes.ACC_PUBLIC, Type.OBJECT);
+		if(methods.size() == 1){
+			addClassMapping("net/minecraft/client/renderer/ItemModelMesher", Type.getReturnType(methods.get(0).desc).getClassName());
+		}
+
 		return true;
 	}
 
@@ -3271,100 +3262,44 @@ public class ClientMappings extends MappingsBase
 		
 		return true;
 	}
-	
-	
-	@Mapping(depends={
-			"net/minecraft/client/renderer/entity/RenderItem",
-			"net/minecraft/init/Items",
-			"net/minecraft/item/ItemStack"
-			},
-			providesMethods={
-			"net/minecraft/client/renderer/color/IItemColor getItemColor (Lnet/minecraft/item/ItemStack;I)I"	
-			},
-			provides={
-			"net/minecraft/client/renderer/texture/TextureManager",
-			//TODO - "net/minecraft/client/renderer/block/model/ModelManager",
-			"net/minecraft/client/renderer/color/ItemColors",
-			"net/minecraft/client/renderer/color/IItemColor"
-			}
-	)
-	public boolean processRenderItemClass()
-	{
-		ClassNode renderItem = getClassNodeFromMapping("net/minecraft/client/renderer/entity/RenderItem");
-		ClassNode items = getClassNodeFromMapping("net/minecraft/init/Items");
-		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
-		if (renderItem == null || items == null || itemStack == null) return false;
-		
-		List<MethodNode> methods = getMatchingMethods(renderItem, "<init>", null);
-		if (methods.size() == 1) {
-			Type t = Type.getMethodType(methods.get(0).desc);
-			Type[] args = t.getArgumentTypes();
-			
-			if (args.length == 3) {				
-				String textureManagerName = args[0].getClassName();
-				String modelManagerName = args[1].getClassName();
-				String itemColorsName = args[2].getClassName();
-				
-				if (searchConstantPoolForStrings(textureManagerName, "Failed to load texture: {}", "Registering texture")) {
-					addClassMapping("net/minecraft/client/renderer/texture/TextureManager", textureManagerName);
-				}				
-				
-				if (searchConstantPoolForClasses(itemColorsName, items.name)) {
-					ClassNode itemColors = getClassNode(itemColorsName);	
-					String descriptor = assembleDescriptor("(", itemStack, "I)I");
-					methods = getMatchingMethods(itemColors, null, descriptor);
-					if (methods.size() == 1) {						
-						// Look for methods invoked with the same signature as the method we're in
-						List<MethodInsnNode> mns = getAllInsnNodesOfType(methods.get(0), MethodInsnNode.class);
-						for (Iterator<MethodInsnNode> it = mns.iterator(); it.hasNext();) {							
-							MethodInsnNode mn = it.next();
-							if (!mn.desc.equals(descriptor)) it.remove();
-						}
-						if (mns.size() == 1) {
-							ClassNode iitemColor = getClassNode(mns.get(0).owner);
-							if ((iitemColor.access & Opcodes.ACC_INTERFACE) != 0 && iitemColor.methods.size() == 1) {
-								addClassMapping("net/minecraft/client/renderer/color/IItemColor", iitemColor.name);
-								addClassMapping("net/minecraft/client/renderer/color/ItemColors", itemColorsName);
-								addMethodMapping("net/minecraft/client/renderer/color/IItemColor getItemColor (Lnet/minecraft/item/ItemStack;I)I",
-										iitemColor.name + " " + iitemColor.methods.get(0).name + " " + descriptor);
-							}
-						}
-					}
-				}
-			}
-		}
-		
-		
-		return true;
-	}
-	
-	
+
 	@Mapping(depends={
 			"net/minecraft/client/renderer/color/ItemColors",
-			"net/minecraft/client/renderer/color/IItemColor",
 			"net/minecraft/item/ItemStack",
 			"net/minecraft/item/Item",
 			"net/minecraft/block/Block"
 			},
+			provides = {
+			"net/minecraft/client/renderer/color/IItemColor"
+			},
 			providesMethods={
 			"net/minecraft/client/renderer/color/ItemColors getItemColor (Lnet/minecraft/item/ItemStack;I)I",
 			"net/minecraft/client/renderer/color/ItemColors registerBlockColor (Lnet/minecraft/client/renderer/color/IItemColor;[Lnet/minecraft/block/Block;)V",
-			"net/minecraft/client/renderer/color/ItemColors registerItemColor (Lnet/minecraft/client/renderer/color/IItemColor;[Lnet/minecraft/item/Item;)V"
+			"net/minecraft/client/renderer/color/ItemColors registerItemColor (Lnet/minecraft/client/renderer/color/IItemColor;[Lnet/minecraft/item/Item;)V",
+			"net/minecraft/client/renderer/color/IItemColor getItemColor (Lnet/minecraft/item/ItemStack;I)I"
 			}			
 	)
 	public boolean processItemColorClass()
 	{
 		ClassNode itemColors = getClassNodeFromMapping("net/minecraft/client/renderer/color/ItemColors");
-		ClassNode iitemColor = getClassNodeFromMapping("net/minecraft/client/renderer/color/IItemColor");
+		ClassNode iitemColor = null;
 		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
 		ClassNode item = getClassNodeFromMapping("net/minecraft/item/Item");
 		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
-		if (!MeddleUtil.notNull(itemColors, iitemColor, itemStack, item, block)) return false;
-		
+		if (!MeddleUtil.notNull(itemColors, itemStack, item, block)) return false;
+
 		List<MethodNode> methods = getMatchingMethods(itemColors, null, assembleDescriptor("(", itemStack, "I)I"));
 		if (methods.size() == 1) { 
 			addMethodMapping("net/minecraft/client/renderer/color/ItemColors getItemColor (Lnet/minecraft/item/ItemStack;I)I",
 					itemColors.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}
+
+		methods = getMatchingMethods(itemColors, Opcodes.ACC_PUBLIC, Type.VOID, Type.OBJECT, Type.ARRAY);
+		if(methods.size() == 2){
+			addClassMapping("net/minecraft/client/renderer/color/IItemColor", Type.getArgumentTypes(methods.get(0).desc)[0].getClassName());
+			iitemColor = getClassNodeFromMapping("net/minecraft/client/renderer/color/IItemColor");
+			addMethodMapping("net/minecraft/client/renderer/color/IItemColor getItemColor (Lnet/minecraft/item/ItemStack;I)I",
+					iitemColor.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
 		methods = getMatchingMethods(itemColors, null, assembleDescriptor("(", iitemColor, "[", block, ")V"));

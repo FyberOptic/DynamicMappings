@@ -3,7 +3,6 @@ package net.fybertech.dynamicmappings.mappers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import net.fybertech.dynamicmappings.DynamicMappings;
@@ -210,6 +209,10 @@ public class MappingsBase
 	{
 		return DynamicMappings.doesInheritFrom(className, inheritFrom);
 	}
+
+    public static List<ClassNode> getClassNodesFromMethodArguments(MethodNode method){
+        return DynamicMappings.getClassNodesFromMethodArguments(method);
+    }
 	
 	
 	public boolean searchConstantPoolForFields(String className, String...fields)
