@@ -1300,6 +1300,37 @@ public class DynamicMappings
 		
 		return false;
 	}
-	
+
+
+	public static List<String> getStringsFromMethod(MethodNode method)
+	{
+		List<String> list = new ArrayList<>();
+
+		for (AbstractInsnNode node : method.instructions.toArray()) {
+			String s = getLdcString(node);
+			if (s != null) list.add(s);
+		}
+
+		return list;
+	}
+
+
+	public static boolean doesMethodContainString(MethodNode method, String string)
+	{
+		return getStringsFromMethod(method).contains(string);
+	}
+
+
+	public static List<MethodNode> getMethodsContainingString(ClassNode cn, String string)
+	{
+		List<MethodNode> list = new ArrayList<>();
+
+		for (MethodNode method : cn.methods) {
+			if (doesMethodContainString(method, string)) list.add(method);
+		}
+
+		return list;
+	}
+
 }
 
