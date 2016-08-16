@@ -3382,7 +3382,24 @@ public class ClientMappings extends MappingsBase
 		
 		return true;
 	}
-	
-	
+
+
+	@Mapping(depends = {"net/minecraft/client/gui/GuiIngame"},
+			provides = "net/minecraft/client/gui/ScaledResolution")
+	public boolean processGuiIngameClass()
+	{
+		ClassNode node = getClassNodeFromMapping("net/minecraft/client/gui/GuiIngame");
+		if(!MeddleUtil.notNull(node)) return false;
+
+		//ScaledResolution
+		List<MethodNode> methods = DynamicMappings.getMatchingMethods(node, Opcodes.ACC_PROTECTED, Type.VOID, Type.OBJECT);
+		System.out.println(methods);
+		if(methods.size() == 1){
+			addClassMapping("net/minecraft/client/gui/ScaledResolution", Type.getArgumentTypes(methods.get(0).desc)[0].getClassName());
+		}
+
+		return true;
+	}
+
 }
 
