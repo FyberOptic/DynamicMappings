@@ -333,5 +333,24 @@ public class MappingsBase
 		}
 		return count;
 	}
-	
+
+
+	public List<String> getStringsFromMethod(MethodNode method)
+	{
+		return DynamicMappings.getStringsFromMethod(method);
+	}
+
+
+	public boolean doesMethodContainString(MethodNode method, String string)
+	{
+		return DynamicMappings.doesMethodContainString(method, string);
+	}
+
+
+	public List<MethodNode> getMethodsContainingString(ClassNode cn, String string)
+	{
+		return DynamicMappings.getMethodsContainingString(cn, string);
+	}
+
+
 }
