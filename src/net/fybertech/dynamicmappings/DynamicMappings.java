@@ -1331,6 +1331,30 @@ public class DynamicMappings
 
 		return list;
 	}
+	
+	
+	public static boolean doesMethodUseField(MethodNode method, String owner, String name, String desc)
+	{
+		List<FieldInsnNode> nodes = getAllInsnNodesOfType(method.instructions.getFirst(), FieldInsnNode.class);
+		
+		for (FieldInsnNode fn : nodes) {
+			if (fn.owner.equals(owner) && fn.name.equals(name) && fn.desc.equals(desc)) return true;
+		}
+		
+		return false;
+	}
+	
+	
+	public static boolean doesMethodUseMethod(MethodNode method, String owner, String name, String desc)
+	{
+		List<MethodInsnNode> nodes = getAllInsnNodesOfType(method.instructions.getFirst(), MethodInsnNode.class);
+		
+		for (MethodInsnNode mn : nodes) {
+			if (mn.owner.equals(owner) && mn.name.equals(name) && mn.desc.equals(desc)) return true;
+		}
+		
+		return false;
+	}
 
 }
 

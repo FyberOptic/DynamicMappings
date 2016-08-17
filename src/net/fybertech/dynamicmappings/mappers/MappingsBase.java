@@ -349,5 +349,16 @@ public class MappingsBase
 		return DynamicMappings.getMethodsContainingString(cn, string);
 	}
 
+	
+	public boolean doesMethodUseField(MethodNode method, String owner, String name, String desc)
+	{
+		return DynamicMappings.doesMethodUseField(method, owner, name, desc);
+	}
+	
+	
+	public boolean doesMethodUseMethod(MethodNode method, String owner, String name, String desc)
+	{
+		return DynamicMappings.doesMethodUseMethod(method, owner, name, desc);
+	}
 
 }

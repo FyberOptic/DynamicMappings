@@ -8686,7 +8686,8 @@ public class SharedMappings extends MappingsBase {
 					}
 				}
 			}
-
+			
+			
 			// public void readFromNBT(NBTTagCompound nbt)
 			boolean isReadNBT = false;
 			for (AbstractInsnNode insn = firstReal; insn != null; insn = insn.getNext()) {
@@ -8731,8 +8732,8 @@ public class SharedMappings extends MappingsBase {
 		}
 
 		if (stackTagCompoundField == null) return false;
-
-
+		
+	
 
 		// Find isItemEnchanted()Z and hasTagCompound()Z
 		methods = getMatchingMethods(itemStack, null, "()Z");
@@ -8917,7 +8918,11 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/item/ItemStack damageItem (ILnet/minecraft/entity/EntityLivingBase;)V",
 			"net/minecraft/item/ItemStack getMaxDamage ()I",
 			"net/minecraft/item/ItemStack updateAnimation (Lnet/minecraft/world/World;Lnet/minecraft/entity/Entity;IZ)V",
-			"net/minecraft/item/ItemStack getAnimationsToGo ()I"
+			"net/minecraft/item/ItemStack getAnimationsToGo ()I",
+			"net/minecraft/item/ItemStack getStackSize ()I",
+			"net/minecraft/item/ItemStack setStackSize (I)V",
+			"net/minecraft/item/ItemStack increaseStackSize (I)V",
+			"net/minecraft/item/ItemStack decreaseStackSize (I)V"
 			},
 			providesFields={
 			"net/minecraft/item/ItemStack item Lnet/minecraft/item/Item;",
@@ -8927,7 +8932,10 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/item/ItemStack getMetadata ()I",
 			"net/minecraft/item/Item getMaxDamage ()I"
 			},
-			dependsFields="net/minecraft/item/ItemStack itemDamage I",
+			dependsFields={
+			"net/minecraft/item/ItemStack itemDamage I",
+			"net/minecraft/item/ItemStack stackSize I"
+			},					
 			depends={
 			"net/minecraft/item/ItemStack",
 			"net/minecraft/entity/EntityLivingBase",
@@ -8945,8 +8953,9 @@ public class SharedMappings extends MappingsBase {
 		if (!MeddleUtil.notNull(itemStack, entityLivingBase, item, entity, world)) return false;
 		
 		FieldNode itemDamage = getFieldNodeFromMapping(itemStack, "net/minecraft/item/ItemStack itemDamage I");
+		FieldNode stackSize = getFieldNodeFromMapping(itemStack, "net/minecraft/item/ItemStack stackSize I");
 		MethodNode getMetadata = getMethodNodeFromMapping(itemStack, "net/minecraft/item/ItemStack getMetadata ()I");
-		if (itemDamage == null || getMetadata == null) return false;		
+		if (itemDamage == null || stackSize == null || getMetadata == null) return false;		
 		
 		
 		String animationsToGo = null;
@@ -8975,10 +8984,13 @@ public class SharedMappings extends MappingsBase {
 		
 		
 		
+		List<MethodNode> getStackSize_list = new ArrayList<>();
 		List<MethodNode> getItemDamage_list = new ArrayList<>();
 		List<MethodNode> getAnimationsToGo_list = new ArrayList<>();
 		
 		// public int getItemDamage()
+		// public int getAnimationsToGo()
+		// public int getStackSize()
 		methods = getMatchingMethods(itemStack, null, "()I");
 		for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
 			MethodNode method = it.next();
@@ -8992,7 +9004,10 @@ public class SharedMappings extends MappingsBase {
 						else if (fn.name.equals(animationsToGo)) getAnimationsToGo_list.add(method);
 					}
 				}
-			}			
+			}
+			else if (doesMethodUseField(method, itemStack.name, stackSize.name, stackSize.desc)) {
+				getStackSize_list.add(method);
+			}
 		}		
 		if (getItemDamage_list.size() == 1) {
 			addMethodMapping("net/minecraft/item/ItemStack getItemDamage ()I", itemStack.name + " " + getItemDamage_list.get(0).name + " ()I");
@@ -9000,23 +9015,64 @@ public class SharedMappings extends MappingsBase {
 		if (getAnimationsToGo_list.size() == 1) {
 			addMethodMapping("net/minecraft/item/ItemStack getAnimationsToGo ()I", itemStack.name + " " + getAnimationsToGo_list.get(0).name + " ()I");
 		}
+		if (getStackSize_list.size() == 1) {
+			addMethodMapping("net/minecraft/item/ItemStack getStackSize ()I", itemStack.name + " " + getStackSize_list.get(0).name + " ()I");
+		}
 		
 		
 		// public void setItemDamage(int meta)
 		methods = getMatchingMethods(itemStack, null, "(I)V");
 		for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
-			MethodNode method = it.next();
-			List<FieldInsnNode> nodes = getAllInsnNodesOfType(method.instructions.getFirst(), FieldInsnNode.class);
-			
-			boolean usesItemDamage = false;
-			for (FieldInsnNode fn : nodes) {
-				if (fn.owner.equals(itemStack.name) && fn.name.equals(itemDamage.name)) usesItemDamage = true;
-			}
-			
-			if (!usesItemDamage) it.remove();			
+			MethodNode method = it.next();			
+			if (!doesMethodUseField(method, itemStack.name, itemDamage.name, "I")) it.remove();			
 		}
 		if (methods.size() == 1) {
 			addMethodMapping("net/minecraft/item/ItemStack setItemDamage (I)V", itemStack.name + " " + methods.get(0).name + " (I)V");
+		}		
+		
+		
+		// public void setStackSize(int size)
+		String setStackSize_name = null;
+		methods = getMatchingMethods(itemStack, null, "(I)V");
+		for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
+			MethodNode method = it.next();			
+			if (!matchOpcodeSequence(method.instructions.getFirst(), Opcodes.ALOAD, Opcodes.ILOAD, Opcodes.PUTFIELD)) {
+				it.remove();
+				continue;			
+			}
+			if (!doesMethodUseField(method, itemStack.name, stackSize.name, "I")) it.remove();			
+		}		
+		if (methods.size() == 1) {
+			addMethodMapping("net/minecraft/item/ItemStack setStackSize (I)V", itemStack.name + " " + methods.get(0).name + " (I)V");
+			setStackSize_name = methods.get(0).name;
+		}
+		
+		
+		// public void increaseStackSize(int size)		
+		String increaseStackSize_name = null;
+		if (setStackSize_name != null) {
+			methods = getMatchingMethods(itemStack, null, "(I)V");
+			for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
+				MethodNode method = it.next();			
+				if (!doesMethodUseMethod(method, itemStack.name, setStackSize_name, "(I)V")) it.remove();			
+			}		
+			if (methods.size() == 1) {
+				addMethodMapping("net/minecraft/item/ItemStack increaseStackSize (I)V", itemStack.name + " " + methods.get(0).name + " (I)V");
+				increaseStackSize_name = methods.get(0).name;
+			}
+		}
+		
+		
+		// public void decreaseStackSize(int size)
+		if (increaseStackSize_name != null) {
+			methods = getMatchingMethods(itemStack, null, "(I)V");
+			for (Iterator<MethodNode> it = methods.iterator(); it.hasNext();) {
+				MethodNode method = it.next();			
+				if (!doesMethodUseMethod(method, itemStack.name, increaseStackSize_name, "(I)V")) it.remove();			
+			}		
+			if (methods.size() == 1) {
+				addMethodMapping("net/minecraft/item/ItemStack decreaseStackSize (I)V", itemStack.name + " " + methods.get(0).name + " (I)V");
+			}
 		}
 		
 		
