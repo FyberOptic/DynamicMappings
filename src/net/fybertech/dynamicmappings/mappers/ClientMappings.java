@@ -321,14 +321,33 @@ public class ClientMappings extends MappingsBase
 			"net/minecraft/client/renderer/ItemModelMesher",
 			"net/minecraft/client/renderer/ModelManager",
 			"net/minecraft/client/renderer/texture/TextureManager",
-			"net/minecraft/client/renderer/color/ItemColors"
+			"net/minecraft/client/renderer/color/ItemColors",
+			"net/minecraft/client/resources/IResourceManagerReloadListener",
+			"net/minecraft/client/resources/IResourceManager"
 			},
-			depends="net/minecraft/client/renderer/entity/RenderItem"
+			providesMethods = {
+			"net/minecraft/client/resources/IResourceManagerReloadListener onResourceManagerReload (Lnet/minecraft/client/resources/IResourceManager;)V"
+			},
+			depends={
+			"net/minecraft/client/renderer/entity/RenderItem"
+			}
 			)
 	public boolean processRenderItemClass()
 	{
 		ClassNode renderItem = getClassNodeFromMapping("net/minecraft/client/renderer/entity/RenderItem");
 		if(!MeddleUtil.notNull(renderItem)) return false;
+
+
+		List<String> interfaces = renderItem.interfaces;
+		if(interfaces.size() == 1){
+			ClassNode node = getClassNode(interfaces.get(0));
+			if(node != null && node.methods.size() == 1){
+				addClassMapping("net/minecraft/client/resources/IResourceManagerReloadListener", node);
+				addClassMapping("net/minecraft/client/resources/IResourceManager", Type.getArgumentTypes(node.methods.get(0).desc)[0].getClassName());
+				addMethodMapping("net/minecraft/client/resources/IResourceManagerReloadListener onResourceManagerReload (Lnet/minecraft/client/resources/IResourceManager;)V", node.name + " " + node.methods.get(0).name + " " + node.methods.get(0).desc);
+			}
+		}
+
 
 		List<MethodNode> methods = getMatchingMethods(renderItem, Opcodes.ACC_PUBLIC, Type.VOID, Type.OBJECT, Type.OBJECT, Type.OBJECT);
 		if(methods.size() == 1){
@@ -345,9 +364,8 @@ public class ClientMappings extends MappingsBase
 					addClassMapping("net/minecraft/client/renderer/ModelManager", argumentClasses.get(1));
 				}
 				//ItemColors
-				cn = argumentClasses.get(2);
-				if(searchConstantPoolForStrings(cn.name, "Colors")){
-					addClassMapping("net/minecraft/client/renderer/color/ItemColors", cn);
+				if(cn == null){ //To be safe that the mapping for TextureManager has worked. Can't take 'Colors' as String, cause it isn't in the class itself
+					addClassMapping("net/minecraft/client/renderer/color/ItemColors", argumentClasses.get(2));
 				}
 			}
 		}
