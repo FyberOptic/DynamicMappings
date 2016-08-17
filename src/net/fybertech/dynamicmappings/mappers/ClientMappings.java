@@ -319,7 +319,9 @@ public class ClientMappings extends MappingsBase
 
 	@Mapping(provides= {
 			"net/minecraft/client/renderer/ItemModelMesher",
-			"net/minecraft/client/renderer/ModelManager"
+			"net/minecraft/client/renderer/ModelManager",
+			"net/minecraft/client/renderer/texture/TextureManager",
+			"net/minecraft/client/renderer/color/ItemColors"
 			},
 			depends="net/minecraft/client/renderer/entity/RenderItem"
 			)
@@ -333,11 +335,20 @@ public class ClientMappings extends MappingsBase
 			List<ClassNode> argumentClasses = getClassNodesFromMethodArguments(methods.get(0));
 			if(argumentClasses.size() == 3){
 				//TextureManager
-				addClassMapping("net/minecraft/client/renderer/texture/TextureManager", argumentClasses.get(0));
+				ClassNode cn = argumentClasses.get(0);
+				if(searchConstantPoolForStrings(cn.name, "Failed to load texture: {}", "Resource location being registered", "Texture object class")){
+					addClassMapping("net/minecraft/client/renderer/texture/TextureManager", cn);
+					cn = null;
+				}
 				//ModelManager
-				addClassMapping("net/minecraft/client/renderer/ModelManager", argumentClasses.get(1));
+				if(cn == null){ //To be safe that the mapping for TextureManager has worked
+					addClassMapping("net/minecraft/client/renderer/ModelManager", argumentClasses.get(1));
+				}
 				//ItemColors
-				addClassMapping("net/minecraft/client/renderer/color/ItemColors", argumentClasses.get(2));
+				cn = argumentClasses.get(2);
+				if(searchConstantPoolForStrings(cn.name, "Colors")){
+					addClassMapping("net/minecraft/client/renderer/color/ItemColors", cn);
+				}
 			}
 		}
 
