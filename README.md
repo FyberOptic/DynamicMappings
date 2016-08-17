@@ -8,7 +8,9 @@ While not often, you will occasionally encounter names which are not always the 
 
 
 
-###### Contributing
+
+
+#### Contributing
 
 You're welcome to contribute to this project, but please consider its nature beforehand.  DynamicMappings is a house of cards.  It's very hierarchical, with one mapping depending on other mappings before it.  As Minecraft evolves, it generally breaks mapping detection routines, and thus many mappings further down the chain fall as well.  This is good in a way, because it lets us see what's changed and how to adapt where necessary.  Sometimes fixing a single mapping fixes an entire chain.  
 
