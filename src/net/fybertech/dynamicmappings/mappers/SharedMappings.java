@@ -8926,7 +8926,8 @@ public class SharedMappings extends MappingsBase {
 			},
 			providesFields={
 			"net/minecraft/item/ItemStack item Lnet/minecraft/item/Item;",
-			"net/minecraft/item/ItemStack animationsToGo I"			
+			"net/minecraft/item/ItemStack animationsToGo I",
+			"net/minecraft/item/ItemStack NULL_STACK Lnet/minecraft/item/ItemStack;"
 			},
 			dependsMethods={
 			"net/minecraft/item/ItemStack getMetadata ()I",
@@ -9106,6 +9107,13 @@ public class SharedMappings extends MappingsBase {
 		List<FieldNode> fields = getMatchingFields(itemStack, null, "L" + item.name + ";");
 		if (fields.size() == 1) {			
 			addFieldMapping("net/minecraft/item/ItemStack item Lnet/minecraft/item/Item;", 
+					itemStack.name + " " + fields.get(0).name + " " + fields.get(0).desc);
+		}
+		
+		
+		fields = getMatchingFields(itemStack, null, "L" + itemStack.name + ";");
+		if (fields.size() == 1) {
+			addFieldMapping("net/minecraft/item/ItemStack NULL_STACK Lnet/minecraft/item/ItemStack;",
 					itemStack.name + " " + fields.get(0).name + " " + fields.get(0).desc);
 		}
 		
