@@ -10526,13 +10526,11 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/Block isFullBlock (Lnet/minecraft/block/state/IBlockState;)Z",
 			"net/minecraft/block/Block getUseNeighborBrightness (Lnet/minecraft/block/state/IBlockState;)Z",
 			"net/minecraft/block/Block onBlockEventReceived (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;II)Z",
-			"net/minecraft/block/Block getLightOpacity (Lnet/minecraft/block/state/IBlockState;)I",
-			"net/minecraft/block/Block isTranslucent (Lnet/minecraft/block/state/IBlockState;)Z",
+			"net/minecraft/block/Block getLightOpacity (Lnet/minecraft/block/state/IBlockState;)I",			
 			"net/minecraft/block/Block getLightValue (Lnet/minecraft/block/state/IBlockState;)I",
 			"net/minecraft/block/Block getTickRandomly ()Z",
 			"net/minecraft/block/Block getBlockHardness (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)F",
-			"net/minecraft/block/Block setBlockUnbreakable ()Lnet/minecraft/block/Block;",
-			"net/minecraft/block/Block getAmbientOcclusionLightValue (Lnet/minecraft/block/state/IBlockState;)F"
+			"net/minecraft/block/Block setBlockUnbreakable ()Lnet/minecraft/block/Block;"			
 			},
 			dependsFields={
 			"net/minecraft/block/Block fullBlock Z",
@@ -10553,7 +10551,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/material/Material",
 			"net/minecraft/util/ResourceLocation",
 			"net/minecraft/world/World",
-			"net/minecraft/util/BlockPos"
+			"net/minecraft/util/BlockPos",
+			"net/minecraft/util/AxisAlignedBB"
 			})	
 	public boolean processBlockClass4()
 	{
@@ -10564,7 +10563,8 @@ public class SharedMappings extends MappingsBase {
 		ClassNode resourceLocation = getClassNodeFromMapping("net/minecraft/util/ResourceLocation");
 		ClassNode world = getClassNodeFromMapping("net/minecraft/world/World");
 		ClassNode blockPos = getClassNodeFromMapping("net/minecraft/util/BlockPos");
-		if (!MeddleUtil.notNull(block, iBlockState, iBlockWrapper, material, resourceLocation, world, blockPos)) return false;
+		ClassNode aabb = getClassNodeFromMapping("net/minecraft/util/AxisAlignedBB");
+		if (!MeddleUtil.notNull(block, iBlockState, iBlockWrapper, material, resourceLocation, world, blockPos, aabb)) return false;
 		
 		
 		// Get Block.AIR_ID field
@@ -10639,8 +10639,7 @@ public class SharedMappings extends MappingsBase {
 		}
 		
 		
-		FieldNode lightOpacity_field = getFieldNodeFromMapping(block, "net/minecraft/block/Block lightOpacity I");
-		FieldNode translucent_field = getFieldNodeFromMapping(block, "net/minecraft/block/Block translucent Z");
+		FieldNode lightOpacity_field = getFieldNodeFromMapping(block, "net/minecraft/block/Block lightOpacity I");		
 		FieldNode lightValue_field = getFieldNodeFromMapping(block, "net/minecraft/block/Block lightValue I");
 		
 		// public int getLightOpacity(IBlockState state)
@@ -10649,17 +10648,6 @@ public class SharedMappings extends MappingsBase {
 			methods = filterMethodsUsingField(methods, block.name, lightOpacity_field.name, lightOpacity_field.desc);
 			if (methods.size() == 1) {
 				addMethodMapping("net/minecraft/block/Block getLightOpacity (Lnet/minecraft/block/state/IBlockState;)I",
-						block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
-			}
-		}
-		
-		
-		// public boolean isTranslucent(IBlockState state)
-		if (translucent_field != null) {
-			methods = getMatchingMethods(block, null, assembleDescriptor("(", iBlockState, ")Z"));
-			methods = filterMethodsUsingField(methods, block.name, translucent_field.name, translucent_field.desc);
-			if (methods.size() == 1) {
-				addMethodMapping("net/minecraft/block/Block isTranslucent (Lnet/minecraft/block/state/IBlockState;)Z",
 						block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 			}
 		}
@@ -10730,17 +10718,6 @@ public class SharedMappings extends MappingsBase {
 					addMethodMapping("net/minecraft/block/Block setBlockUnbreakable ()Lnet/minecraft/block/Block;",
 							block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 				}
-			}
-		}
-		
-		
-		// public float getAmbientOcclusionLightValue(IBlockState state)
-		methods = getMatchingMethods(block, null, assembleDescriptor("(", iBlockState, ")F"));
-		if (methods.size() == 1) {
-			List<Float> floats = getFloatsFromMethod(methods.get(0));			
-			if (floats.size() == 1 && floats.get(0) == 0.2F) {
-				addMethodMapping("net/minecraft/block/Block getAmbientOcclusionLightValue (Lnet/minecraft/block/state/IBlockState;)F",
-						block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 			}
 		}
 		
