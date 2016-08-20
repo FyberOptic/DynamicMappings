@@ -995,6 +995,7 @@ net/minecraft/item/ItemStack item Lnet/minecraft/item/Item; -> aeq e Laeo;
 net/minecraft/item/ItemStack itemDamage I -> aeq h I
 net/minecraft/item/ItemStack stackSize I -> aeq c I
 net/minecraft/item/ItemStack stackTagCompound Lnet/minecraft/nbt/NBTTagCompound; -> aeq f Ldt;
+net/minecraft/item/ItemStack validStack Z -> aeq g Z
 net/minecraft/item/ItemTool efficiencyOnProperMaterial F -> adr a F
 net/minecraft/item/crafting/ShapedRecipes copyIngredientNBT Z -> agx e Z
 net/minecraft/item/crafting/ShapedRecipes recipeHeight I -> agx b I
@@ -1464,6 +1465,7 @@ net/minecraft/item/ItemStack setTagCompound (Lnet/minecraft/nbt/NBTTagCompound;)
 net/minecraft/item/ItemStack setTagInfo (Ljava/lang/String;Lnet/minecraft/nbt/NBTBase;)V -> aeq a (Ljava/lang/String;Leh;)V
 net/minecraft/item/ItemStack splitStack (I)Lnet/minecraft/item/ItemStack; -> aeq a (I)Laeq;
 net/minecraft/item/ItemStack updateAnimation (Lnet/minecraft/world/World;Lnet/minecraft/entity/Entity;IZ)V -> aeq a (Laiu;Lse;IZ)V
+net/minecraft/item/ItemStack validate ()V -> aeq F ()V
 net/minecraft/item/ItemStack writeToNBT (Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound; -> aeq a (Ldt;)Ldt;
 net/minecraft/item/ItemTool getStrVsBlock (Lnet/minecraft/item/ItemStack;Lnet/minecraft/block/state/IBlockState;)F -> adr a (Laeq;Lasj;)F
 net/minecraft/item/crafting/CraftingManager addRecipe (Lnet/minecraft/item/ItemStack;[Ljava/lang/Object;)Lnet/minecraft/item/crafting/ShapedRecipes; -> agv a (Laeq;[Ljava/lang/Object;)Lagx;

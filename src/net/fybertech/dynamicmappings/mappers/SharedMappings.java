@@ -8923,12 +8923,14 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/item/ItemStack setStackSize (I)V",
 			"net/minecraft/item/ItemStack increaseStackSize (I)V",
 			"net/minecraft/item/ItemStack decreaseStackSize (I)V",
-			"net/minecraft/item/ItemStack isValid ()Z"
+			"net/minecraft/item/ItemStack isValid ()Z",
+			"net/minecraft/item/ItemStack validate ()V"
 			},
 			providesFields={
 			"net/minecraft/item/ItemStack item Lnet/minecraft/item/Item;",
 			"net/minecraft/item/ItemStack animationsToGo I",
-			"net/minecraft/item/ItemStack NULL_STACK Lnet/minecraft/item/ItemStack;"
+			"net/minecraft/item/ItemStack NULL_STACK Lnet/minecraft/item/ItemStack;",
+			"net/minecraft/item/ItemStack validStack Z"
 			},
 			dependsMethods={
 			"net/minecraft/item/ItemStack getMetadata ()I",
@@ -9110,11 +9112,28 @@ public class SharedMappings extends MappingsBase {
 		
 		methods = getMatchingMethods(itemStack, null, "()Z");
 		methods = filterMethodsUsingField(methods, blocks.name, air.name, air.desc);
+		String isValid_name = null;
 		if (methods.size() == 1 && doesMethodContainInteger(methods.get(0), 65535)) {
 			addMethodMapping("net/minecraft/item/ItemStack isValid ()Z", 
 					itemStack.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+			isValid_name = methods.get(0).name;
 		}		
 		
+		if (isValid_name != null) {
+			methods = getMatchingMethods(itemStack, null, "()V");
+			for (MethodNode method : methods) {
+				AbstractInsnNode[] nodes = getOpcodeSequenceArray(method.instructions.getFirst(), Opcodes.ALOAD, Opcodes.ALOAD, Opcodes.INVOKEVIRTUAL, Opcodes.PUTFIELD, Opcodes.RETURN);
+				if (nodes != null) {
+					MethodInsnNode mn = (MethodInsnNode)nodes[2];
+					if (mn.owner.equals(itemStack.name) && mn.name.equals(isValid_name) && mn.desc.equals("()Z")) {
+						FieldInsnNode fn = (FieldInsnNode)nodes[3];
+						addMethodMapping("net/minecraft/item/ItemStack validate ()V", itemStack.name + " " + method.name + " " + method.desc);
+						addFieldMapping("net/minecraft/item/ItemStack validStack Z", itemStack.name + " " + fn.name + " Z");
+						break;
+					}
+				}
+			}
+		}
 		
 		
 		List<FieldNode> fields = getMatchingFields(itemStack, null, "L" + item.name + ";");
