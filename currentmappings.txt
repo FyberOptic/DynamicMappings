@@ -1456,6 +1456,7 @@ net/minecraft/item/ItemStack isItemEnchanted ()Z -> aeq x ()Z
 net/minecraft/item/ItemStack isItemEqual (Lnet/minecraft/item/ItemStack;)Z -> aeq a (Laeq;)Z
 net/minecraft/item/ItemStack isItemStackDamageable ()Z -> aeq f ()Z
 net/minecraft/item/ItemStack isItemStackEqual (Lnet/minecraft/item/ItemStack;)Z -> aeq d (Laeq;)Z
+net/minecraft/item/ItemStack isValid ()Z -> aeq b ()Z
 net/minecraft/item/ItemStack readFromNBT (Lnet/minecraft/nbt/NBTTagCompound;)V -> aeq <init> (Ldt;)V
 net/minecraft/item/ItemStack setItemDamage (I)V -> aeq b (I)V
 net/minecraft/item/ItemStack setStackSize (I)V -> aeq e (I)V

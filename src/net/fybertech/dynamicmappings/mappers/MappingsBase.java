@@ -360,5 +360,30 @@ public class MappingsBase
 	{
 		return DynamicMappings.doesMethodUseMethod(method, owner, name, desc);
 	}
+	
+	
+	public List<MethodNode> filterMethodsUsingField(List<MethodNode> paramMethods, String owner, String name, String desc)
+	{
+		return DynamicMappings.filterMethodsUsingField(paramMethods, owner, name, desc);
+	}
+	
+	
+	public Integer getLdcInt(AbstractInsnNode node)
+	{
+		return DynamicMappings.getLdcInteger(node);
+	}
 
+	
+	public List<Integer> getIntegersFromMethod(MethodNode method)
+	{
+		return DynamicMappings.getIntegersFromMethod(method);
+	}
+	
+	
+	public boolean doesMethodContainInteger(MethodNode method, int i)
+	{
+		return DynamicMappings.doesMethodContainInteger(method, i);
+	}
+
+	
 }

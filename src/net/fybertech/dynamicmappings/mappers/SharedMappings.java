@@ -8922,7 +8922,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/item/ItemStack getStackSize ()I",
 			"net/minecraft/item/ItemStack setStackSize (I)V",
 			"net/minecraft/item/ItemStack increaseStackSize (I)V",
-			"net/minecraft/item/ItemStack decreaseStackSize (I)V"
+			"net/minecraft/item/ItemStack decreaseStackSize (I)V",
+			"net/minecraft/item/ItemStack isValid ()Z"
 			},
 			providesFields={
 			"net/minecraft/item/ItemStack item Lnet/minecraft/item/Item;",
@@ -8935,7 +8936,8 @@ public class SharedMappings extends MappingsBase {
 			},
 			dependsFields={
 			"net/minecraft/item/ItemStack itemDamage I",
-			"net/minecraft/item/ItemStack stackSize I"
+			"net/minecraft/item/ItemStack stackSize I",
+			"net/minecraft/init/Blocks air Lnet/minecraft/block/Block;"
 			},					
 			depends={
 			"net/minecraft/item/ItemStack",
@@ -8951,10 +8953,12 @@ public class SharedMappings extends MappingsBase {
 		ClassNode item = getClassNodeFromMapping("net/minecraft/item/Item");
 		ClassNode entity = getClassNodeFromMapping("net/minecraft/entity/Entity");
 		ClassNode world = getClassNodeFromMapping("net/minecraft/world/World");
-		if (!MeddleUtil.notNull(itemStack, entityLivingBase, item, entity, world)) return false;
+		ClassNode blocks = getClassNodeFromMapping("net/minecraft/init/Blocks");
+		if (!MeddleUtil.notNull(itemStack, entityLivingBase, item, entity, world, blocks)) return false;
 		
 		FieldNode itemDamage = getFieldNodeFromMapping(itemStack, "net/minecraft/item/ItemStack itemDamage I");
 		FieldNode stackSize = getFieldNodeFromMapping(itemStack, "net/minecraft/item/ItemStack stackSize I");
+		FieldNode air = getFieldNodeFromMapping(blocks, "net/minecraft/init/Blocks air Lnet/minecraft/block/Block;");
 		MethodNode getMetadata = getMethodNodeFromMapping(itemStack, "net/minecraft/item/ItemStack getMetadata ()I");
 		if (itemDamage == null || stackSize == null || getMetadata == null) return false;		
 		
@@ -9102,6 +9106,15 @@ public class SharedMappings extends MappingsBase {
 				addMethodMapping("net/minecraft/item/ItemStack getMaxDamage ()I", itemStack.name + " " + methods.get(0).name + " ()I");
 			}
 		}
+		
+		
+		methods = getMatchingMethods(itemStack, null, "()Z");
+		methods = filterMethodsUsingField(methods, blocks.name, air.name, air.desc);
+		if (methods.size() == 1 && doesMethodContainInteger(methods.get(0), 65535)) {
+			addMethodMapping("net/minecraft/item/ItemStack isValid ()Z", 
+					itemStack.name + " " + methods.get(0).name + " " + methods.get(0).desc);
+		}		
+		
 		
 		
 		List<FieldNode> fields = getMatchingFields(itemStack, null, "L" + item.name + ";");
