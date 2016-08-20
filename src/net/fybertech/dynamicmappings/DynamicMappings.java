@@ -493,6 +493,23 @@ public class DynamicMappings
 		if (!(ldc.cst instanceof Integer)) return null;
 		return (Integer)ldc.cst;
 	}
+	
+	
+	/**
+	 * Get constant pool float that an LDC instruction is 
+	 * referencing.
+	 * 
+	 * @param node - The instruction node to check.
+	 * @return Returns the class name if the LDC is accessing a 
+	 * Class constant pool item, else null.
+	 */
+	public static Float getLdcFloat(AbstractInsnNode node)
+	{
+		if (!(node instanceof LdcInsnNode)) return null;
+		LdcInsnNode ldc = (LdcInsnNode)node;
+		if (!(ldc.cst instanceof Float)) return null;
+		return (Float)ldc.cst;
+	}
 
 
 	/**
@@ -1349,6 +1366,19 @@ public class DynamicMappings
 
 		return list;
 	}
+	
+	
+	public static List<Float> getFloatsFromMethod(MethodNode method)
+	{
+		List<Float> list = new ArrayList<>();
+
+		for (AbstractInsnNode node : method.instructions.toArray()) {
+			Float f = getLdcFloat(node);
+			if (f != null) list.add(f);
+		}
+
+		return list;
+	}
 
 
 	public static boolean doesMethodContainInteger(MethodNode method, int i)
@@ -1399,6 +1429,18 @@ public class DynamicMappings
 		
 		for (MethodNode method : paramMethods) {
 			if (doesMethodUseField(method, owner, name, desc)) methods.add(method);
+		}
+		
+		return methods;
+	}
+	
+	
+	public static List<MethodNode> filterMethodsUsingMethod(List<MethodNode> paramMethods, String owner, String name, String desc)
+	{
+		List<MethodNode> methods = new ArrayList<>();
+		
+		for (MethodNode method : paramMethods) {
+			if (doesMethodUseMethod(method, owner, name, desc)) methods.add(method);
 		}
 		
 		return methods;

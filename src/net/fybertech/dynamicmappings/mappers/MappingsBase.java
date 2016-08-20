@@ -368,9 +368,15 @@ public class MappingsBase
 	}
 	
 	
-	public Integer getLdcInt(AbstractInsnNode node)
+	public Integer getLdcInteger(AbstractInsnNode node)
 	{
 		return DynamicMappings.getLdcInteger(node);
+	}
+	
+	
+	public Float getLdcFloat(AbstractInsnNode node)
+	{
+		return DynamicMappings.getLdcFloat(node);
 	}
 
 	
@@ -380,10 +386,20 @@ public class MappingsBase
 	}
 	
 	
+	public List<Float> getFloatsFromMethod(MethodNode method)
+	{
+		return DynamicMappings.getFloatsFromMethod(method);
+	}
+	
+	
 	public boolean doesMethodContainInteger(MethodNode method, int i)
 	{
 		return DynamicMappings.doesMethodContainInteger(method, i);
 	}
 
 	
+	public List<MethodNode> filterMethodsUsingMethod(List<MethodNode> paramMethods, String owner, String name, String desc)
+	{
+		return DynamicMappings.filterMethodsUsingMethod(paramMethods, owner, name, desc);
+	}
 }
