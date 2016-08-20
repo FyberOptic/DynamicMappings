@@ -8924,7 +8924,8 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/item/ItemStack increaseStackSize (I)V",
 			"net/minecraft/item/ItemStack decreaseStackSize (I)V",
 			"net/minecraft/item/ItemStack isValid ()Z",
-			"net/minecraft/item/ItemStack validate ()V"
+			"net/minecraft/item/ItemStack validate ()V",
+			"net/minecraft/item/ItemStack getMaxStackSize ()I"
 			},
 			providesFields={
 			"net/minecraft/item/ItemStack item Lnet/minecraft/item/Item;",
@@ -8934,7 +8935,8 @@ public class SharedMappings extends MappingsBase {
 			},
 			dependsMethods={
 			"net/minecraft/item/ItemStack getMetadata ()I",
-			"net/minecraft/item/Item getMaxDamage ()I"
+			"net/minecraft/item/Item getMaxDamage ()I",
+			"net/minecraft/item/Item getMaxStackSize ()I"
 			},
 			dependsFields={
 			"net/minecraft/item/ItemStack itemDamage I",
@@ -9132,6 +9134,18 @@ public class SharedMappings extends MappingsBase {
 						break;
 					}
 				}
+			}
+		}
+		
+		
+		// public int getMaxStackSize()
+		MethodNode getMaxStackSize = getMethodNodeFromMapping(item, "net/minecraft/item/Item getMaxStackSize ()I");
+		if (getMaxStackSize !=  null) {
+			methods = getMatchingMethods(itemStack, null, "()I");
+			methods = filterMethodsUsingMethod(methods, item.name, getMaxStackSize.name, getMaxStackSize.desc);
+			if (methods.size() == 1) {
+				addMethodMapping("net/minecraft/item/ItemStack getMaxStackSize ()I",
+						itemStack.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 			}
 		}
 		
