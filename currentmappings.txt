@@ -270,6 +270,7 @@ net/minecraft/inventory/ICrafting -> aca
 net/minecraft/inventory/IInventory -> qt
 net/minecraft/inventory/InventoryBasic -> ri
 net/minecraft/inventory/InventoryCrafting -> acc
+net/minecraft/inventory/InventoryHelper -> qw
 net/minecraft/inventory/Slot -> act
 net/minecraft/item/EnumAction -> aga
 net/minecraft/item/EnumDyeColor -> adt
@@ -1400,6 +1401,7 @@ net/minecraft/inventory/IInventory markDirty ()V -> qt u_ ()V
 net/minecraft/inventory/IInventory openInventory (Lnet/minecraft/entity/player/EntityPlayer;)V -> qt b (Laak;)V
 net/minecraft/inventory/IInventory setField (II)V -> qt b (II)V
 net/minecraft/inventory/IInventory setInventorySlotContents (ILnet/minecraft/item/ItemStack;)V -> qt a (ILaeq;)V
+net/minecraft/inventory/InventoryHelper dropInventoryItems (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/inventory/IInventory;)V -> qw a (Laiu;Lcn;Lqt;)V
 net/minecraft/inventory/Slot canTakeStack (Lnet/minecraft/entity/player/EntityPlayer;)Z -> act a (Laak;)Z
 net/minecraft/inventory/Slot decrStackSize (I)Lnet/minecraft/item/ItemStack; -> act a (I)Laeq;
 net/minecraft/inventory/Slot getHasStack ()Z -> act e ()Z
@@ -1454,6 +1456,7 @@ net/minecraft/item/ItemStack getDisplayName ()Ljava/lang/String; -> aeq r ()Ljav
 net/minecraft/item/ItemStack getItem ()Lnet/minecraft/item/Item; -> aeq c ()Laeo;
 net/minecraft/item/ItemStack getItemDamage ()I -> aeq i ()I
 net/minecraft/item/ItemStack getMaxDamage ()I -> aeq k ()I
+net/minecraft/item/ItemStack getMaxStackSize ()I -> aeq d ()I
 net/minecraft/item/ItemStack getMetadata ()I -> aeq j ()I
 net/minecraft/item/ItemStack getStackSize ()I -> aeq E ()I
 net/minecraft/item/ItemStack getTagCompound ()Lnet/minecraft/nbt/NBTTagCompound; -> aeq p ()Ldt;

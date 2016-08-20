@@ -1034,7 +1034,10 @@ public class SharedMappings extends MappingsBase {
 	
 	
 	
-	@Mapping(providesFields={
+	@Mapping(provides={
+			"net/minecraft/inventory/InventoryHelper"
+			},
+			providesFields={
 			"net/minecraft/block/BlockHopper FACING Lnet/minecraft/block/properties/PropertyDirection;",
 			"net/minecraft/block/BlockHopper ENABLED Lnet/minecraft/block/properties/PropertyBool;",
 			"net/minecraft/block/material/Material iron Lnet/minecraft/block/material/Material;"
@@ -1043,13 +1046,15 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/properties/PropertyDirection create (Ljava/lang/String;Lcom/google/common/base/Predicate;)Lnet/minecraft/block/properties/PropertyDirection;",
 			"net/minecraft/item/ItemStack hasDisplayName ()Z",
 			//"net/minecraft/block/Block hasComparatorInputOverride (Lnet/minecraft/block/state/IBlockState;)Z",
-			"net/minecraft/util/EnumFacing getOpposite ()Lnet/minecraft/util/EnumFacing;"
+			"net/minecraft/util/EnumFacing getOpposite ()Lnet/minecraft/util/EnumFacing;",
+			"net/minecraft/inventory/InventoryHelper dropInventoryItems (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/inventory/IInventory;)V"
 			},
 			dependsMethods={
 			"net/minecraft/block/Block onBlockPlacedBy (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/EntityLivingBase;Lnet/minecraft/item/ItemStack;)V",
 			"net/minecraft/block/Block isFullCube (Lnet/minecraft/block/state/IBlockState;)Z",
 			"net/minecraft/block/Block isOpaqueCube (Lnet/minecraft/block/state/IBlockState;)Z",
 			"net/minecraft/block/Block onBlockPlaced (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;FFFILnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/block/state/IBlockState;",
+			"net/minecraft/block/Block breakBlock (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)V",			
 			},
 			depends={
 			"net/minecraft/block/Block",
@@ -1059,7 +1064,10 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/material/Material",
 			"net/minecraft/item/ItemStack",
 			"net/minecraft/block/state/IBlockState",
-			"net/minecraft/util/EnumFacing"
+			"net/minecraft/util/EnumFacing",
+			"net/minecraft/world/World",
+			"net/minecraft/util/BlockPos",
+			"net/minecraft/inventory/IInventory"
 			})
 	public boolean processBlockHopperClass()
 	{
@@ -1071,7 +1079,11 @@ public class SharedMappings extends MappingsBase {
 		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
 		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
 		ClassNode enumFacing = getClassNodeFromMapping("net/minecraft/util/EnumFacing");
-		if (!MeddleUtil.notNull(block, blockHopper, propertyDirection, propertyBool, material, itemStack, iBlockState, enumFacing)) return false;
+		ClassNode world = getClassNodeFromMapping("net/minecraft/world/World");
+		ClassNode blockPos = getClassNodeFromMapping("net/minecraft/util/BlockPos");
+		ClassNode iInventory = getClassNodeFromMapping("net/minecraft/inventory/IInventory");
+		if (!MeddleUtil.notNull(block, blockHopper, propertyDirection, propertyBool, material, itemStack, iBlockState, 
+				enumFacing, world, blockPos, iInventory)) return false;
 
 		
 		// Parse fields to find:
@@ -1174,6 +1186,35 @@ public class SharedMappings extends MappingsBase {
 						enumFacing.name + " " + getOpposite.get(0).name + " " + getOpposite.get(0).desc);
 			}
 			
+		}
+		
+		
+		// class net/minecraft/inventory/InventoryHelper
+		// public static void InventoryHelper.dropInventoryItems(World, BlockPos, IInventory)
+		MethodNode breakBlock = getMethodNodeFromMapping(blockHopper, "net/minecraft/block/Block breakBlock (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)V");
+		if (breakBlock != null) {
+			List<MethodInsnNode> mnodes = getAllInsnNodesOfType(breakBlock, MethodInsnNode.class);
+			mnodes = filterMethodInsnNodes(mnodes, null, assembleDescriptor("(", world, blockPos, iInventory, ")V"));
+			if (mnodes.size() == 1 && mnodes.get(0).getOpcode() == Opcodes.INVOKESTATIC) {
+				MethodInsnNode mn = (MethodInsnNode)mnodes.get(0);
+				ClassNode inventoryHelper = getClassNode(mn.owner);
+				
+				// All the methods should be static
+				boolean allStatic = true;
+				for (MethodNode method : inventoryHelper.methods) {
+					if (method.name.startsWith("<")) continue;
+					if ((method.access & Opcodes.ACC_STATIC) == 0) allStatic = false;
+				}
+				
+				if (allStatic) {
+					addClassMapping("net/minecraft/inventory/InventoryHelper", inventoryHelper.name);
+					addMethodMapping("net/minecraft/inventory/InventoryHelper dropInventoryItems (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/inventory/IInventory;)V",
+							inventoryHelper.name + " " + mn.name + " " + mn.desc); 
+				}
+			}
+			
+			
+			// TODO - World.updateComparatorOutputLevel(pos, this);
 		}
 		
 		return true;
@@ -11259,6 +11300,7 @@ public class SharedMappings extends MappingsBase {
 
 		return true;
 	}
+	
 
 }
 
