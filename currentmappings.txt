@@ -1595,6 +1595,7 @@ net/minecraft/world/World isAreaLoaded (Lnet/minecraft/util/BlockPos;Lnet/minecr
 net/minecraft/world/World markBlockForUpdate (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/state/IBlockState;I)V -> aiu a (Lcn;Lasj;Lasj;I)V
 net/minecraft/world/World markBlockRangeForRenderUpdate (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/BlockPos;)V -> aiu b (Lcn;Lcn;)V
 net/minecraft/world/World markChunkDirty (Lnet/minecraft/util/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V -> aiu b (Lcn;Larb;)V
+net/minecraft/world/World notifyNeighborsOfStateChange (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;)V -> aiu d (Lcn;Lakw;)V
 net/minecraft/world/World playAuxSFXAtEntity (Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/BlockPos;I)V -> aiu a (Laak;ILcn;I)V
 net/minecraft/world/World playSoundEffect (Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/Sound;Lnet/minecraft/util/SoundCategory;FF)V -> aiu a (Laak;DDDLnk;Lnm;FF)V
 net/minecraft/world/World setBlockState (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z -> aiu a (Lcn;Lasj;I)Z

@@ -11302,6 +11302,43 @@ public class SharedMappings extends MappingsBase {
 	}
 	
 
+	@Mapping(providesMethods={
+			"net/minecraft/world/World notifyNeighborsOfStateChange (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;)V"
+			},
+			depends={
+			"net/minecraft/block/BlockBasePressurePlate",
+			"net/minecraft/world/World",
+			"net/minecraft/util/BlockPos",
+			"net/minecraft/block/Block"
+			})
+	public boolean processBlockBasePressurePlate()
+	{
+		ClassNode basePressurePlate = getClassNodeFromMapping("net/minecraft/block/BlockBasePressurePlate");
+		ClassNode world = getClassNodeFromMapping("net/minecraft/world/World");
+		ClassNode blockPos = getClassNodeFromMapping("net/minecraft/util/BlockPos");
+		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
+		if (!MeddleUtil.notNull(basePressurePlate, world, blockPos, block)) return false;
+
+		// public void World.notifyNeighborsOfStateChange(BlockPos pos, Block blockType)
+		// Find in updateNeighbors(World, BlockPos)
+		List<MethodNode> methods = getMatchingMethods(basePressurePlate, null, assembleDescriptor("(", world, blockPos, ")V"));
+		methods = removeMethodsWithFlags(methods, Opcodes.ACC_ABSTRACT);
+		if (methods.size() == 1) {
+			List<MethodInsnNode> mnodes = getAllInsnNodesOfType(methods.get(0), MethodInsnNode.class);
+			mnodes = filterMethodInsnNodes(mnodes, world.name, assembleDescriptor("(", blockPos, block, ")V"));
+			if (mnodes.size() == 2 && mnodes.get(0).name.equals(mnodes.get(1).name)) {
+				addMethodMapping("net/minecraft/world/World notifyNeighborsOfStateChange (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;)V",
+						world.name + " " + mnodes.get(0).name + " " + mnodes.get(0).desc);
+			}
+		}
+
+
+		// TODO - get getWeakPower and getStrongPower
+
+
+		return true;
+	}
+
 }
 
 
