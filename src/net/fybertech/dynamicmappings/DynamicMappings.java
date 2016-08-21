@@ -48,6 +48,11 @@ import net.fybertech.meddle.MeddleUtil;
 public class DynamicMappings
 {	
 	public static final Logger LOGGER = LogManager.getLogger("Meddle");
+	
+	public static String[] MAPPINGS_CLASSES = { 
+		"net.fybertech.dynamicmappings.mappers.SharedMappings",
+		"net.fybertech.dynamicmappings.mappers.ClientMappings"
+	};	
 
 	/** Deobfuscated class -> obfuscated class */
 	public static final Map<String, String> classMappings = new HashMap<String, String>();
@@ -91,8 +96,22 @@ public class DynamicMappings
 	public static void generateClassMappings()
 	{
 		generateClassLinkages();
-		DynamicMappings.registerMappingsClass(SharedMappings.class);
-		DynamicMappings.registerMappingsClass(ClientMappings.class);
+		
+		for (String clazz : MAPPINGS_CLASSES)
+		{
+			Class c = null;
+			try { 
+				c = Class.forName(clazz); 
+			}
+			catch (ClassNotFoundException e) {
+				System.out.println("[DynamicMappings] Error - Couldn't find mappings class \"" + clazz + "\"");
+			}
+			
+			if (c != null) {
+				DynamicMappings.registerMappingsClass(c);
+			}
+			
+		}
 	}
 	
 	
