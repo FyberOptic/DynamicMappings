@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.JarURLConnection;
@@ -13,35 +12,26 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FieldNode;
-import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.TableSwitchInsnNode;
-import org.objectweb.asm.tree.TypeInsnNode;
-import org.objectweb.asm.tree.VarInsnNode;
 
-import net.fybertech.dynamicmappings.mappers.ClientMappings;
-import net.fybertech.dynamicmappings.mappers.SharedMappings;
 import net.fybertech.meddle.MeddleUtil;
 
 
@@ -49,10 +39,10 @@ public class DynamicMappings
 {	
 	public static final Logger LOGGER = LogManager.getLogger("Meddle");
 	
-	public static String[] MAPPINGS_CLASSES = { 
+	public static List<String> MAPPINGS_CLASSES = new ArrayList<String>(Arrays.asList(new String[]{ 
 		"net.fybertech.dynamicmappings.mappers.SharedMappings",
 		"net.fybertech.dynamicmappings.mappers.ClientMappings"
-	};	
+	}));
 
 	/** Deobfuscated class -> obfuscated class */
 	public static final Map<String, String> classMappings = new HashMap<String, String>();
@@ -1463,6 +1453,22 @@ public class DynamicMappings
 		}
 		
 		return methods;
+	}
+
+
+	public static void reset() 
+	{
+		classMappings.clear();
+		reverseClassMappings.clear();
+		fieldMappings.clear();
+		reverseFieldMappings.clear();
+		methodMappings.clear();
+		reverseMethodMappings.clear();
+		
+		clientMappingsSet.clear();
+		serverMappingsSet.clear();
+		
+		cachedClassNodes.clear();
 	}
 
 }
