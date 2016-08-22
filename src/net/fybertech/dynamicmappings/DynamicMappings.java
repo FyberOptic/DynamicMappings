@@ -32,6 +32,7 @@ import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
+import net.fybertech.dynamicmappings.ParmParser.Parm;
 import net.fybertech.meddle.MeddleUtil;
 
 
@@ -366,6 +367,17 @@ public class DynamicMappings
 	 * @throws FileNotFoundException */
 	public static void main(String[] args)
 	{
+		ParmParser pp = new ParmParser();
+		Parm clearMappersParm = pp.addParm("-clearmappers", 0);		
+		Parm addMapperParm = pp.addParm("-addmapper", 1);
+		pp.processArgs(args);
+		
+		if (clearMappersParm.found) DynamicMappings.MAPPINGS_CLASSES.clear();
+		if (addMapperParm.found) {
+			String split[] = addMapperParm.getFirstResult().split(":;,");
+			for (String mapper : split) DynamicMappings.MAPPINGS_CLASSES.add(mapper);
+		}
+		
 		// If true, prints out the mappings
 		boolean showMappings = false;		
 		// If true, saves mappings to currentmappings.txt

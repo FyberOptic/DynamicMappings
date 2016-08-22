@@ -347,11 +347,19 @@ public class DynamicRemap
 	public static void main(String[] args)
 	{	
 		ParmParser pp = new ParmParser();
-		Parm outputParm = pp.addParm("-o",  1); // Output location		
+		Parm outputParm = pp.addParm("-o",  1); // Output location
+		Parm clearMappersParm = pp.addParm("-clearmappers", 0);		
+		Parm addMapperParm = pp.addParm("-addmapper", 1);
 		pp.processArgs(args);
 		
 		File outputFile = new File("mcremapped.jar");
 		if (outputParm.found) outputFile = new File(outputParm.getFirstResult());
+		
+		if (clearMappersParm.found) DynamicMappings.MAPPINGS_CLASSES.clear();
+		if (addMapperParm.found) {
+			String split[] = addMapperParm.getFirstResult().split(":;,");
+			for (String mapper : split) DynamicMappings.MAPPINGS_CLASSES.add(mapper);
+		}
 		
 		DynamicMappings.generateClassMappings();
 
