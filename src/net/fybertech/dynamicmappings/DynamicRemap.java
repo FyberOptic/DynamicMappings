@@ -349,7 +349,7 @@ public class DynamicRemap
 		ParmParser pp = new ParmParser();
 		Parm outputParm = pp.addParm("-o",  1); // Output location
 		Parm clearMappersParm = pp.addParm("-clearmappers", 0);		
-		Parm addMapperParm = pp.addParm("-addmapper", 1);
+		Parm addMapperParm = pp.addParm("-addmappers", 1);
 		pp.processArgs(args);
 		
 		File outputFile = new File("mcremapped.jar");

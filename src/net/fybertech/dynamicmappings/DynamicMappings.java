@@ -369,7 +369,7 @@ public class DynamicMappings
 	{
 		ParmParser pp = new ParmParser();
 		Parm clearMappersParm = pp.addParm("-clearmappers", 0);		
-		Parm addMapperParm = pp.addParm("-addmapper", 1);
+		Parm addMapperParm = pp.addParm("-addmappers", 1);
 		pp.processArgs(args);
 		
 		if (clearMappersParm.found) DynamicMappings.MAPPINGS_CLASSES.clear();
