@@ -15,6 +15,7 @@ import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -424,6 +425,15 @@ public class DynamicRemap
 			if (name.endsWith(".class")) {
 				name = name.substring(0, name.length() - 6);			
 				ClassNode mapped = remapper.remapClass(name);
+				
+				// Correct the source filename
+				if (mapped.sourceFile != null && mapped.sourceFile.equals("SourceFile")) {
+					String sourceName = mapped.name;
+					if (sourceName.indexOf('$') >= 0)
+						sourceName = sourceName.substring(0, sourceName.indexOf('$'));					
+					mapped.sourceFile = sourceName + ".java";
+				}				
+				
 				accessUtil.transformDeobfuscatedClass(mapped);
 				ClassWriter writer = new ClassWriter(0);
 				mapped.accept(writer);
