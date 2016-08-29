@@ -1226,8 +1226,11 @@ public class DynamicMappings
 
 	public static JarFile getMinecraftJar()
 	{
+		// For modern versions
 		URL url = MeddleUtil.class.getClassLoader().getResource("net/minecraft/server/MinecraftServer.class");
-		if (url == null) return null;
+		// For older versions
+		if (url == null) url = MeddleUtil.class.getClassLoader().getResource("net/minecraft/client/Minecraft.class");
+		if (url == null) return null;		
 
 		JarFile jar = null;
 

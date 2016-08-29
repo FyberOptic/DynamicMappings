@@ -31,6 +31,7 @@ import net.fybertech.dynamicmappings.InheritanceMap;
 import net.fybertech.dynamicmappings.InheritanceMap.FieldHolder;
 import net.fybertech.dynamicmappings.InheritanceMap.MethodHolder;
 import net.fybertech.dynamicmappings.ParmParser.Parm;
+import net.fybertech.meddle.MeddleUtil;
 
 
 public class DynamicRemap 
@@ -288,17 +289,17 @@ public class DynamicRemap
 	
 	public static byte[] getFileFromZip(ZipEntry entry, ZipFile zipFile)
 	{
-		byte[] buffer = null;		
+		byte[] buffer = null;
 
 		if (entry != null)
-		{			
+		{
 			try {
-				InputStream stream = zipFile.getInputStream(entry);				
+				InputStream stream = zipFile.getInputStream(entry);
 				int pos = 0;
 				buffer = new byte[(int)entry.getSize()];
 				while (true)
 				{
-					int read = stream.read(buffer, pos, Math.min(1024, (int)entry.getSize() - pos));					
+					int read = stream.read(buffer, pos, Math.min(1024, (int)entry.getSize() - pos));
 					pos += read;					
 					if (read < 1) break;
 				}
@@ -306,7 +307,7 @@ public class DynamicRemap
 				e.printStackTrace();
 			}
 		}
-		
+
 		return buffer;
 	}
 	
@@ -375,9 +376,9 @@ public class DynamicRemap
 					"net/minecraft/entity/Entity", "net/minecraft/tileentity/TileEntity", "net/minecraft/inventory/Container", 
 					"net/minecraft/client/gui/inventory/GuiContainer", "net/minecraft/client/gui/Gui", "net/minecraft/stats/StatBase");				
 			
-			try {
+			/*try {
 				mcJar.close();
-			} catch (IOException e) {}
+			} catch (IOException e) {}*/
 		}
 		
 				
@@ -387,7 +388,8 @@ public class DynamicRemap
 				DynamicMappings.reverseMethodMappings);		
 		
 		
-		URL url = DynamicRemap.class.getClassLoader().getResource("net/minecraft/server/MinecraftServer.class");	
+		JarFile jar = mcJar;
+		/*URL url = DynamicRemap.class.getClassLoader().getResource("net/minecraft/server/MinecraftServer.class");	
 		if (url == null) { System.out.println("Couldn't locate server class!"); return; }
 		
 		
@@ -400,7 +402,7 @@ public class DynamicRemap
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		}
+		}*/
 		
 		if (jar == null) { System.out.println("Couldn't locate Minecraft jar!"); return; }
 		
@@ -453,6 +455,7 @@ public class DynamicRemap
 		
 		try {
 			outJar.close();
+			jar.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
