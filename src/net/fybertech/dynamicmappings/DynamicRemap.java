@@ -41,8 +41,8 @@ public class DynamicRemap
 	Map<String, String> fieldMappings;
 	Map<String, String> methodMappings;	
 	
-	public String unpackagedPrefix = "net/minecraft/class_";
-	public String unpackagedInnerPrefix = "innerclass_";
+	public static String unpackagedPrefix = "net/minecraft/class_";
+	public static String unpackagedInnerPrefix = "innerclass_";
 	
 	public InheritanceMap inheritanceMapper = new InheritanceMap();
 	
@@ -450,7 +450,7 @@ public class DynamicRemap
 				outJar.write(bytes);
 			} catch (IOException e) {
 				e.printStackTrace();
-			}		
+			}
 		}
 		
 		try {
