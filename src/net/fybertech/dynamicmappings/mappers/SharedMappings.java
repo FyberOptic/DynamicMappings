@@ -425,7 +425,7 @@ public class SharedMappings extends MappingsBase {
 	
 	@Mapping(providesMethods={			
 			"net/minecraft/block/state/IBlockEvents onBlockEventReceived (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;II)Z",
-			"net/minecraft/block/state/IBlockEvents onNeighborBlockChange (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block)V"
+			"net/minecraft/block/state/IBlockEvents onNeighborBlockChange (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;Lnet/minecraft/util/BlockPos;)V"
 			},
 			depends={
 			"net/minecraft/world/World",
@@ -449,9 +449,9 @@ public class SharedMappings extends MappingsBase {
 					iBlockEvents.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
-		methods = getMatchingMethods(iBlockEvents, null, assembleDescriptor("(", world, blockPos, block, ")V"));
+		methods = getMatchingMethods(iBlockEvents, null, assembleDescriptor("(", world, blockPos, block, blockPos, ")V"));
 		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/block/state/IBlockEvents onNeighborBlockChange (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block)V",
+			addMethodMapping("net/minecraft/block/state/IBlockEvents onNeighborBlockChange (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;Lnet/minecraft/util/BlockPos;)V",
 					iBlockEvents.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
@@ -5701,7 +5701,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/Block getBlockFromName (Ljava/lang/String;)Lnet/minecraft/block/Block;",
 			//"net/minecraft/block/Block setBlockBounds (Lnet/minecraft/util/AxisAlignedBB;)V",
 			//"net/minecraft/block/Block getBlockBounds (Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/util/AxisAlignedBB;",
-			"net/minecraft/block/Block onNeighborBlockChange (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;)V",
+			"net/minecraft/block/Block onNeighborBlockChange (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;Lnet/minecraft/util/BlockPos;)V",
 			//"net/minecraft/block/Block setBlockBoundsBasedOnState (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)V"
 			"net/minecraft/block/Block setCreativeTab (Lnet/minecraft/creativetab/CreativeTabs;)Lnet/minecraft/block/Block;",
 			"net/minecraft/block/Block dropBlockAsItemWithChance (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;FI)V",
@@ -5847,9 +5847,9 @@ public class SharedMappings extends MappingsBase {
 		
 		
 		//  public void onNeighborBlockChange(IBlockState, World, BlockPos, Block)
-		methods = getMatchingMethods(block, null, assembleDescriptor("(", iBlockState, world, blockPos, block, ")V"));
+		methods = getMatchingMethods(block, null, assembleDescriptor("(", iBlockState, world, blockPos, block, blockPos, ")V"));
 		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/block/Block onNeighborBlockChange (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;)V",
+			addMethodMapping("net/minecraft/block/Block onNeighborBlockChange (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;Lnet/minecraft/util/BlockPos;)V",
 					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
 		
@@ -10823,7 +10823,7 @@ public class SharedMappings extends MappingsBase {
 			},
 			depends={
 			"net/minecraft/block/Block",
-			"net/minecraft/block/BlockFarmland",
+			"net/minecraft/block/BlockReed",
 			"net/minecraft/world/World",
 			"net/minecraft/util/BlockPos",
 			"net/minecraft/block/state/IBlockState",
@@ -10832,16 +10832,16 @@ public class SharedMappings extends MappingsBase {
 	public boolean processBlockFarmlandClass()
 	{
 		ClassNode block = getClassNodeFromMapping("net/minecraft/block/Block");
-		ClassNode farmland = getClassNodeFromMapping("net/minecraft/block/BlockFarmland");
+		ClassNode reed = getClassNodeFromMapping("net/minecraft/block/BlockReed");
 		ClassNode world = getClassNodeFromMapping("net/minecraft/world/World");
 		ClassNode blockPos = getClassNodeFromMapping("net/minecraft/util/BlockPos");
 		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
 		ClassNode itemStack = getClassNodeFromMapping("net/minecraft/item/ItemStack");
-		if (!MeddleUtil.notNull(block, farmland, world, blockPos, iBlockState, itemStack)) return false;
+		if (!MeddleUtil.notNull(block, reed, world, blockPos, iBlockState, itemStack)) return false;
 		
 		
 		// public ItemStack getItem(World param0, BlockPos param1, IBlockState param2)
-		List<MethodNode> methods = getMatchingMethods(farmland, null, assembleDescriptor("(", world, blockPos, iBlockState, ")", itemStack));
+		List<MethodNode> methods = getMatchingMethods(reed, null, assembleDescriptor("(", world, blockPos, iBlockState, ")", itemStack));
 		if (methods.size() == 1) {
 			addMethodMapping("net/minecraft/block/Block getItem (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/item/ItemStack;",
 					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
