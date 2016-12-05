@@ -1363,6 +1363,22 @@ public class DynamicMappings
 		return false;
 	}
 
+    /**
+     *
+     * @param method The Method to get the parameter ClassNodes
+     * @return A List of ClassNodes
+     * @author canitzp
+     */
+	public static List<ClassNode> getClassNodesFromMethodArguments(MethodNode method){
+	    List<ClassNode> classes = new ArrayList<>();
+        Type[] params = Type.getArgumentTypes(method.desc);
+        for(Type param : params){
+            classes.add(getClassNode(param.getClassName()));
+        }
+        return classes;
+    }
+
+
 
 	public static List<String> getStringsFromMethod(MethodNode method)
 	{
