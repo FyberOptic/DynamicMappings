@@ -1230,14 +1230,16 @@ public class SharedMappings extends MappingsBase {
 			depends={
 			"net/minecraft/block/Block", 
 			"net/minecraft/block/BlockLeaves",
-			"net/minecraft/block/state/IBlockState"
+			"net/minecraft/block/state/IBlockState",
+			"net/minecraft/block/BlockBarrier"
 			})
 	public boolean processBlockLeavesClass()
 	{
 		ClassNode blockLeaves = getClassNode(getClassMapping("net/minecraft/block/BlockLeaves"));
 		ClassNode block = getClassNode(getClassMapping("net/minecraft/block/Block"));
 		ClassNode iBlockState = getClassNodeFromMapping("net/minecraft/block/state/IBlockState");
-		if (!MeddleUtil.notNull(block, blockLeaves, iBlockState)) return false;
+		ClassNode blockBarrier = getClassNodeFromMapping("net/minecraft/block/BlockBarrier");
+		if (!MeddleUtil.notNull(block, blockLeaves, iBlockState, blockBarrier)) return false;
 
 
 		// protected Block setTickRandomly(boolean)
@@ -1262,15 +1264,15 @@ public class SharedMappings extends MappingsBase {
 			addMethodMapping("net/minecraft/block/Block isVisuallyOpaque ()Z", block.name + " " + methods.get(0).name + " ()Z");
 		}
 		
-		
+		//TODO move this into another method since it now uses BlockBarrier
 		// public boolean isOpaqueCube(IBlockState state)
-		methods = getMatchingMethods(blockLeaves, null, assembleDescriptor("(", iBlockState, ")Z"));
+		methods = getMatchingMethods(blockBarrier, null, assembleDescriptor("(", iBlockState, ")Z"));
 		if (methods.size() == 1) {
 			addMethodMapping("net/minecraft/block/Block isOpaqueCube (Lnet/minecraft/block/state/IBlockState;)Z",
 					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 		}
-				
-		
+
+
 		
 		return true;
 	}
@@ -6000,7 +6002,7 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/block/Block getItemDropped (Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;I)Lnet/minecraft/item/Item;",
 			"net/minecraft/block/Block randomTick (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V",
 			"net/minecraft/block/Block updateTick (Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V",
-			"net/minecraft/block/Block addCollisionBoxesToList (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/AxisAlignedBB;Ljava/util/List;Lnet/minecraft/entity/Entity;)V",
+			"net/minecraft/block/Block addCollisionBoxesToList (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/AxisAlignedBB;Ljava/util/List;Lnet/minecraft/entity/Entity;Z)V",
 			"net/minecraft/block/state/IBlockWrapper getCollisionBoundingBox (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;)Lnet/minecraft/util/AxisAlignedBB;",
 			"net/minecraft/block/Block addCollisionBoxToList (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/AxisAlignedBB;Ljava/util/List;Lnet/minecraft/util/AxisAlignedBB;)V",
 			"net/minecraft/block/Block rayTrace (Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/AxisAlignedBB;)Lnet/minecraft/util/MovingObjectPosition;"
@@ -6395,9 +6397,10 @@ public class SharedMappings extends MappingsBase {
 		
 		
 		// public void addCollisionBoxesToList(IBlockState param0, World param1, BlockPos param2, AxisAlignedBB param3, List<AxisAlignedBB> param4, Entity param5)
-		methods = getMatchingMethods(block, null, assembleDescriptor("(", iBlockState, world, blockPos, aabb, "Ljava/util/List;", entity, ")V"));
+		// added a boolean as last parameter
+		methods = getMatchingMethods(block, null, assembleDescriptor("(", iBlockState, world, blockPos, aabb, "Ljava/util/List;", entity, "Z)V"));
 		if (methods.size() == 1) {
-			addMethodMapping("net/minecraft/block/Block addCollisionBoxesToList (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/AxisAlignedBB;Ljava/util/List;Lnet/minecraft/entity/Entity;)V",
+			addMethodMapping("net/minecraft/block/Block addCollisionBoxesToList (Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/AxisAlignedBB;Ljava/util/List;Lnet/minecraft/entity/Entity;Z)V",
 					block.name + " " + methods.get(0).name + " " + methods.get(0).desc);
 			
 			List<MethodInsnNode> nodes = getAllInsnNodesOfType(methods.get(0), MethodInsnNode.class);
@@ -11303,7 +11306,7 @@ public class SharedMappings extends MappingsBase {
 	
 
 	@Mapping(providesMethods={
-			"net/minecraft/world/World notifyNeighborsOfStateChange (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;)V"
+			"net/minecraft/world/World notifyNeighborsOfStateChange (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;Z)V"
 			},
 			depends={
 			"net/minecraft/block/BlockBasePressurePlate",
@@ -11321,13 +11324,14 @@ public class SharedMappings extends MappingsBase {
 
 		// public void World.notifyNeighborsOfStateChange(BlockPos pos, Block blockType)
 		// Find in updateNeighbors(World, BlockPos)
+		// added a updateObservers bool at last parameter
 		List<MethodNode> methods = getMatchingMethods(basePressurePlate, null, assembleDescriptor("(", world, blockPos, ")V"));
 		methods = removeMethodsWithFlags(methods, Opcodes.ACC_ABSTRACT);
 		if (methods.size() == 1) {
 			List<MethodInsnNode> mnodes = getAllInsnNodesOfType(methods.get(0), MethodInsnNode.class);
-			mnodes = filterMethodInsnNodes(mnodes, world.name, assembleDescriptor("(", blockPos, block, ")V"));
+			mnodes = filterMethodInsnNodes(mnodes, world.name, assembleDescriptor("(", blockPos, block, "Z)V"));
 			if (mnodes.size() == 2 && mnodes.get(0).name.equals(mnodes.get(1).name)) {
-				addMethodMapping("net/minecraft/world/World notifyNeighborsOfStateChange (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;)V",
+				addMethodMapping("net/minecraft/world/World notifyNeighborsOfStateChange (Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;Z)V",
 						world.name + " " + mnodes.get(0).name + " " + mnodes.get(0).desc);
 			}
 		}
