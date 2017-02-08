@@ -6542,9 +6542,9 @@ public class SharedMappings extends MappingsBase {
 			"net/minecraft/creativetab/CreativeTabs tabTools Lnet/minecraft/creativetab/CreativeTabs;",
 			"net/minecraft/creativetab/CreativeTabs tabCombat Lnet/minecraft/creativetab/CreativeTabs;",
 			"net/minecraft/creativetab/CreativeTabs tabBrewing Lnet/minecraft/creativetab/CreativeTabs;",
-			"net/minecraft/creativetab/CreativeTabs tabMaterials Lnet/minecraft/creativetab/CreativeTabs;",
+			"net/minecraft/creativetab/CreativeTabs tabSavedHotbars Lnet/minecraft/creativetab/CreativeTabs;",
 			"net/minecraft/creativetab/CreativeTabs tabInventory Lnet/minecraft/creativetab/CreativeTabs;"
-	},
+			},
 	depends="net/minecraft/creativetab/CreativeTabs")
 	public boolean getCreativeTabs()
 	{
@@ -6579,7 +6579,7 @@ public class SharedMappings extends MappingsBase {
 			put("tools", "tabTools");
 			put("combat", "tabCombat");
 			put("brewing", "tabBrewing");
-			put("materials", "tabMaterials");
+			put("hotbar", "tabSavedHotbars");
 			put("inventory", "tabInventory");
 		}};
 
